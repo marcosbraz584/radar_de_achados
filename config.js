@@ -9,8 +9,16 @@
 // 3. Salve o arquivo e suba na hospedagem junto com o index.html
 // ============================================
 
-const ACHADINHOS = {
-  planilha_configuracoes: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ_5XiBT9b521Uk3-H2UhfTB6Scbg7WpBRT1X5fURSL8zym27h9Z_mY8eYK9IeKl_UYSW3E1098C414/pub?gid=480609827&single=true&output=csv",
-  planilha_catalogo: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ_5XiBT9b521Uk3-H2UhfTB6Scbg7WpBRT1X5fURSL8zym27h9Z_mY8eYK9IeKl_UYSW3E1098C414/pub?gid=952991100&single=true&output=csv",
-  registrar_cliques: ""
-};
+<!-- LEITURA SEGURA DO CONFIG.JS -->
+  <script>
+    window.ACHADINHOS = {
+      // ATENÇÃO: COLOQUE AQUI O SEU LINK DA ABA DE CONFIGURAÇÕES DA PLANILHA (CSV)
+      planilha_configuracoes: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ_5XiBT9b521Uk3-H2UhfTB6Scbg7WpBRT1X5fURSL8zym27h9Z_mY8eYK9IeKl_UYSW3E1098C414/pub?gid=480609827&single=true&output=csv",
+      
+      // ATENÇÃO: COLOQUE AQUI O SEU LINK DA ABA DE CATÁLOGO DA PLANILHA (CSV)
+      planilha_catalogo: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ_5XiBT9b521Uk3-H2UhfTB6Scbg7WpBRT1X5fURSL8zym27h9Z_mY8eYK9IeKl_UYSW3E1098C414/pub?gid=952991100&single=true&output=csv",
+      
+      registrar_cliques: ""
+    };
+  </script>
+  <script src="config.js" onerror="console.log('Usando ACHADINHOS interno')"></script>
