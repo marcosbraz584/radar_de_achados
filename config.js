@@ -12,5 +12,5 @@
 const ACHADINHOS = {
   planilha_configuracoes: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ_5XiBT9b521Uk3-H2UhfTB6Scbg7WpBRT1X5fURSL8zym27h9Z_mY8eYK9IeKl_UYSW3E1098C414/pub?gid=480609827&single=true&output=csv",
   planilha_catalogo: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ_5XiBT9b521Uk3-H2UhfTB6Scbg7WpBRT1X5fURSL8zym27h9Z_mY8eYK9IeKl_UYSW3E1098C414/pub?gid=952991100&single=true&output=csv",
-  registrar_cliques: "https://docs.google.com/spreadsheets/d/11H7UfeRJ2_gVzHijkYyAhT3IggwVIfqkyRk85JYTxJk/edit?gid=180773339#gid=180773339",
+  registrar_cliques: "",
 };
