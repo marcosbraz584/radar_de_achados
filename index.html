@@ -14,10 +14,10 @@
     CSS VARIABLES — Defaults (overridden by spreadsheet)
     ============================================ */
     :root {
-      --primary: #3483FA;
-      --primary-rgb: 52, 131, 250;
-      --primary-light: rgba(52, 131, 250, 0.08);
-      --primary-hover: #2968C8;
+      --primary: #2A5C3F;
+      --primary-rgb: 42, 92, 63;
+      --primary-light: rgba(42, 92, 63, 0.08);
+      --primary-hover: #1E4530;
       --secondary: #1B1B1B;
       --secondary-hover: #000000;
       --secondary-light: rgba(27, 27, 27, 0.08);
@@ -171,14 +171,13 @@
       font-size: 0.9rem;
     }
 
-    /* FAIXA SUPERIOR AMARELA COM TEXTO PRETO LEGÍVEL */
     .top-bar {
-      background: #FFE600 !important;
-      color: #1B1B1B !important;
+      background: var(--top-bar-bg, var(--primary));
+      color: var(--white);
       text-align: center;
-      padding: 9px 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
+      padding: 8px 20px;
+      font-size: 0.82rem;
+      font-weight: 500;
       letter-spacing: 0.01em;
       display: none;
     }
@@ -430,27 +429,23 @@
       border-radius: var(--radius-lg);
       overflow: hidden;
       position: relative;
-      background: transparent;
-      box-shadow: var(--shadow-sm);
     }
 
     .banner-img {
       width: 100%;
-      height: auto;
+      height: 260px;
+      object-fit: cover;
       display: block;
-      border-radius: var(--radius-lg);
-      object-fit: contain;
     }
 
     .banner-overlay {
       position: absolute;
       inset: 0;
-      background: transparent;
+      background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.85) 0%, rgba(var(--primary-rgb), 0.3) 60%, transparent 100%);
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 30px 40px;
-      pointer-events: none;
+      padding: 40px 48px;
     }
 
     .banner-tag {
@@ -458,8 +453,7 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: rgba(255, 255, 255, 0.95);
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+      color: rgba(255, 255, 255, 0.8);
       margin-bottom: 8px;
     }
 
@@ -469,14 +463,12 @@
       color: var(--white);
       letter-spacing: -0.03em;
       line-height: 1.2;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
       margin-bottom: 6px;
     }
 
     .banner-sub {
       font-size: 0.95rem;
-      color: rgba(255, 255, 255, 0.9);
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+      color: rgba(255, 255, 255, 0.85);
     }
 
     /* ============================================
@@ -572,6 +564,11 @@
       color: var(--text-light);
       font-weight: 500;
       margin-bottom: 4px;
+      /* Ajuste para evitar quebra de linha nas categorias */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
     }
 
     .product-name {
@@ -643,7 +640,7 @@
     }
 
     /* ============================================
-    PRODUCT DETAIL MODAL & CTA BUTTON
+    PRODUCT DETAIL MODAL
     ============================================ */
     .modal-overlay {
       position: fixed;
@@ -870,35 +867,25 @@
 
     .btn-cta {
       width: 100%;
-      padding: 14px 20px;
-      background: var(--primary, #3483FA) !important;
-      color: #FFFFFF !important;
+      padding: 15px;
+      background: var(--primary);
+      color: var(--white);
       border-radius: var(--radius);
       font-size: 1rem;
       font-weight: 700;
-      transition: all 0.2s ease;
-      display: flex !important;
+      transition: var(--transition);
+      display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       position: relative;
       z-index: 2;
-      box-shadow: 0 4px 14px rgba(52, 131, 250, 0.3);
-      cursor: pointer;
-      text-decoration: none;
-      border: none;
-      outline: none;
     }
 
     .btn-cta:hover {
-      background: var(--primary-hover, #2968C8) !important;
-      color: #FFFFFF !important;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(52, 131, 250, 0.45);
-    }
-
-    .btn-cta:active {
-      transform: translateY(0);
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
     }
 
     .price-note {
@@ -1249,15 +1236,15 @@
       }
 
       .banner-img {
-        height: auto !important;
+        height: 180px;
       }
 
       .banner-overlay {
-        padding: 16px 20px;
+        padding: 24px;
       }
 
       .banner-title {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
       }
 
       .modal-body {
@@ -1278,6 +1265,8 @@
         overflow-y: visible !important;
       }
 
+
+
       .modal-overlay {
         padding: 0 !important;
         align-items: flex-start !important;
@@ -1292,11 +1281,24 @@
         overflow-y: auto !important;
       }
 
+      .modal-details {
+        padding: 20px 16px !important;
+      }
+
+
+
+
+
       .banner {
         padding: 0 12px;
       }
+
+      .banner-overlay {
+        padding: 20px;
+      }
     }
 
+    /* CORREÇÕES VISUAIS DO CELULAR SOLICITADAS */
     @media (max-width: 480px) {
       #featuredGrid { grid-template-columns: repeat(2, 1fr) !important; }
       #featuredSection { padding: 14px; }
@@ -1305,21 +1307,60 @@
         gap: 10px;
       }
 
-      .product-info {
-        padding: 10px 12px 12px;
+      /* 1. Ajuste das etiquetas (Badges) para ficarem menores e não espremidas */
+      .badge-promo {
+        top: 6px;
+        left: 6px;
+        font-size: 0.6rem;
+        padding: 3px 6px;
       }
 
+      .badge-platform {
+        top: 6px;
+        right: 6px;
+        font-size: 0.55rem;
+        padding: 3px 6px;
+        max-width: 65%;
+      }
+
+      /* 2. Ajuste do espaçamento interno do Card */
+      .product-info {
+        padding: 10px 8px 12px;
+      }
+
+      /* 3. Ajuste da Categoria para ficar sempre em 1 linha e com reticências */
+      .product-cat {
+        font-size: 0.65rem;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+      }
+
+      /* 4. Ajuste do Título do Produto */
       .product-name {
         font-size: 0.85rem;
+        line-height: 1.2;
+        margin-bottom: 6px;
+        height: 2.4em; /* Força 2 linhas para alinhar todos os cards */
+      }
+
+      .product-price {
+        margin-bottom: 8px;
       }
 
       .price-current {
         font-size: 0.95rem;
       }
 
+      .price-old {
+        font-size: 0.75rem;
+      }
+
       .btn-details {
         padding: 8px;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
       }
 
       .modal-name {
@@ -1347,7 +1388,6 @@
     <p>Verifique se a planilha está publicada corretamente e tente novamente.</p>
   </div>
 
-  <!-- FAIXA TOPO -->
   <div class='top-bar' id='topBar'></div>
 
   <!-- Header -->
@@ -1413,7 +1453,7 @@
           <p class="modal-desc" id="modalDesc"></p>
           <div id="modalCoupon"></div>
           <div id="modalVideo"></div>
-          <button class="btn-cta" id="modalCta" onclick="ctaClick()">Compre no Mercado Livre</button>
+          <button class="btn-cta" id="modalCta" onclick="ctaClick()">Ver oferta →</button>
           <div class="price-note" id="modalPriceNote"></div>
           <button class='btn-copy-link' id='btnCopyLink' onclick='copyProductLink()'><svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' d='M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0-12.814a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0 12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z'/></svg><span id='copyLinkText'>Compartilhar</span></button>
         </div>
@@ -1423,14 +1463,15 @@
 
   <!-- Footer -->
   <footer class="footer" style="display:none" id="siteFooter">
-    <div class="footer-name" id="footerName"></div>
-    <div class="footer-socials" id="footerSocials"></div>
-    <div class="footer-disclosure" id="footerDisclosure"></div>
-    <div class="footer-disclosure" id="footerAvisoPrecos"></div>
-    <div class="footer-credit">
-      Feito com <a href="https://planiloja.com.br/" target="_blank" rel="noopener noreferrer">Planiloja Achadinhos</a>
-    </div>
-  </footer>
+  <div class="footer-name" id="footerName"></div>
+  <div class="footer-socials" id="footerSocials"></div>
+  <div class="footer-disclosure" id="footerDisclosure"></div>
+  <div class="footer-disclosure" id="footerAvisoPrecos"></div>
+  <div class="footer-credit">
+    Feito com <a href="https://planiloja.com.br/" target="_blank" rel="noopener noreferrer">Planiloja Achadinhos</a>
+  </div>
+</footer>
+
 
   <button class='back-to-top' id='backToTop' onclick='window.scrollTo({top:0,behavior:"smooth"})'>
     <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2.5' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' d='M4.5 15.75l7.5-7.5 7.5 7.5'/></svg>
@@ -1455,6 +1496,7 @@
     // APP ENGINE — Planiloja Achadinhos
     // ============================================
 
+    // State
     let CONFIG = {};
     let PRODUCTS = [];
     let activeCategory = "Todos";
@@ -1493,47 +1535,6 @@
     }
 
     // ============================================
-    // CONVERSOR DE CORES ROBUSTO
-    // ============================================
-    function resolveColor(val) {
-      if (!val) return null;
-      var s = String(val).trim();
-      var low = s.toLowerCase();
-      var paletas = {
-        'preto': '#1B1B1B',
-        'black': '#1B1B1B',
-        'branco': '#FFFFFF',
-        'white': '#FFFFFF',
-        'amarelo': '#FFE600',
-        'amarelo mercado livre': '#FFE600',
-        'yellow': '#FFE600',
-        'azul': '#3483FA',
-        'azul mercado livre': '#3483FA',
-        'blue': '#3483FA',
-        'verde': '#2A5C3F',
-        'green': '#25D366',
-        'vermelho': '#DC2626',
-        'red': '#DC2626',
-        'roxo': '#7C3AED',
-        'rosa': '#DB2777',
-        'laranja': '#EA580C',
-        'dourado': '#B8860B',
-        'marrom': '#78350F',
-        'cinza': '#6B6760',
-        'turquesa': '#0D9488'
-      };
-      if (paletas[low]) return paletas[low];
-      
-      var clean = s.replace('#', '');
-      if (clean.length === 3 || clean.length === 6) {
-        if (/^[0-9A-Fa-f]+$/.test(clean)) {
-          return '#' + clean;
-        }
-      }
-      return s;
-    }
-
-    // ============================================
     // LOAD CONFIG FROM SHEETS
     // ============================================
     async function loadConfig() {
@@ -1545,13 +1546,15 @@
 
       for (const row of rows) {
         if (!row[0] && !row[1]) continue;
-        const field = (row[0] || '').replace(/[⚙️📋🎨🚚🏷️💳💡📊]/g, '').trim().toUpperCase();
+        const field = (row[0] || '').replace(/[⚙️📋🎨🚚🏷️💳💡]/g, '').trim().toUpperCase();
         const val = (row[1] || '').trim();
 
+        // Skip headers and section titles
         if (field === 'CAMPO' || field === 'VALOR' || field === 'INSTRUÇÕES' || field === '') continue;
         if (field.includes('CONFIGURAÇÕES') || field.includes('PREENCHA')) continue;
-        if (field.includes('DADOS DA LOJA') || field.includes('PERSONALIZAÇÃO') || field.includes('CANAL DE OFERTAS') || field.includes('AVISOS') || field.includes('RASTREAMENTO')) continue;
+        if (field.includes('DADOS DA LOJA') || field.includes('PERSONALIZAÇÃO') || field.includes('CANAL DE OFERTAS') || field.includes('AVISOS')) continue;
 
+        // Map fields
         if (field === 'NOME DA LOJA') cfg.storeName = val;
         else if (field === 'LOGO (URL)') cfg.logo = val;
         else if (field === 'INSTAGRAM') cfg.instagram = val;
@@ -1571,11 +1574,11 @@
         else if (field === 'LOJA ATIVA') cfg.lojaAtiva = val.toUpperCase() !== 'NÃO' && val.toUpperCase() !== 'NAO';
         else if (field === 'MENSAGEM MANUTENCAO' || field === 'MENSAGEM MANUTENÇÃO' || field === 'MENSAGEM MANUTENÇAO') cfg.msgManutencao = val;
         else if (field === 'MENSAGEM TOPO' || field === 'BARRA TOPO') cfg.mensagemTopo = val;
-        else if (field === 'COR BARRA TOPO' || field === 'COR MENSAGEM TOPO' || field === 'COR DA BARRA TOPO') cfg.corBarraTopo = val;
-        else if (field === 'COR TEXTO TOPO' || field === 'COR TEXTO BARRA TOPO' || field === 'COR DO TEXTO TOPO' || field === 'COR DO TEXTO') cfg.corTextoTopo = val;
+        else if (field === 'COR BARRA TOPO' || field === 'COR MENSAGEM TOPO') cfg.corBarraTopo = val;
         else if (field === 'CNPJ') cfg.cnpj = val;
         else if (field === 'ENDERECO' || field === 'ENDEREÇO' || field === 'ENDERECO DA LOJA' || field === 'ENDEREÇO DA LOJA') cfg.endereco = val;
         else if (field === 'EMAIL' || field === 'EMAIL DE CONTATO') cfg.email = val;
+        // Novos campos — Achadinhos
         else if (field === 'CANAL WHATSAPP') cfg.canalWhatsapp = val;
         else if (field === 'CANAL TELEGRAM') cfg.canalTelegram = val;
         else if (field === 'BOTÃO CANAL FLUTUANTE' || field === 'BOTAO CANAL FLUTUANTE') cfg.botaoCanalFlutuante = val.toUpperCase() === 'SIM';
@@ -1583,6 +1586,7 @@
         else if (field === 'AVISO PREÇOS' || field === 'AVISO PRECOS') cfg.avisoPrecos = val;
       }
 
+      // Textos padrão (fallback)
       if (!cfg.textoDisclosure) cfg.textoDisclosure = 'Este site participa de programas de afiliados e pode receber comissão pelas compras realizadas nos links, sem custo adicional para você.';
       if (!cfg.avisoPrecos) cfg.avisoPrecos = 'Preços e disponibilidade sujeitos a alteração. Confirme na loja parceira.';
       CONFIG = cfg;
@@ -1599,6 +1603,7 @@
       const products = [];
       for (const row of rows) {
         const first = (row[0] || '').trim().toUpperCase();
+        // Skip headers, instructions, title rows
         if (!first || first === 'ATIVO' || first === 'ATIVO *' || first === 'SIM OU NÃO' || first.includes('CATÁLOGO') || first.includes('CATALOGO') || first.includes('CADA LINHA') || first.includes('DICAS')) continue;
         if (first !== 'SIM') continue;
 
@@ -1625,6 +1630,7 @@
           destaque: row.length > 19 && (row[19] || '').trim().toUpperCase() === 'SIM',
         });
       }
+      // Produto válido = Nome + Link de Afiliado + oferta dentro da validade
       PRODUCTS = products.filter(p => p.nome && p.linkAfiliado && ofertaValida(p));
     }
 
@@ -1638,6 +1644,7 @@
     }
 
     function ofertaValida(p) {
+      // Sem validade = sempre válido; com validade = válido até 23h59 da data
       if (!p.validade) return true;
       return new Date() <= p.validade;
     }
@@ -1652,12 +1659,14 @@
     // APPLY CONFIG TO UI
     // ============================================
     function applyConfig() {
+      // Title
       document.title = CONFIG.tituloSite || (CONFIG.storeName ? CONFIG.storeName + ' — Achadinhos' : 'Achadinhos');
       if (CONFIG.descricaoSite) {
         var metaDesc = document.querySelector('meta[name="description"]');
         if (!metaDesc) { metaDesc = document.createElement('meta'); metaDesc.name = 'description'; document.head.appendChild(metaDesc); }
         metaDesc.content = CONFIG.descricaoSite;
       }
+      // Open Graph para compartilhamento em redes sociais
       var ogTitle = document.querySelector('meta[property="og:title"]');
       if (!ogTitle) { ogTitle = document.createElement('meta'); ogTitle.setAttribute('property', 'og:title'); document.head.appendChild(ogTitle); }
       ogTitle.content = CONFIG.tituloSite || CONFIG.storeName || 'Achadinhos';
@@ -1683,6 +1692,8 @@
         logo.src = fixImg(CONFIG.logo);
         logo.style.display = 'block';
         logo.onerror = function () { this.style.display = 'none'; };
+      }
+      if (CONFIG.logo) {
         var favicon = document.querySelector('link[rel="icon"]');
         if (!favicon) {
           favicon = document.createElement('link');
@@ -1692,28 +1703,28 @@
         favicon.href = fixImg(CONFIG.logo);
       }
 
-      // Aplica Cor Primária
-      var primaryHex = resolveColor(CONFIG.corPrimaria) || '#3483FA';
-      if (/^#?(fff|ffffff|white)$/i.test(primaryHex)) {
-        primaryHex = '#3483FA';
+      // Colors
+      // Resolve primary color (name or hex)
+      if (CONFIG.corPrimaria) {
+        var primaryHex = nameToHex(CONFIG.corPrimaria) || CONFIG.corPrimaria;
+        document.documentElement.style.setProperty('--primary', primaryHex);
+        var hex = primaryHex.replace('#', '');
+        var r = parseInt(hex.substr(0, 2), 16) || 42;
+        var g = parseInt(hex.substr(2, 2), 16) || 92;
+        var b = parseInt(hex.substr(4, 2), 16) || 63;
+        document.documentElement.style.setProperty('--primary-rgb', r + ', ' + g + ', ' + b);
+        document.documentElement.style.setProperty('--primary-light', 'rgba(' + r + ', ' + g + ', ' + b + ', 0.08)');
+        document.documentElement.style.setProperty('--primary-hover', 'rgb(' + Math.max(0,r-20) + ', ' + Math.max(0,g-20) + ', ' + Math.max(0,b-20) + ')');
+        // Auto-generate secondary (dark version of primary)
+        var secondaryHex = darkenColor(primaryHex, 0.18);
+        document.documentElement.style.setProperty('--secondary', secondaryHex);
+        var sr = parseInt(secondaryHex.replace('#','').substr(0,2), 16);
+        var sg = parseInt(secondaryHex.replace('#','').substr(2,2), 16);
+        var sb = parseInt(secondaryHex.replace('#','').substr(4,2), 16);
+        document.documentElement.style.setProperty('--secondary-hover', 'rgb(' + Math.max(0,sr-15) + ',' + Math.max(0,sg-15) + ',' + Math.max(0,sb-15) + ')');
+        document.documentElement.style.setProperty('--secondary-light', 'rgba(' + sr + ',' + sg + ',' + sb + ',0.08)');
+        CONFIG.corSecundaria = secondaryHex;
       }
-
-      document.documentElement.style.setProperty('--primary', primaryHex);
-      var hex = primaryHex.replace('#', '');
-      if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
-      var r = parseInt(hex.substr(0, 2), 16) || 52;
-      var g = parseInt(hex.substr(2, 2), 16) || 131;
-      var b = parseInt(hex.substr(4, 2), 16) || 250;
-      document.documentElement.style.setProperty('--primary-rgb', r + ', ' + g + ', ' + b);
-      document.documentElement.style.setProperty('--primary-light', 'rgba(' + r + ', ' + g + ', ' + b + ', 0.08)');
-      
-      var hr = Math.max(0, Math.round(r * 0.82));
-      var hg = Math.max(0, Math.round(g * 0.82));
-      var hb = Math.max(0, Math.round(b * 0.82));
-      document.documentElement.style.setProperty('--primary-hover', 'rgb(' + hr + ', ' + hg + ', ' + hb + ')');
-
-      var secondaryHex = darkenColor(primaryHex, 0.18);
-      document.documentElement.style.setProperty('--secondary', secondaryHex);
 
       // Banner
       if (CONFIG.bannerUrl) {
@@ -1745,7 +1756,7 @@
         banner.classList.add('show');
       }
 
-      // Redes Sociais
+      // Footer socials
       const socials = document.getElementById('footerSocials');
       let socialsHTML = '';
       if (CONFIG.canalWhatsapp) socialsHTML += '<a href="' + CONFIG.canalWhatsapp + '" target="_blank" title="Canal de Ofertas no WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>';
@@ -1795,31 +1806,23 @@
         }
       });
 
+      // Canal de ofertas (header + botão flutuante)
       setupChannel();
 
+      // Disclosure de afiliado + aviso de preços (footer)
       document.getElementById('footerDisclosure').textContent = CONFIG.textoDisclosure || '';
       document.getElementById('footerAvisoPrecos').textContent = CONFIG.avisoPrecos || '';
 
+      // Show UI
       installPixels();
-      
-      // Configuração forçada e prioritária da Faixa do Topo
       if (CONFIG.mensagemTopo) {
         var topBar = document.getElementById('topBar');
         topBar.textContent = CONFIG.mensagemTopo;
-        
-        var barBg = resolveColor(CONFIG.corBarraTopo) || '#FFE600';
-        topBar.style.setProperty('background', barBg, 'important');
-        
-        // Define a cor da letra (Preto ou configurada na planilha)
-        var textColor = resolveColor(CONFIG.corTextoTopo);
-        if (!textColor) {
-          textColor = isLightColor(barBg) ? '#1B1B1B' : '#FFFFFF';
+        if (CONFIG.corBarraTopo) {
+          topBar.style.background = CONFIG.corBarraTopo;
         }
-        topBar.style.setProperty('color', textColor, 'important');
-        
         topBar.classList.add('show');
       }
-      
       document.getElementById('siteHeader').style.display = '';
       document.getElementById('catNavWrap').style.display = '';
       document.getElementById('mainContent').style.display = '';
@@ -1925,7 +1928,7 @@
       document.getElementById("galleryThumbs").innerHTML = imgs.length > 1 ? imgs.map((img, i) =>
         `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="switchImage('${img}', this)"><img src="${img}" alt=""></div>`
       ).join("") : "";
-
+      // Badge de plataforma + tipo no topo
       var catParts = [];
       if (currentProduct.plataforma) catParts.push(currentProduct.plataforma);
       if (currentProduct.tipo === 'DIGITAL') catParts.push('Digital');
@@ -1944,14 +1947,18 @@
         priceEl.innerHTML = '';
       }
       document.getElementById("modalDesc").textContent = currentProduct.descricao;
+      // Cupom (com botão copiar)
       document.getElementById('modalCoupon').innerHTML = currentProduct.cupom
         ? '<div class="coupon-box"><div><div class="coupon-label">Cupom de desconto</div><div class="coupon-code">' + currentProduct.cupom + '</div></div><button class="coupon-copy" id="btnCopyCoupon" onclick="copyCoupon()">Copiar cupom</button></div>'
         : '';
+      // Vídeo (YouTube embed)
       var embedUrl = ytEmbed(currentProduct.video);
       document.getElementById('modalVideo').innerHTML = embedUrl
         ? '<div class="video-embed"><iframe src="' + embedUrl + '" title="Vídeo do produto" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>'
         : '';
+      // CTA de saída
       document.getElementById('modalCta').textContent = ctaLabel(currentProduct);
+      // Aviso de preços (apenas se o produto exibir preço)
       var note = document.getElementById('modalPriceNote');
       note.textContent = CONFIG.avisoPrecos || '';
       note.classList.toggle('show', currentProduct.preco > 0);
@@ -1966,21 +1973,13 @@
       document.body.classList.remove('modal-open');
     }
     function switchImage(src, el) { document.getElementById("modalMainImg").src = src; document.querySelectorAll(".gallery-thumb").forEach(t => t.classList.remove("active")); el.classList.add("active"); }
-
     // ============================================
-    // AÇÕES DE AFILIADO
+    // AÇÕES DE AFILIADO (CTA, CUPOM, VÍDEO, CANAL)
     // ============================================
     function ctaLabel(p) {
       if (p.textoBotao) return p.textoBotao;
       if (p.tipo === 'DIGITAL') return 'Quero conhecer →';
-      if (p.plataforma) {
-        var plat = p.plataforma.toLowerCase();
-        if (plat.includes('mercado livre') || plat.includes('mercadolivre')) {
-          return 'Compre no Mercado Livre';
-        }
-        return 'Comprar na ' + p.plataforma;
-      }
-      return 'Ver oferta →';
+      return p.plataforma ? 'Ver oferta na ' + p.plataforma + ' →' : 'Ver oferta →';
     }
 
     function ctaClick() {
@@ -2052,8 +2051,8 @@
       var url = getChannelUrl();
       if (!url) return;
       var isTelegram = !CONFIG.canalWhatsapp && !!CONFIG.canalTelegram;
-      var iconWa = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
-      var iconTg = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>';
+      var iconWa = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z\'/></svg></a>';
+      if (CONFIG.canalTelegram) socialsHTML += '<a href="' + CONFIG.canalTelegram + '" target="_blank" title="Canal no Telegram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg></a>';
       var icon = isTelegram ? iconTg : iconWa;
       var btn = document.getElementById('channelBtn');
       btn.href = url;
@@ -2095,7 +2094,6 @@
         img.src = ACHADINHOS.registrar_cliques + '?data=' + encodeURIComponent(JSON.stringify(dados));
       } catch (err) {}
     }
-
     function clearSearch() {
       var input = document.getElementById('searchInput');
       input.value = '';
@@ -2103,7 +2101,6 @@
       document.getElementById('searchClear').classList.remove('show');
       input.focus();
     }
-
     document.addEventListener('click', function(e) {
       var searchBar = document.getElementById('searchBar');
       var searchToggle = document.querySelector('.search-toggle');
@@ -2113,7 +2110,21 @@
         }
       }
     });
-
+    function nameToHex(name) {
+      var paletas = {
+        'azul': '#2563EB',
+        'verde': '#2A5C3F',
+        'vermelho': '#DC2626',
+        'roxo': '#7C3AED',
+        'rosa': '#DB2777',
+        'laranja': '#EA580C',
+        'dourado': '#B8860B',
+        'preto': '#1B1B1B',
+        'marrom': '#78350F',
+        'turquesa': '#0D9488'
+      };
+      return paletas[name.toLowerCase().trim()] || null;
+    }
     function darkenColor(hex, factor) {
       hex = hex.replace('#', '');
       if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
@@ -2122,7 +2133,6 @@
       var b = Math.round(parseInt(hex.substr(4, 2), 16) * factor);
       return '#' + ('0'+r.toString(16)).slice(-2) + ('0'+g.toString(16)).slice(-2) + ('0'+b.toString(16)).slice(-2);
     }
-
     function isLightColor(hex) {
       hex = hex.replace('#', '');
       if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
@@ -2132,7 +2142,6 @@
       var luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
       return luminance > 0.55;
     }
-
     function handleImgError(img) {
       var parent = img.parentElement;
       var div = document.createElement('div');
@@ -2147,7 +2156,6 @@
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
     }
-
     function copyProductLink() {
       if (!currentProduct) return;
       var slug = toSlug(currentProduct.nome);
@@ -2178,13 +2186,14 @@
         }, 2500);
       });
     }
-
     function installPixels() {
+      // Facebook Pixel
       if (CONFIG.pixelFacebook) {
         const fb = document.createElement('script');
         fb.textContent = "!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','" + CONFIG.pixelFacebook + "');fbq('track','PageView');";
         document.head.appendChild(fb);
       }
+      // Google Analytics
       if (CONFIG.googleAnalytics) {
         const gaScript = document.createElement('script');
         gaScript.async = true;
@@ -2194,6 +2203,7 @@
         gaInit.textContent = "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','" + CONFIG.googleAnalytics + "');";
         document.head.appendChild(gaInit);
       }
+      // Google Ads
       if (CONFIG.googleAds) {
         if (!CONFIG.googleAnalytics) {
           const adsScript = document.createElement('script');
@@ -2212,16 +2222,19 @@
     }
 
     function trackEvent(eventName, data) {
+      // Facebook — clique de afiliado é a conversão (Lead)
       if (CONFIG.pixelFacebook && typeof fbq !== 'undefined') {
         if (eventName === 'ViewContent') fbq('track', 'ViewContent', { content_name: data.name, value: data.value, currency: 'BRL' });
         else if (eventName === 'ClickOferta') fbq('track', 'Lead', { content_name: data.name, value: data.value, currency: 'BRL' });
         else if (eventName === 'CopiaCupom') fbq('trackCustom', 'CopiaCupom', { content_name: data.name });
       }
+      // Google Analytics
       if (CONFIG.googleAnalytics && typeof gtag !== 'undefined') {
         if (eventName === 'ViewContent') gtag('event', 'view_item', { currency: 'BRL', value: data.value });
         else if (eventName === 'ClickOferta') gtag('event', 'click_oferta', { item_name: data.name, currency: 'BRL', value: data.value });
         else if (eventName === 'CopiaCupom') gtag('event', 'copy_coupon', { item_name: data.name });
       }
+      // Google Ads — conversão disparada no clique do CTA
       if (CONFIG.googleAds && typeof gtag !== 'undefined') {
         if (eventName === 'ClickOferta') gtag('event', 'conversion', { send_to: CONFIG.googleAds, value: data.value, currency: 'BRL' });
       }
@@ -2242,27 +2255,28 @@
         buildSubcategoryBar();
       }
     }
-
     function fixImg(url) {
       if (!url) return '';
+      // https://drive.google.com/file/d/XXXXX/view... → direct link
       let m = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
       if (m) return 'https://lh3.googleusercontent.com/d/' + m[1];
+      // https://drive.google.com/open?id=XXXXX → direct link
       m = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
       if (m) return 'https://lh3.googleusercontent.com/d/' + m[1];
+      // https://drive.google.com/uc?id=XXXXX → direct link
       m = url.match(/drive\.google\.com\/uc\?.*id=([^&]+)/);
       if (m) return 'https://lh3.googleusercontent.com/d/' + m[1];
       return url;
     }
-
     function fp(v) { return v.toFixed(2).replace(".", ","); }
-
     function parsePrecoBR(val) {
       var s = (val || '').trim();
       if (!s) return 0;
+      // Se tem vírgula: formato BR (ex: 1.299,90 ou 146,90)
       if (s.indexOf(',') !== -1) return parseFloat(s.replace(/\./g, '').replace(',', '.')) || 0;
+      // Sem vírgula: ponto é decimal (ex: 146.90) ou inteiro (ex: 146)
       return parseFloat(s) || 0;
     }
-
     function showToast(text, priority) {
       var el = document.getElementById('toast');
       document.getElementById('toastImg').style.display = 'none';
@@ -2277,7 +2291,6 @@
       clearTimeout(window._toastTimer);
       window._toastTimer = setTimeout(function() { el.classList.remove('show'); el.style.zIndex = ''; }, 3000);
     }
-
     function toggleMobileSearch() { document.getElementById("searchBar").classList.toggle("mobile-open"); }
 
     window.addEventListener('scroll', function() {
@@ -2296,13 +2309,13 @@
         await Promise.all([loadConfig(), loadCatalogo()]);
         if (CONFIG.lojaAtiva === false) {
           document.getElementById('loadingScreen').classList.add('hidden');
-          document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px"><div style="text-align:center;max-width:480px"><div style="width:64px;height:64px;background:rgba(52,131,250,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' fill=\'none\' viewBox=\'0 0 24 24\' stroke-width=\'1.5\' stroke=\'#3483FA\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z\'/></svg></div><h1 style="font-family:var(--font);font-size:1.5rem;font-weight:700;color:#1B1B1B;margin-bottom:8px">' + (CONFIG.storeName || 'Nossa Loja') + '</h1><p style="font-family:var(--font);font-size:1rem;color:#6B6760;line-height:1.6;margin-bottom:24px">' + (CONFIG.msgManutencao || 'Estamos temporariamente fechados. Volte em breve!') + '</p>' + (getChannelUrl() ? '<a href="' + getChannelUrl() + '" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:#25D366;color:white;border-radius:8px;font-family:var(--font);font-size:0.9rem;font-weight:600;text-decoration:none"><svg viewBox=\'0 0 24 24\' width=\'20\' height=\'20\' fill=\'currentColor\'><path d=\'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z\'/></svg>Entrar no Canal de Ofertas</a>' : '') + '</div></div>';
+          document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px"><div style="text-align:center;max-width:480px"><div style="width:64px;height:64px;background:rgba(42,92,63,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' fill=\'none\' viewBox=\'0 0 24 24\' stroke-width=\'1.5\' stroke=\'#2A5C3F\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z\'/></svg></div><h1 style="font-family:var(--font);font-size:1.5rem;font-weight:700;color:#1B1B1B;margin-bottom:8px">' + (CONFIG.storeName || 'Nossa Loja') + '</h1><p style="font-family:var(--font);font-size:1rem;color:#6B6760;line-height:1.6;margin-bottom:24px">' + (CONFIG.msgManutencao || 'Estamos temporariamente fechados. Volte em breve!') + '</p>' + (getChannelUrl() ? '<a href="' + getChannelUrl() + '" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:#25D366;color:white;border-radius:8px;font-family:var(--font);font-size:0.9rem;font-weight:600;text-decoration:none"><svg viewBox=\'0 0 24 24\' width=\'20\' height=\'20\' fill=\'currentColor\'><path d=\'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z\'/></svg>Entrar no Canal de Ofertas</a>' : '') + '</div></div>';
           return;
         }
         applyConfig();
         buildCategoryNav();
         renderProducts();
-
+        // Check for direct product link
         var urlParams = new URLSearchParams(window.location.search);
         var productSlug = urlParams.get('produto');
         if (productSlug) {
