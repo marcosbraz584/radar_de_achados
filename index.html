@@ -559,6 +559,26 @@
       border-radius: 50px;
       letter-spacing: 0.02em;
       text-transform: uppercase;
+      z-index: 2;
+    }
+
+    .badge-platform {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.65);
+      color: var(--white);
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 50px;
+      letter-spacing: 0.02em;
+      backdrop-filter: blur(2px);
+      max-width: 46%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      z-index: 2;
     }
 
     .product-info {
@@ -572,6 +592,10 @@
       color: var(--text-light);
       font-weight: 500;
       margin-bottom: 4px;
+      /* Mantém a categoria em apenas 1 linha sempre */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .product-name {
@@ -913,38 +937,6 @@
       display: block;
     }
 
-    .badge-platform {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(0, 0, 0, 0.65);
-      color: var(--white);
-      font-size: 0.68rem;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 50px;
-      letter-spacing: 0.02em;
-      backdrop-filter: blur(2px);
-      max-width: 46%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .badge-limited {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      background: #B45309;
-      color: var(--white);
-      font-size: 0.62rem;
-      font-weight: 700;
-      padding: 4px 8px;
-      border-radius: var(--radius-sm);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
     .channel-float {
       position: fixed;
       bottom: 24px;
@@ -1163,7 +1155,7 @@
     }
 
     /* ============================================
-    RESPONSIVE
+    RESPONSIVE (Ajustes visuais para Celular)
     ============================================ */
     @media (max-width: 1024px) {
       .products-grid {
@@ -1305,16 +1297,42 @@
         gap: 10px;
       }
 
+      /* Etiquetas menores e mais bem posicionadas */
+      .badge-promo {
+        top: 6px;
+        left: 6px;
+        font-size: 0.6rem;
+        padding: 3px 6px;
+      }
+
+      .badge-platform {
+        top: 6px;
+        right: 6px;
+        font-size: 0.58rem;
+        padding: 3px 6px;
+        max-width: 65%; /* Permite exibir o nome da plataforma sem cortar tanto */
+      }
+
       .product-info {
-        padding: 10px 12px 12px;
+        padding: 8px 10px 10px; /* Padding um pouco menor para dar respiro */
+      }
+
+      .product-cat {
+        font-size: 0.65rem;
       }
 
       .product-name {
         font-size: 0.85rem;
+        line-height: 1.2;
+        margin-bottom: 6px;
       }
 
       .price-current {
         font-size: 0.95rem;
+      }
+
+      .price-old {
+        font-size: 0.75rem;
       }
 
       .btn-details {
@@ -1871,7 +1889,7 @@
       var hasPromo = p.precoPromo && p.precoPromo > 0 && p.preco > 0 && p.precoPromo < p.preco;
       var priceHTML = '';
       if (p.preco > 0) {
-        var prefixo = p.tipo !== 'DIGITAL' ? '<span style="font-size:0.72rem;font-weight:500;color:var(--text-muted)">a partir de </span>' : '';
+        var prefixo = p.tipo !== 'DIGITAL' ? '<span style="font-size:0.7rem;font-weight:500;color:var(--text-muted)">a partir de </span>' : '';
         priceHTML = '<div class="product-price"><span class="price-current">' + prefixo + 'R$ ' + fp(hasPromo ? p.precoPromo : p.preco) + '</span>' + (hasPromo ? '<span class="price-old">R$ ' + fp(p.preco) + '</span>' : '') + '</div>';
       }
       return '<div class="product-card" onclick="openProductModal(' + idx + ')">' +
@@ -2052,251 +2070,7 @@
       var url = getChannelUrl();
       if (!url) return;
       var isTelegram = !CONFIG.canalWhatsapp && !!CONFIG.canalTelegram;
-      var iconWa = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
-      var iconTg = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>';
-      var icon = isTelegram ? iconTg : iconWa;
-      var btn = document.getElementById('channelBtn');
-      btn.href = url;
-      btn.innerHTML = icon + '<span>Canal de Ofertas</span>';
-      btn.classList.toggle('telegram', isTelegram);
-      btn.classList.add('show');
-      if (CONFIG.botaoCanalFlutuante) {
-        var f = document.getElementById('channelFloat');
-        f.href = url;
-        f.innerHTML = icon;
-        f.classList.toggle('telegram', isTelegram);
-        f.classList.add('show');
-        document.body.classList.add('has-channel-float');
-      }
-    }
-
-    // ============================================
-    // HELPERS
-    // ============================================
-    function salvarClique(produto, categoria, plataforma) {
-      if (!ACHADINHOS.registrar_cliques) return;
-
-      if (!window._cliquesRegistrados) window._cliquesRegistrados = {};
-      var chave = produto + '_' + plataforma;
-      var agora = Date.now();
-      if (window._cliquesRegistrados[chave] && (agora - window._cliquesRegistrados[chave]) < 300000) {
-        return;
-      }
-      window._cliquesRegistrados[chave] = agora;
-
-      try {
-        var dados = {
-          dataHora: new Date().toLocaleString('pt-BR'),
-          produto: produto,
-          categoria: categoria,
-          plataforma: plataforma
-        };
-        var img = new Image();
-        img.src = ACHADINHOS.registrar_cliques + '?data=' + encodeURIComponent(JSON.stringify(dados));
-      } catch (err) {}
-    }
-
-    function clearSearch() {
-      var input = document.getElementById('searchInput');
-      input.value = '';
-      filterProducts();
-      document.getElementById('searchClear').classList.remove('show');
-      input.focus();
-    }
-
-    document.addEventListener('click', function(e) {
-      var searchBar = document.getElementById('searchBar');
-      var searchToggle = document.querySelector('.search-toggle');
-      if (searchBar && searchBar.classList.contains('mobile-open')) {
-        if (!searchBar.contains(e.target) && !searchToggle.contains(e.target)) {
-          searchBar.classList.remove('mobile-open');
-        }
-      }
-    });
-
-    function darkenColor(hex, factor) {
-      hex = hex.replace('#', '');
-      if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
-      var r = Math.round(parseInt(hex.substr(0, 2), 16) * factor);
-      var g = Math.round(parseInt(hex.substr(2, 2), 16) * factor);
-      var b = Math.round(parseInt(hex.substr(4, 2), 16) * factor);
-      return '#' + ('0'+r.toString(16)).slice(-2) + ('0'+g.toString(16)).slice(-2) + ('0'+b.toString(16)).slice(-2);
-    }
-
-    function isLightColor(hex) {
-      hex = hex.replace('#', '');
-      if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
-      var r = parseInt(hex.substr(0, 2), 16);
-      var g = parseInt(hex.substr(2, 2), 16);
-      var b = parseInt(hex.substr(4, 2), 16);
-      var luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-      return luminance > 0.55;
-    }
-
-    function handleImgError(img) {
-      var parent = img.parentElement;
-      var div = document.createElement('div');
-      div.style.cssText = 'width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f0eeea;color:#a8a49c;gap:8px';
-      div.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M6.75 7.5a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg><span style="font-size:0.75rem;font-weight:500">Sem foto</span>';
-      parent.replaceChild(div, img);
-    }
-
-    function toSlug(text) {
-      return text.toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-    }
-
-    function copyProductLink() {
-      if (!currentProduct) return;
-      var slug = toSlug(currentProduct.nome);
-      var url = window.location.origin + window.location.pathname + '?produto=' + slug;
-      navigator.clipboard.writeText(url).then(function() {
-        var btn = document.getElementById('btnCopyLink');
-        var txt = document.getElementById('copyLinkText');
-        btn.classList.add('copied');
-        txt.textContent = 'Link Copiado!';
-        setTimeout(function() {
-          btn.classList.remove('copied');
-          txt.textContent = 'Compartilhar';
-        }, 2500);
-      }).catch(function() {
-        var textarea = document.createElement('textarea');
-        textarea.value = window.location.origin + window.location.pathname + '?produto=' + toSlug(currentProduct.nome);
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        var btn = document.getElementById('btnCopyLink');
-        var txt = document.getElementById('copyLinkText');
-        btn.classList.add('copied');
-        txt.textContent = 'Link Copiado!';
-        setTimeout(function() {
-          btn.classList.remove('copied');
-          txt.textContent = 'Compartilhar';
-        }, 2500);
-      });
-    }
-
-    function installPixels() {
-      if (CONFIG.pixelFacebook) {
-        const fb = document.createElement('script');
-        fb.textContent = "!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','" + CONFIG.pixelFacebook + "');fbq('track','PageView');";
-        document.head.appendChild(fb);
-      }
-      if (CONFIG.googleAnalytics) {
-        const gaScript = document.createElement('script');
-        gaScript.async = true;
-        gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + CONFIG.googleAnalytics;
-        document.head.appendChild(gaScript);
-        const gaInit = document.createElement('script');
-        gaInit.textContent = "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','" + CONFIG.googleAnalytics + "');";
-        document.head.appendChild(gaInit);
-      }
-      if (CONFIG.googleAds) {
-        if (!CONFIG.googleAnalytics) {
-          const adsScript = document.createElement('script');
-          adsScript.async = true;
-          adsScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + CONFIG.googleAds;
-          document.head.appendChild(adsScript);
-          const adsInit = document.createElement('script');
-          adsInit.textContent = "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','" + CONFIG.googleAds + "');";
-          document.head.appendChild(adsInit);
-        } else {
-          const adsConfig = document.createElement('script');
-          adsConfig.textContent = "gtag('config','" + CONFIG.googleAds + "');";
-          document.head.appendChild(adsConfig);
-        }
-      }
-    }
-
-    function trackEvent(eventName, data) {
-      if (CONFIG.pixelFacebook && typeof fbq !== 'undefined') {
-        if (eventName === 'ViewContent') fbq('track', 'ViewContent', { content_name: data.name, value: data.value, currency: 'BRL' });
-        else if (eventName === 'ClickOferta') fbq('track', 'Lead', { content_name: data.name, value: data.value, currency: 'BRL' });
-        else if (eventName === 'CopiaCupom') fbq('trackCustom', 'CopiaCupom', { content_name: data.name });
-      }
-      if (CONFIG.googleAnalytics && typeof gtag !== 'undefined') {
-        if (eventName === 'ViewContent') gtag('event', 'view_item', { currency: 'BRL', value: data.value });
-        else if (eventName === 'ClickOferta') gtag('event', 'click_oferta', { item_name: data.name, currency: 'BRL', value: data.value });
-        else if (eventName === 'CopiaCupom') gtag('event', 'copy_coupon', { item_name: data.name });
-      }
-      if (CONFIG.googleAds && typeof gtag !== 'undefined') {
-        if (eventName === 'ClickOferta') gtag('event', 'conversion', { send_to: CONFIG.googleAds, value: data.value, currency: 'BRL' });
-      }
-    }
-
-    function bannerFilter(value) {
-      let categoria, subcategoria = null;
-      if (value.includes('>')) {
-        const parts = value.split('>');
-        categoria = parts[0].trim();
-        subcategoria = parts[1].trim();
-      } else {
-        categoria = value.trim();
-      }
-      selectCategory(categoria);
-      if (subcategoria) {
-        activeSubcategory = subcategoria;
-        buildSubcategoryBar();
-      }
-    }
-
-    function fixImg(url) {
-      if (!url) return '';
-      let m = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
-      if (m) return 'https://lh3.googleusercontent.com/d/' + m[1];
-      m = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
-      if (m) return 'https://lh3.googleusercontent.com/d/' + m[1];
-      m = url.match(/drive\.google\.com\/uc\?.*id=([^&]+)/);
-      if (m) return 'https://lh3.googleusercontent.com/d/' + m[1];
-      return url;
-    }
-
-    function fp(v) { return v.toFixed(2).replace(".", ","); }
-
-    function parsePrecoBR(val) {
-      var s = (val || '').trim();
-      if (!s) return 0;
-      if (s.indexOf(',') !== -1) return parseFloat(s.replace(/\./g, '').replace(',', '.')) || 0;
-      return parseFloat(s) || 0;
-    }
-
-    function showToast(text, priority) {
-      var el = document.getElementById('toast');
-      document.getElementById('toastImg').style.display = 'none';
-      document.getElementById('toastTitle').textContent = text;
-      document.getElementById('toastSubtitle').textContent = '';
-      if (priority) {
-        el.style.zIndex = '600';
-      } else {
-        el.style.zIndex = '';
-      }
-      el.classList.add('show');
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(function() { el.classList.remove('show'); el.style.zIndex = ''; }, 3000);
-    }
-
-    function toggleMobileSearch() { document.getElementById("searchBar").classList.toggle("mobile-open"); }
-
-    window.addEventListener('scroll', function() {
-      var btn = document.getElementById('backToTop');
-      if (btn) {
-        if (window.scrollY > 400) { btn.classList.add('show'); }
-        else { btn.classList.remove('show'); }
-      }
-    });
-
-    // ============================================
-    // INIT
-    // ============================================
-    async function init() {
-      try {
-        await Promise.all([loadConfig(), loadCatalogo()]);
-        if (CONFIG.lojaAtiva === false) {
-          document.getElementById('loadingScreen').classList.add('hidden');
-          document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px"><div style="text-align:center;max-width:480px"><div style="width:64px;height:64px;background:rgba(52,131,250,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' fill=\'none\' viewBox=\'0 0 24 24\' stroke-width=\'1.5\' stroke=\'#3483FA\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z\'/></svg></div><h1 style="font-family:var(--font);font-size:1.5rem;font-weight:700;color:#1B1B1B;margin-bottom:8px">' + (CONFIG.storeName || 'Nossa Loja') + '</h1><p style="font-family:var(--font);font-size:1rem;color:#6B6760;line-height:1.6;margin-bottom:24px">' + (CONFIG.msgManutencao || 'Estamos temporariamente fechados. Volte em breve!') + '</p>' + (getChannelUrl() ? '<a href="' + getChannelUrl() + '" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:#25D366;color:white;border-radius:8px;font-family:var(--font);font-size:0.9rem;font-weight:600;text-decoration:none"><svg viewBox=\'0 0 24 24\' width=\'20\' height=\'20\' fill=\'currentColor\'><path d=\'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z\'/></svg>Entrar no Canal de Ofertas</a>' : '') + '</div></div>';
+      var iconWa = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z\'/></svg>Entrar no Canal de Ofertas</a>' : '') + '</div></div>';
           return;
         }
         applyConfig();
