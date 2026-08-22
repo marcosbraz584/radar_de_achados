@@ -1636,7 +1636,7 @@
         if (field.includes('CONFIGURAÇÕES') || field.includes('PREENCHA')) continue;
         if (field.includes('DADOS DA LOJA') || field.includes('PERSONALIZAÇÃO') || field.includes('CANAL DE OFERTAS') || field.includes('AVISOS') || field.includes('RASTREAMENTO')) continue;
 
-        if (field === 'NOME DA LOJA') cfg.storeName = val;
+        if (field === '') cfg.storeName = val;
         else if (field === 'LOGO (URL)') cfg.logo = val;
         else if (field === 'INSTAGRAM') cfg.instagram = val;
         else if (field === 'FACEBOOK') cfg.facebook = val;
