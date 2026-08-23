@@ -1861,7 +1861,11 @@
       var ogType = document.querySelector('meta[property="og:type"]');
       if (!ogType) { ogType = document.createElement('meta'); ogType.setAttribute('property', 'og:type'); document.head.appendChild(ogType); }
       ogType.content = 'website';
-      document.getElementById('headerName').textContent = CONFIG.storeName || 'Minha Loja';
+      if (CONFIG.logo) {
+        document.getElementById('headerName').style.display = 'none';
+      } else {
+        document.getElementById('headerName').textContent = CONFIG.storeName || 'Minha Loja';
+      }
       document.getElementById('footerName').textContent = CONFIG.storeName || 'Minha Loja';
 
       // Logo
