@@ -172,14 +172,15 @@
     }
 
     /* FAIXA SUPERIOR AMARELA COM TEXTO PRETO LEGÍVEL */
-    .top-bar {
+  .top-bar {
       background: #FFE600 !important;
       color: #1B1B1B !important;
       text-align: center;
-      padding: 9px 20px;
+      padding: 8px 16px; /* Diminuímos um pouquinho o respiro em volta */
       font-size: 0.85rem;
       font-weight: 600;
       letter-spacing: 0.01em;
+      line-height: 1.2; /* Isso "esmaga" as duas linhas deixando-as grudadinhas */
       display: none;
     }
     .top-bar.show { display: block; }
@@ -643,11 +644,11 @@
       padding: 16px 20px 80px; /* Diminuímos o espaçamento acima da palavra 'Destaques' */
     }
 
-    .section-header {
+   .section-header {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
-      margin-bottom: 24px;
+      margin-bottom: 12px; /* Reduzimos de 24px para 12px para colar o título nos produtos */
     }
 
     .section-title {
@@ -1297,16 +1298,16 @@
     }
     .back-to-top svg { width: 20px; height: 20px; }
 
-    #featuredSection {
+#featuredSection {
       background: var(--primary-light);
       border-radius: var(--radius-lg);
-      padding: 24px;
-      margin-bottom: 32px;
+      padding: 16px 16px 20px; /* Menos espaço no topo (16px) e lados, e 20px no fundo */
+      margin-bottom: 24px; /* O espaço antes do próximo título "Todos os Achadinhos" */
     }
     #featuredSection .section-title {
       color: var(--primary);
       font-size: 1.2rem;
-      margin-bottom: 16px;
+      margin-bottom: 0; /* Removemos a margem extra daqui também */
     }
     #featuredGrid {
       grid-template-columns: repeat(3, 1fr) !important;
