@@ -697,15 +697,13 @@
       padding: 16px 18px 20px;
     }
 
-    .product-cat {
-      font-size: 0.73rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-light);
-      font-weight: 500;
-      margin-bottom: 6px;
-    }
-
+    /* ============================================
+       VISUAL ESTILO MERCADO LIVRE (APP)
+       ============================================ */
+    .product-cat { display: none !important; }
+    .badge-promo, .badge-platform { display: none !important; }
+    .btn-details { display: none !important; }
+    
     .product-name {
       font-size: 0.95rem;
       font-weight: 600;
@@ -721,25 +719,39 @@
 
     .product-price {
       display: flex;
-      align-items: baseline;
-      gap: 8px;
-      row-gap: 0;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
+      flex-direction: column;
+      gap: 2px;
+      margin-bottom: 4px;
     }
-
-    .price-current {
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: var(--secondary);
-      white-space: nowrap;
+    .price-old-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-
+    .ml-badge-discount {
+      background: #00A650;
+      color: #FFFFFF;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
     .price-old {
-      font-size: 0.8rem;
-      color: var(--gray-400);
+      font-size: 0.75rem;
+      color: #A8A49C;
       text-decoration: line-through;
-      white-space: nowrap;
+    }
+    .price-current {
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: #1B1B1B;
+      line-height: 1.1;
+    }
+    .ml-platform-text {
+      font-size: 0.75rem;
+      color: #00A650;
+      font-weight: 600;
+      margin-top: 4px;
     }
 
     .btn-details {
@@ -1481,7 +1493,7 @@
         font-size: 1.2rem;
       }
     }
-  </style>
+  </>
 </head>
 
 <body>
@@ -1502,10 +1514,10 @@
   <div class='top-bar' id='topBar'></div>
 
   <!-- Header -->
-  <header class="header" style="display:none" id="siteHeader">
+  <header class="header" ="display:none" id="siteHeader">
     <div class="header-inner">
-      <div class="header-logo" onclick="window.location.href=window.location.pathname" style="cursor:pointer">
-        <img id="headerLogo" src="" alt="Logo" style="display:none">
+      <div class="header-logo" onclick="window.location.href=window.location.pathname" ="cursor:pointer">
+        <img id="headerLogo" src="" alt="Logo" ="display:none">
         <span id="headerName"></span>
       </div>
       <div class="search-bar" id="searchBar">
@@ -1514,7 +1526,7 @@
             d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
         </svg>
         <input type="text" placeholder="Buscar achadinhos..." id="searchInput" oninput='filterProducts(); document.getElementById("searchClear").classList.toggle("show", this.value.length > 0);'>
-        <button type="button" class="search-clear" id="searchClear" onclick="clearSearch()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--gray-200);border:none;width:20px;height:20px;border-radius:50%;font-size:0.7rem;color:var(--gray-600);cursor:pointer;align-items:center;justify-content:center;padding:0;line-height:1">✕</button>
+        <button type="button" class="search-clear" id="searchClear" onclick="clearSearch()" ="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--gray-200);border:none;width:20px;height:20px;border-radius:50%;font-size:0.7rem;color:var(--gray-600);cursor:pointer;align-items:center;justify-content:center;padding:0;line-height:1">✕</button>
       </div>
       <div class="header-actions">
         <button class="search-toggle" onclick="toggleMobileSearch()">
@@ -1528,13 +1540,13 @@
       </div>
     </div>
   </header>
-  <nav class="cat-nav" style="display:none" id="catNavWrap">
+  <nav class="cat-nav" ="display:none" id="catNavWrap">
     <div class="cat-nav-inner" id="catNav"></div>
   </nav>
   <div class="subcat-bar" id="subcatBar"></div>
   <section class="banner" id="bannerSection"></section>
-  <main class="main" style="display:none" id="mainContent">
-    <div id='featuredSection' style='display:none;margin-bottom:32px'>
+  <main class="main" ="display:none" id="mainContent">
+    <div id='featuredSection' ='display:none;margin-bottom:32px'>
       <div class='section-header'><h2 class='section-title'>Destaques</h2></div>
       <div class='products-grid' id='featuredGrid'></div>
     </div>
@@ -1551,7 +1563,7 @@
     <div class="sidebar-header">
       <div class="sidebar-title">Todas as Categorias</div>
       <button class="sidebar-close" onclick="closeSidebar()">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" ="width: 18px; height: 18px;">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
@@ -1609,7 +1621,7 @@
   </nav>
 
   <!-- Footer -->
-  <footer class="footer" style="display:none" id="siteFooter">
+  <footer class="footer" ="display:none" id="siteFooter">
     <div class="footer-name" id="footerName"></div>
     <div class="footer-socials" id="footerSocials"></div>
     <div class="footer-disclosure" id="footerDisclosure"></div>
@@ -1862,7 +1874,7 @@
       if (!ogType) { ogType = document.createElement('meta'); ogType.setAttribute('property', 'og:type'); document.head.appendChild(ogType); }
       ogType.content = 'website';
       if (CONFIG.logo) {
-        document.getElementById('headerName').style.display = 'none';
+        document.getElementById('headerName')..display = 'none';
       } else {
         document.getElementById('headerName').textContent = CONFIG.storeName || 'Minha Loja';
       }
@@ -2104,25 +2116,30 @@
       var idx = PRODUCTS.indexOf(p);
       var hasPromo = p.precoPromo && p.precoPromo > 0 && p.preco > 0 && p.precoPromo < p.preco;
       var priceHTML = '';
+      
       if (p.preco > 0) {
-        var prefixo = p.tipo !== 'DIGITAL' ? '<span style="font-size:0.75rem;font-weight:500;color:var(--text-muted)">a partir de </span>' : '';
-        priceHTML = '<div class="product-price"><span class="price-current">' + prefixo + 'R$ ' + fp(hasPromo ? p.precoPromo : p.preco) + '</span>' + (hasPromo ? '<span class="price-old">R$ ' + fp(p.preco) + '</span>' : '') + '</div>';
+        priceHTML += '<div class="product-price">';
+        
+        if (hasPromo) {
+          var percent = Math.round((1 - p.precoPromo / p.preco) * 100);
+          priceHTML += '<div class="price-old-row"><span class="ml-badge-discount">' + percent + '% OFF</span><span class="price-old">R$ ' + fp(p.preco) + '</span></div>';
+        }
+        
+        var currentPriceVal = fp(hasPromo ? p.precoPromo : p.preco);
+        priceHTML += '<span class="price-current">R$ ' + currentPriceVal + '</span>';
+        priceHTML += '</div>';
       }
       
-      var iconHandshake = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor"><path d="M502.6 214.6l-54.7-54.7c-12.5-12.5-32.8-12.5-45.3 0l-27.4 27.4c-12.5 12.5-12.5 32.8 0 45.3l18.4 18.4-142.1 142.1c-12.5 12.5-32.8 12.5-45.3 0L174.5 361.3c-12.5-12.5-12.5-32.8 0-45.3l18.4-18.4-27.4-27.4c-12.5-12.5-32.8-12.5-45.3 0L10.3 325.9c-12.5 12.5-12.5 32.8 0 45.3l54.7 54.7c12.5 12.5 32.8 12.5 45.3 0l27.4-27.4c12.5-12.5 12.5-32.8 0-45.3l-18.4-18.4 142.1-142.1c12.5-12.5 32.8-12.5 45.3 0L337.5 224.5c12.5 12.5 12.5 32.8 0 45.3l-18.4 18.4 27.4 27.4c12.5 12.5 32.8 12.5 45.3 0l109.9-109.9c13.4-12.4 13.4-32.7.9-45.1z"/></svg>';
-      var platBadge = p.plataforma ? '<span class="badge-platform">' + iconHandshake + '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + p.plataforma.toUpperCase() + '</span></span>' : '';
+      var platName = p.plataforma ? '<div class="ml-platform-text">' + p.plataforma + '</div>' : '';
 
       return '<div class="product-card" onclick="openProductModal(' + idx + ')">' +
         '<div class="product-img-wrap"><img src="' + p.img1 + '" alt="' + p.nome + '" loading="lazy" onerror="handleImgError(this)">' +
-        (hasPromo ? '<span class="badge-promo">-' + Math.round((1 - p.precoPromo / p.preco) * 100) + '%</span>' : '') +
-        platBadge +
-        (ofertaExpiraEmBreve(p) ? '<span class="badge-limited">Oferta por tempo limitado</span>' : '') +
+        (ofertaExpiraEmBreve(p) ? '<span class="badge-limited">Tempo limitado</span>' : '') +
         '</div>' +
         '<div class="product-info">' +
-        '<div class="product-cat">' + p.categoria + (p.subcategoria ? ' · ' + p.subcategoria : '') + '</div>' +
         '<div class="product-name">' + p.nome + '</div>' +
         priceHTML +
-        '<button class="btn-details">Ver Detalhes</button>' +
+        platName +
         '</div></div>';
     }
 
