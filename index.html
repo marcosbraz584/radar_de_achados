@@ -517,70 +517,124 @@
     /* ============================================
     BANNER
     =========================================== */
-    .banner {
+   /* ============================================
+    BANNER CARROSSEL
+    =========================================== */
+    .banner-container {
       max-width: 1200px;
       margin: 20px auto;
       padding: 0 20px;
       display: none;
+      position: relative;
     }
 
-    .banner.show {
+    .banner-container.show {
       display: block;
     }
 
-    .banner a,
-    .banner div.banner-wrap {
-      display: block;
+    .banner-slider {
+      position: relative;
+      width: 100%;
       border-radius: var(--radius-lg);
       overflow: hidden;
-      position: relative;
-      background: transparent;
       box-shadow: var(--shadow-sm);
+      aspect-ratio: 3 / 1; /* Mantém a proporção 1200x400 (3:1) */
+      background: var(--gray-50);
+    }
+
+    .banner-slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .banner-slide.active {
+      opacity: 1;
+      z-index: 2;
     }
 
     .banner-img {
       width: 100%;
-      height: auto;
+      height: 100%;
+      object-fit: cover; /* Garante que a imagem preencha o espaço */
       display: block;
-      border-radius: var(--radius-lg);
-      object-fit: contain;
     }
 
-    .banner-overlay {
+    /* Setas de navegação */
+    .banner-nav {
       position: absolute;
-      inset: 0;
-      background: transparent;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--secondary);
+      border-radius: 50%;
       display: flex;
-      flex-direction: column;
+      align-items: center;
       justify-content: center;
-      padding: 30px 40px;
-      pointer-events: none;
+      cursor: pointer;
+      z-index: 10;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+      border: none;
     }
 
-    .banner-tag {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: rgba(255, 255, 255, 0.95);
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-      margin-bottom: 8px;
+    .banner-nav:hover {
+      background: var(--white);
+      color: var(--primary);
     }
 
-    .banner-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--white);
-      letter-spacing: -0.03em;
-      line-height: 1.2;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
-      margin-bottom: 6px;
+    .banner-prev { left: 10px; }
+    .banner-next { right: 10px; }
+
+    .banner-nav svg {
+      width: 24px;
+      height: 24px;
     }
 
-    .banner-sub {
-      font-size: 0.95rem;
-      color: rgba(255, 255, 255, 0.9);
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    /* Bolinhas indicadores */
+    .banner-dots {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .dot.active {
+      background: var(--primary);
+      width: 24px;
+      border-radius: 5px;
+    }
+
+    @media (max-width: 768px) {
+      .banner-slider {
+        aspect-ratio: 16 / 9; /* Proporção melhor para celular se a imagem não for específica para mobile */
+      }
+      .banner-nav {
+        display: none; /* Esconde as setas no celular (usa só os pontinhos ou auto-play) */
+      }
     }
 
     /* ============================================
@@ -1544,7 +1598,22 @@
     <div class="cat-nav-inner" id="catNav"></div>
   </nav>
   <div class="subcat-bar" id="subcatBar"></div>
-  <section class="banner" id="bannerSection"></section>
+  <section class="banner-container" id="bannerContainer">
+    <div class="banner-slider" id="bannerSlider">
+      <!-- Os slides serão inseridos aqui pelo JavaScript -->
+    </div>
+    <button class="banner-nav banner-prev" onclick="moveSlide(-1)">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+      </svg>
+    </button>
+    <button class="banner-nav banner-next" onclick="moveSlide(1)">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+      </svg>
+    </button>
+    <div class="banner-dots" id="bannerDots"></div>
+  </section>
   <main class="main" ="display:none" id="mainContent">
     <div id='featuredSection' ='display:none;margin-bottom:32px'>
       <div class='section-header'><h2 class='section-title'>Destaques</h2></div>
