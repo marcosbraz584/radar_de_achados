@@ -37,7 +37,7 @@
       --text-light: #87837A;
       --radius: 10px;
       --radius-sm: 6px;
-      --radius-lg: 16px; /* Bordas mais suaves nos cards */
+      --radius-lg: 16px;
       --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
       --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
       --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -230,7 +230,7 @@
     }
 
     .header-logo span {
-      font-weight: 800; /* Destaque no logo textual */
+      font-weight: 800;
       font-size: 1.15rem;
       color: #1B1B1B;
       letter-spacing: -0.02em;
@@ -335,7 +335,7 @@
     }
 
     /* ============================================
-    CATEGORY NAV
+    CATEGORY NAV & SIDEBAR
     =========================================== */
     .cat-nav {
       background: var(--white);
@@ -348,6 +348,7 @@
       padding: 0 20px;
       display: flex;
       align-items: center;
+      justify-content: space-between; /* Distribui os botões no mobile */
       gap: 4px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -359,8 +360,8 @@
     }
 
     .cat-btn {
-      padding: 14px 20px;
-      font-size: 0.9rem;
+      padding: 14px 10px; /* Reduzi um pouco para caber os 4 botões */
+      font-size: 0.88rem;
       font-weight: 500;
       color: var(--text-muted);
       background: none;
@@ -368,6 +369,8 @@
       border-bottom: 2px solid transparent;
       transition: var(--transition);
       letter-spacing: -0.01em;
+      flex: 1; /* Faz os botões dividirem o espaço no mobile */
+      text-align: center;
     }
 
     .cat-btn:hover {
@@ -378,6 +381,99 @@
       color: var(--primary);
       border-bottom-color: var(--primary);
       font-weight: 700;
+    }
+
+    /* ESTILOS DO MENU LATERAL (SIDEBAR) */
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .sidebar-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .sidebar-menu {
+      position: fixed;
+      top: 0;
+      right: -320px; /* Sidebar desliza pela direita */
+      width: 300px;
+      max-width: 80vw;
+      height: 100%;
+      background: var(--white);
+      z-index: 1001;
+      box-shadow: var(--shadow-xl);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-menu.open {
+      transform: translateX(-320px);
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .sidebar-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--secondary);
+    }
+    
+    .sidebar-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-600);
+      transition: var(--transition);
+    }
+    .sidebar-close:hover {
+      background: var(--gray-100);
+    }
+
+    .sidebar-content {
+      padding: 10px 0;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .sidebar-cat-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 24px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: transparent;
+      border-bottom: 1px solid var(--gray-50);
+      transition: var(--transition);
+    }
+    .sidebar-cat-btn:hover {
+      background: var(--gray-50);
+      color: var(--text);
+    }
+    .sidebar-cat-btn.active {
+      color: var(--primary);
+      font-weight: 700;
+      background: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      padding-left: 20px;
     }
 
     /* ============================================
@@ -518,7 +614,7 @@
     .products-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 20px; /* Maior respiro entre os cards */
+      gap: 20px;
     }
 
     .product-card {
@@ -571,12 +667,11 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    /* NOVO BADGE MERCADO LIVRE / PLATAFORMAS */
     .badge-platform {
       position: absolute;
       top: 12px;
       right: 12px;
-      background: #192C4B; /* Fundo azul marinho mais elegante */
+      background: #192C4B;
       color: var(--white);
       font-size: 0.6rem;
       font-weight: 700;
@@ -594,7 +689,7 @@
     .badge-platform svg {
       width: 14px;
       height: 14px;
-      color: #FBBF24; /* Destaque amarelo para o ícone */
+      color: #FBBF24;
       flex-shrink: 0;
     }
 
@@ -633,7 +728,6 @@
       margin-bottom: 14px;
     }
 
-    /* HIERARQUIA DE PREÇOS MELHORADA */
     .price-current {
       font-size: 1.2rem;
       font-weight: 800;
@@ -700,15 +794,8 @@
     }
 
     @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .modal {
@@ -1057,7 +1144,7 @@
     .footer {
       background: #1B1B1B;
       color: rgba(255,255,255,0.5);
-      padding: 36px 20px 80px; /* Adicionado padding para a navbar não cobrir */
+      padding: 36px 20px 80px;
       text-align: center;
     }
     .footer-name {
@@ -1231,8 +1318,8 @@
     }
 
     @media (max-width: 768px) {
-      .bottom-nav { display: flex; } /* Mostra nav bar de baixo no mobile */
-      .main { padding-bottom: 90px; } /* Evita conteúdo esconder atrás da nav */
+      .bottom-nav { display: flex; } 
+      .main { padding-bottom: 90px; } 
       .channel-float { bottom: 80px; }
       .back-to-top { bottom: 80px; }
 
@@ -1457,6 +1544,22 @@
     </div>
     <div class="products-grid" id="productsGrid"></div>
   </main>
+
+  <!-- Sidebar Menu -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+  <div class="sidebar-menu" id="sidebarMenu">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Todas as Categorias</div>
+      <button class="sidebar-close" onclick="closeSidebar()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <div class="sidebar-content" id="sidebarCatList">
+      <!-- Categorias do menu lateral são geradas aqui -->
+    </div>
+  </div>
 
   <!-- Product Modal -->
   <div class="modal-overlay" id="productModal" onclick="if(event.target===this)closeProductModal()">
@@ -1758,8 +1861,8 @@
       var ogType = document.querySelector('meta[property="og:type"]');
       if (!ogType) { ogType = document.createElement('meta'); ogType.setAttribute('property', 'og:type'); document.head.appendChild(ogType); }
       ogType.content = 'website';
-      document.getElementById('headerName').textContent = CONFIG.storeName || '';
-      document.getElementById('footerName').textContent = CONFIG.storeName || '';
+      document.getElementById('headerName').textContent = CONFIG.storeName || 'Minha Loja';
+      document.getElementById('footerName').textContent = CONFIG.storeName || 'Minha Loja';
 
       // Logo
       if (CONFIG.logo) {
@@ -1886,21 +1989,16 @@
 
       installPixels();
       
-      // Configuração forçada e prioritária da Faixa do Topo
       if (CONFIG.mensagemTopo) {
         var topBar = document.getElementById('topBar');
         topBar.textContent = CONFIG.mensagemTopo;
-        
         var barBg = resolveColor(CONFIG.corBarraTopo) || '#FFE600';
         topBar.style.setProperty('background', barBg, 'important');
-        
-        // Define a cor da letra (Preto ou configurada na planilha)
         var textColor = resolveColor(CONFIG.corTextoTopo);
         if (!textColor) {
           textColor = isLightColor(barBg) ? '#1B1B1B' : '#FFFFFF';
         }
         topBar.style.setProperty('color', textColor, 'important');
-        
         topBar.classList.add('show');
       }
       
@@ -1916,18 +2014,66 @@
     function getCategories() {
       return ["Todos", ...new Set(PRODUCTS.map(p => p.categoria).filter(Boolean))];
     }
+    
     function getSubcategories(cat) {
       return [...new Set(PRODUCTS.filter(p => p.categoria === cat && p.subcategoria).map(p => p.subcategoria))];
     }
+
+    // NOVA LÓGICA DE CATEGORIAS: Limita a 3 botões horizontais e gera menu lateral
     function buildCategoryNav() {
-      document.getElementById("catNav").innerHTML = getCategories().map(c =>
+      const allCats = getCategories();
+      
+      // Top 3 categorias para ficar no menu de rolagem horizontal
+      const topCats = allCats.slice(0, 3);
+      
+      let horizontalHTML = topCats.map(c =>
         `<button class="cat-btn ${c === activeCategory ? 'active' : ''}" onclick="selectCategory('${c.replace(/'/g, "\\'")}')">${c}</button>`
       ).join("");
+      
+      // Se houver mais de 3 categorias, adicionamos o botão MAIS
+      if (allCats.length > 3) {
+        // Se a categoria ativa atual não estiver no top 3, deixamos o botão MAIS ativo
+        const isTopCatActive = topCats.includes(activeCategory);
+        const maisActive = !isTopCatActive ? 'active' : '';
+        
+        horizontalHTML += `<button class="cat-btn ${maisActive}" onclick="openSidebar()"><svg style="width:16px;height:16px;vertical-align:-3px;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg> Mais</button>`;
+      }
+      
+      document.getElementById("catNav").innerHTML = horizontalHTML;
+      
+      // Gera as categorias completas no menu lateral oculto
+      let sidebarHTML = allCats.map(c =>
+        `<button class="sidebar-cat-btn ${c === activeCategory ? 'active' : ''}" onclick="selectCategory('${c.replace(/'/g, "\\'")}', true)">${c}</button>`
+      ).join("");
+      
+      document.getElementById("sidebarCatList").innerHTML = sidebarHTML;
     }
-    function selectCategory(cat) {
-      activeCategory = cat; activeSubcategory = null;
-      buildCategoryNav(); buildSubcategoryBar(); renderProducts();
+
+    function selectCategory(cat, fromSidebar = false) {
+      activeCategory = cat; 
+      activeSubcategory = null;
+      buildCategoryNav(); 
+      buildSubcategoryBar(); 
+      renderProducts();
+      
+      if (fromSidebar) {
+        closeSidebar();
+      }
     }
+
+    // AÇÕES DO MENU LATERAL
+    function openSidebar() {
+      document.getElementById('sidebarOverlay').classList.add('show');
+      document.getElementById('sidebarMenu').classList.add('open');
+      document.body.style.overflow = "hidden"; // trava rolagem da tela de fundo
+    }
+    
+    function closeSidebar() {
+      document.getElementById('sidebarOverlay').classList.remove('show');
+      document.getElementById('sidebarMenu').classList.remove('open');
+      document.body.style.overflow = ""; // volta rolagem
+    }
+
     function buildSubcategoryBar() {
       const bar = document.getElementById("subcatBar");
       if (activeCategory === "Todos") { bar.classList.remove("show"); return; }
