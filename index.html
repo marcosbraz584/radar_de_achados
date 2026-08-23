@@ -517,9 +517,9 @@
     /* ============================================
     BANNER CARROSSEL
     =========================================== */
-    .banner-container {
+   .banner-container {
       max-width: 1200px;
-      margin: 20px auto;
+      margin: 16px auto 0; /* 16px no topo, 0 embaixo para não somar espaço */
       padding: 0 20px;
       display: none;
       position: relative;
@@ -640,7 +640,7 @@
     .main {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 24px 20px 80px;
+      padding: 16px 20px 80px; /* Diminuímos o espaçamento acima da palavra 'Destaques' */
     }
 
     .section-header {
@@ -1321,11 +1321,23 @@
       }
     }
 
-    @media (max-width: 768px) {
+   @media (max-width: 768px) {
       .bottom-nav { display: flex; } 
-      .main { padding-bottom: 90px; } 
+      .main { padding: 16px 16px 90px; } /* Ajuste fino do main no celular */
       .channel-float { bottom: 80px; }
       .back-to-top { bottom: 80px; }
+
+      .banner-container {
+        padding: 0 16px;
+        margin-top: 16px;
+      }
+      .banner-slider {
+        aspect-ratio: 3 / 1; /* Mantém a imagem perfeitamente retangular sem sobrar fundo branco! */
+        border-radius: 10px; /* Borda mais delicada no celular */
+      }
+      .banner-nav {
+        display: none; 
+      }
 
       #featuredGrid { grid-template-columns: repeat(2, 1fr) !important; }
       #featuredSection { padding: 16px; }
