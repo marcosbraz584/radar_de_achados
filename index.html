@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carregando... — Radar de Achados</title>
+  <title>Carregando... — Planiloja Achadinhos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap"
@@ -348,7 +348,7 @@
       padding: 0 20px;
       display: flex;
       align-items: center;
-      justify-content: space-between; /* Distribui os botões no mobile */
+      justify-content: space-between; 
       gap: 4px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -360,7 +360,7 @@
     }
 
     .cat-btn {
-      padding: 14px 10px; /* Reduzi um pouco para caber os 4 botões */
+      padding: 14px 10px; 
       font-size: 0.88rem;
       font-weight: 500;
       color: var(--text-muted);
@@ -369,7 +369,7 @@
       border-bottom: 2px solid transparent;
       transition: var(--transition);
       letter-spacing: -0.01em;
-      flex: 1; /* Faz os botões dividirem o espaço no mobile */
+      flex: 1; 
       text-align: center;
     }
 
@@ -402,7 +402,7 @@
     .sidebar-menu {
       position: fixed;
       top: 0;
-      right: -320px; /* Sidebar desliza pela direita */
+      right: -320px; 
       width: 300px;
       max-width: 80vw;
       height: 100%;
@@ -515,9 +515,6 @@
     }
 
     /* ============================================
-    BANNER
-    =========================================== */
-   /* ============================================
     BANNER CARROSSEL
     =========================================== */
     .banner-container {
@@ -538,7 +535,7 @@
       border-radius: var(--radius-lg);
       overflow: hidden;
       box-shadow: var(--shadow-sm);
-      aspect-ratio: 3 / 1; /* Mantém a proporção 1200x400 (3:1) */
+      aspect-ratio: 3 / 1; 
       background: var(--gray-50);
     }
 
@@ -564,7 +561,7 @@
     .banner-img {
       width: 100%;
       height: 100%;
-      object-fit: cover; /* Garante que a imagem preencha o espaço */
+      object-fit: cover; 
       display: block;
     }
 
@@ -630,15 +627,15 @@
 
     @media (max-width: 768px) {
       .banner-slider {
-        aspect-ratio: 16 / 9; /* Proporção melhor para celular se a imagem não for específica para mobile */
+        aspect-ratio: 16 / 9; 
       }
       .banner-nav {
-        display: none; /* Esconde as setas no celular (usa só os pontinhos ou auto-play) */
+        display: none; 
       }
     }
 
     /* ============================================
-    PRODUCTS GRID
+    PRODUCTS GRID & ML STYLE
     =========================================== */
     .main {
       max-width: 1200px;
@@ -706,47 +703,6 @@
       transform: scale(1.05);
     }
 
-    .badge-promo {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      background: #E53E3E;
-      color: white;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 50px;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .badge-platform {
-      position: absolute;
-      bottom: 10px; /* Mudamos de top para bottom */
-      right: 10px;
-      background: #192C4B;
-      color: var(--white);
-      font-size: 0.55rem; 
-      font-weight: 700;
-      padding: 4px 8px; 
-      border-radius: 50px;
-      letter-spacing: 0.02em;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      max-width: 90%; 
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .badge-platform svg {
-      width: 14px;
-      height: 14px;
-      color: #FBBF24;
-      flex-shrink: 0;
-    }
-
     .product-info {
       padding: 16px 18px 20px;
     }
@@ -806,24 +762,6 @@
       color: #00A650;
       font-weight: 600;
       margin-top: 4px;
-    }
-
-    .btn-details {
-      width: 100%;
-      padding: 12px;
-      background: var(--gray-50);
-      border: 1.5px solid var(--gray-200);
-      border-radius: var(--radius);
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text);
-      transition: var(--transition);
-    }
-
-    .btn-details:hover {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: var(--white);
     }
 
     .no-results {
@@ -1547,7 +1485,7 @@
         font-size: 1.2rem;
       }
     }
-  </>
+  </style>
 </head>
 
 <body>
@@ -1568,10 +1506,10 @@
   <div class='top-bar' id='topBar'></div>
 
   <!-- Header -->
-  <header class="header" ="display:none" id="siteHeader">
+  <header class="header" style="display:none" id="siteHeader">
     <div class="header-inner">
-      <div class="header-logo" onclick="window.location.href=window.location.pathname" ="cursor:pointer">
-        <img id="headerLogo" src="" alt="Logo" ="display:none">
+      <div class="header-logo" onclick="window.location.href=window.location.pathname" style="cursor:pointer">
+        <img id="headerLogo" src="" alt="Logo" style="display:none">
         <span id="headerName"></span>
       </div>
       <div class="search-bar" id="searchBar">
@@ -1580,7 +1518,7 @@
             d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
         </svg>
         <input type="text" placeholder="Buscar achadinhos..." id="searchInput" oninput='filterProducts(); document.getElementById("searchClear").classList.toggle("show", this.value.length > 0);'>
-        <button type="button" class="search-clear" id="searchClear" onclick="clearSearch()" ="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--gray-200);border:none;width:20px;height:20px;border-radius:50%;font-size:0.7rem;color:var(--gray-600);cursor:pointer;align-items:center;justify-content:center;padding:0;line-height:1">✕</button>
+        <button type="button" class="search-clear" id="searchClear" onclick="clearSearch()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--gray-200);border:none;width:20px;height:20px;border-radius:50%;font-size:0.7rem;color:var(--gray-600);cursor:pointer;align-items:center;justify-content:center;padding:0;line-height:1">✕</button>
       </div>
       <div class="header-actions">
         <button class="search-toggle" onclick="toggleMobileSearch()">
@@ -1594,13 +1532,33 @@
       </div>
     </div>
   </header>
-  <nav class="cat-nav" ="display:none" id="catNavWrap">
+  
+  <nav class="cat-nav" style="display:none" id="catNavWrap">
     <div class="cat-nav-inner" id="catNav"></div>
   </nav>
+  
   <div class="subcat-bar" id="subcatBar"></div>
-  <section class="banner" id="bannerSection"></section>
-  <main class="main" ="display:none" id="mainContent">
-    <div id='featuredSection' ='display:none;margin-bottom:32px'>
+  
+  <!-- Banner Carrossel Novo -->
+  <section class="banner-container" id="bannerContainer">
+    <div class="banner-slider" id="bannerSlider">
+      <!-- Os slides serão inseridos aqui pelo JavaScript -->
+    </div>
+    <button class="banner-nav banner-prev" onclick="moveSlide(-1)">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+      </svg>
+    </button>
+    <button class="banner-nav banner-next" onclick="moveSlide(1)">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+      </svg>
+    </button>
+    <div class="banner-dots" id="bannerDots"></div>
+  </section>
+
+  <main class="main" style="display:none" id="mainContent">
+    <div id='featuredSection' style='display:none;margin-bottom:32px'>
       <div class='section-header'><h2 class='section-title'>Destaques</h2></div>
       <div class='products-grid' id='featuredGrid'></div>
     </div>
@@ -1617,7 +1575,7 @@
     <div class="sidebar-header">
       <div class="sidebar-title">Todas as Categorias</div>
       <button class="sidebar-close" onclick="closeSidebar()">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" ="width: 18px; height: 18px;">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
@@ -1675,7 +1633,7 @@
   </nav>
 
   <!-- Footer -->
-  <footer class="footer" ="display:none" id="siteFooter">
+  <footer class="footer" style="display:none" id="siteFooter">
     <div class="footer-name" id="footerName"></div>
     <div class="footer-socials" id="footerSocials"></div>
     <div class="footer-disclosure" id="footerDisclosure"></div>
@@ -1714,9 +1672,6 @@
     let activeSubcategory = null;
     let currentProduct = null;
 
-    // ============================================
-    // CSV PARSER
-    // ============================================
     function parseCSV(text) {
       const lines = [];
       let current = '';
@@ -1745,55 +1700,31 @@
       return rows;
     }
 
-    // ============================================
-    // CONVERSOR DE CORES ROBUSTO
-    // ============================================
     function resolveColor(val) {
       if (!val) return null;
       var s = String(val).trim();
       var low = s.toLowerCase();
       var paletas = {
-        'preto': '#1B1B1B',
-        'black': '#1B1B1B',
-        'branco': '#FFFFFF',
-        'white': '#FFFFFF',
-        'amarelo': '#FFE600',
-        'amarelo mercado livre': '#FFE600',
-        'yellow': '#FFE600',
-        'azul': '#3483FA',
-        'azul mercado livre': '#3483FA',
-        'blue': '#3483FA',
-        'verde': '#2A5C3F',
-        'green': '#25D366',
-        'vermelho': '#DC2626',
-        'red': '#DC2626',
-        'roxo': '#7C3AED',
-        'rosa': '#DB2777',
-        'laranja': '#EA580C',
-        'dourado': '#B8860B',
-        'marrom': '#78350F',
-        'cinza': '#6B6760',
-        'turquesa': '#0D9488'
+        'preto': '#1B1B1B', 'black': '#1B1B1B', 'branco': '#FFFFFF', 'white': '#FFFFFF',
+        'amarelo': '#FFE600', 'amarelo mercado livre': '#FFE600', 'yellow': '#FFE600',
+        'azul': '#3483FA', 'azul mercado livre': '#3483FA', 'blue': '#3483FA',
+        'verde': '#2A5C3F', 'green': '#25D366', 'vermelho': '#DC2626', 'red': '#DC2626',
+        'roxo': '#7C3AED', 'rosa': '#DB2777', 'laranja': '#EA580C', 'dourado': '#B8860B',
+        'marrom': '#78350F', 'cinza': '#6B6760', 'turquesa': '#0D9488'
       };
       if (paletas[low]) return paletas[low];
       
       var clean = s.replace('#', '');
       if (clean.length === 3 || clean.length === 6) {
-        if (/^[0-9A-Fa-f]+$/.test(clean)) {
-          return '#' + clean;
-        }
+        if (/^[0-9A-Fa-f]+$/.test(clean)) { return '#' + clean; }
       }
       return s;
     }
 
-    // ============================================
-    // LOAD CONFIG FROM SHEETS
-    // ============================================
     async function loadConfig() {
       const res = await fetch(ACHADINHOS.planilha_configuracoes + '&_t=' + Date.now(), { cache: 'no-store' });
       const text = await res.text();
       const rows = parseCSV(text);
-
       const cfg = {};
 
       for (const row of rows) {
@@ -1841,9 +1772,6 @@
       CONFIG = cfg;
     }
 
-    // ============================================
-    // LOAD CATÁLOGO FROM SHEETS
-    // ============================================
     async function loadCatalogo() {
       const res = await fetch(ACHADINHOS.planilha_catalogo + '&_t=' + Date.now(), { cache: 'no-store' });
       const text = await res.text();
@@ -1901,9 +1829,6 @@
       return diff > 0 && diff <= 48 * 60 * 60 * 1000;
     }
 
-    // ============================================
-    // APPLY CONFIG TO UI
-    // ============================================
     function applyConfig() {
       document.title = CONFIG.tituloSite || (CONFIG.storeName ? CONFIG.storeName + ' — Achadinhos' : 'Achadinhos');
       if (CONFIG.descricaoSite) {
@@ -1927,19 +1852,17 @@
       var ogType = document.querySelector('meta[property="og:type"]');
       if (!ogType) { ogType = document.createElement('meta'); ogType.setAttribute('property', 'og:type'); document.head.appendChild(ogType); }
       ogType.content = 'website';
-      if (CONFIG.logo) {
-        document.getElementById('headerName')..display = 'none';
-      } else {
-        document.getElementById('headerName').textContent = CONFIG.storeName || 'Minha Loja';
-      }
+      
+      document.getElementById('headerName').textContent = CONFIG.storeName || 'Minha Loja';
       document.getElementById('footerName').textContent = CONFIG.storeName || 'Minha Loja';
 
-      // Logo
+      // Logo e Texto do Cabeçalho
       if (CONFIG.logo) {
         const logo = document.getElementById('headerLogo');
         logo.src = fixImg(CONFIG.logo);
         logo.style.display = 'block';
-        logo.onerror = function () { this.style.display = 'none'; };
+        document.getElementById('headerName').style.display = 'none'; // Esconde o texto se tiver logo
+        logo.onerror = function () { this.style.display = 'none'; document.getElementById('headerName').style.display = 'block'; };
         var favicon = document.querySelector('link[rel="icon"]');
         if (!favicon) {
           favicon = document.createElement('link');
@@ -1949,7 +1872,6 @@
         favicon.href = fixImg(CONFIG.logo);
       }
 
-      // Aplica Cor Primária
       var primaryHex = resolveColor(CONFIG.corPrimaria) || '#3483FA';
       if (/^#?(fff|ffffff|white)$/i.test(primaryHex)) {
         primaryHex = '#3483FA';
@@ -1972,37 +1894,53 @@
       var secondaryHex = darkenColor(primaryHex, 0.18);
       document.documentElement.style.setProperty('--secondary', secondaryHex);
 
-      // Banner
+      // Banner Carrossel
       if (CONFIG.bannerUrl) {
-        const banner = document.getElementById('bannerSection');
-        const hasLink = CONFIG.bannerLink;
-        let overlayHTML = '';
-        if (CONFIG.bannerTag || CONFIG.bannerTitulo || CONFIG.bannerSubtitulo) {
-          overlayHTML = `<div class="banner-overlay">
-        ${CONFIG.bannerTag ? `<div class="banner-tag">${CONFIG.bannerTag}</div>` : ''}
-        ${CONFIG.bannerTitulo ? `<div class="banner-title">${CONFIG.bannerTitulo}</div>` : ''}
-        ${CONFIG.bannerSubtitulo ? `<div class="banner-sub">${CONFIG.bannerSubtitulo}</div>` : ''}
-      </div>`;
+        const container = document.getElementById('bannerContainer');
+        const slider = document.getElementById('bannerSlider');
+        const dotsContainer = document.getElementById('bannerDots');
+        
+        const urls = CONFIG.bannerUrl.split(',').map(u => u.trim()).filter(Boolean);
+        const links = CONFIG.bannerLink ? CONFIG.bannerLink.split(',').map(l => l.trim()) : [];
+        
+        if (urls.length > 0) {
+          let slidesHTML = '';
+          let dotsHTML = '';
+          
+          urls.forEach((url, i) => {
+            const link = links[i] || links[0] || ''; 
+            let wrapperOpen = '<div class="banner-slide' + (i === 0 ? ' active' : '') + '">';
+            let wrapperClose = '</div>';
+            
+            if (link && link.startsWith('http')) {
+              wrapperOpen = '<a href="' + link + '" target="_blank" class="banner-slide' + (i === 0 ? ' active' : '') + '">';
+              wrapperClose = '</a>';
+            } else if (link) {
+              wrapperOpen = '<div class="banner-slide' + (i === 0 ? ' active' : '') + '" style="cursor:pointer" onclick="bannerFilter(\'' + link.replace(/'/g, "\\'") + '\')">';
+            }
+            
+            slidesHTML += wrapperOpen + '<img class="banner-img" src="' + fixImg(url) + '" alt="Banner ' + (i+1) + '">' + wrapperClose;
+            dotsHTML += '<div class="dot' + (i === 0 ? ' active' : '') + '" onclick="goToSlide(' + i + ')"></div>';
+          });
+          
+          slider.innerHTML = slidesHTML;
+          dotsContainer.innerHTML = urls.length > 1 ? dotsHTML : ''; 
+          
+          if (urls.length <= 1) {
+            document.querySelectorAll('.banner-nav').forEach(btn => btn.style.display = 'none');
+          }
+          
+          container.classList.add('show');
+          
+          if (urls.length > 1) {
+            window.slideCount = urls.length;
+            window.currentSlide = 0;
+            if (window.slideInterval) clearInterval(window.slideInterval);
+            window.slideInterval = setInterval(() => moveSlide(1), 4000);
+          }
         }
-        let wrapperOpen, wrapperClose;
-        if (hasLink && hasLink.startsWith('http')) {
-          wrapperOpen = `<a href="${hasLink}" class="banner-wrap">`;
-          wrapperClose = `</a>`;
-        } else if (hasLink) {
-          wrapperOpen = `<div class="banner-wrap" style="cursor:pointer" onclick="bannerFilter('${hasLink.replace(/'/g, "\\'")}')">`;
-          wrapperClose = `</div>`;
-        } else {
-          wrapperOpen = `<div class="banner-wrap">`;
-          wrapperClose = `</div>`;
-        }
-        banner.innerHTML = `${wrapperOpen}
-      <img class="banner-img" src="${fixImg(CONFIG.bannerUrl)}" alt="Banner" onerror="this.parentElement.parentElement.style.display='none'">
-      ${overlayHTML}
-    ${wrapperClose}`;
-        banner.classList.add('show');
       }
 
-      // Redes Sociais
       const socials = document.getElementById('footerSocials');
       let socialsHTML = '';
       if (CONFIG.canalWhatsapp) socialsHTML += '<a href="' + CONFIG.canalWhatsapp + '" target="_blank" title="Canal de Ofertas no WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>';
@@ -2078,9 +2016,6 @@
       document.getElementById('siteFooter').style.display = '';
     }
 
-    // ============================================
-    // CATEGORIES & PRODUCTS RENDERING
-    // ============================================
     function getCategories() {
       return ["Todos", ...new Set(PRODUCTS.map(p => p.categoria).filter(Boolean))];
     }
@@ -2089,29 +2024,22 @@
       return [...new Set(PRODUCTS.filter(p => p.categoria === cat && p.subcategoria).map(p => p.subcategoria))];
     }
 
-    // NOVA LÓGICA DE CATEGORIAS: Limita a 3 botões horizontais e gera menu lateral
     function buildCategoryNav() {
       const allCats = getCategories();
-      
-      // Top 3 categorias para ficar no menu de rolagem horizontal
       const topCats = allCats.slice(0, 3);
       
       let horizontalHTML = topCats.map(c =>
         `<button class="cat-btn ${c === activeCategory ? 'active' : ''}" onclick="selectCategory('${c.replace(/'/g, "\\'")}')">${c}</button>`
       ).join("");
       
-      // Se houver mais de 3 categorias, adicionamos o botão MAIS
       if (allCats.length > 3) {
-        // Se a categoria ativa atual não estiver no top 3, deixamos o botão MAIS ativo
         const isTopCatActive = topCats.includes(activeCategory);
         const maisActive = !isTopCatActive ? 'active' : '';
-        
         horizontalHTML += `<button class="cat-btn ${maisActive}" onclick="openSidebar()"><svg style="width:16px;height:16px;vertical-align:-3px;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg> Mais</button>`;
       }
       
       document.getElementById("catNav").innerHTML = horizontalHTML;
       
-      // Gera as categorias completas no menu lateral oculto
       let sidebarHTML = allCats.map(c =>
         `<button class="sidebar-cat-btn ${c === activeCategory ? 'active' : ''}" onclick="selectCategory('${c.replace(/'/g, "\\'")}', true)">${c}</button>`
       ).join("");
@@ -2131,17 +2059,16 @@
       }
     }
 
-    // AÇÕES DO MENU LATERAL
     function openSidebar() {
       document.getElementById('sidebarOverlay').classList.add('show');
       document.getElementById('sidebarMenu').classList.add('open');
-      document.body.style.overflow = "hidden"; // trava rolagem da tela de fundo
+      document.body.style.overflow = "hidden"; 
     }
     
     function closeSidebar() {
       document.getElementById('sidebarOverlay').classList.remove('show');
       document.getElementById('sidebarMenu').classList.remove('open');
-      document.body.style.overflow = ""; // volta rolagem
+      document.body.style.overflow = ""; 
     }
 
     function buildSubcategoryBar() {
@@ -2220,9 +2147,6 @@
       grid.innerHTML = prods.map(productCardHTML).join("");
     }
 
-    // ============================================
-    // PRODUCT MODAL
-    // ============================================
     function openProductModal(idx) {
       var toastEl = document.getElementById('toast');
       toastEl.classList.remove('show');
@@ -2276,9 +2200,6 @@
     }
     function switchImage(src, el) { document.getElementById("modalMainImg").src = src; document.querySelectorAll(".gallery-thumb").forEach(t => t.classList.remove("active")); el.classList.add("active"); }
 
-    // ============================================
-    // AÇÕES DE AFILIADO
-    // ============================================
     function ctaLabel(p) {
       if (p.textoBotao) return p.textoBotao;
       if (p.tipo === 'DIGITAL') return 'Quero conhecer →';
@@ -2377,6 +2298,34 @@
         f.classList.add('show');
         document.body.classList.add('has-channel-float');
       }
+    }
+
+    // ============================================
+    // CARROSSEL DE BANNERS
+    // ============================================
+    function moveSlide(step) {
+      if (typeof window.slideCount === 'undefined' || window.slideCount <= 1) return;
+      goToSlide(window.currentSlide + step);
+    }
+
+    function goToSlide(index) {
+      if (typeof window.slideCount === 'undefined' || window.slideCount <= 1) return;
+      
+      const slides = document.querySelectorAll('.banner-slide');
+      const dots = document.querySelectorAll('.dot');
+      
+      if(slides.length > 0 && slides[window.currentSlide]) slides[window.currentSlide].classList.remove('active');
+      if(dots.length > 0 && dots[window.currentSlide]) dots[window.currentSlide].classList.remove('active');
+      
+      window.currentSlide = index;
+      if (window.currentSlide >= window.slideCount) window.currentSlide = 0;
+      if (window.currentSlide < 0) window.currentSlide = window.slideCount - 1;
+      
+      if(slides.length > 0 && slides[window.currentSlide]) slides[window.currentSlide].classList.add('active');
+      if(dots.length > 0 && dots[window.currentSlide]) dots[window.currentSlide].classList.add('active');
+      
+      if (window.slideInterval) clearInterval(window.slideInterval);
+      window.slideInterval = setInterval(() => moveSlide(1), 4000);
     }
 
     // ============================================
