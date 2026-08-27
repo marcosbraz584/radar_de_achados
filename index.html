@@ -2696,24 +2696,34 @@
                         }
                     }
 
-                    // 1. INJEÇÃO DE FOTOS (Com filtro forçado de HTTPS para a Vercel não bloquear)
+                    // 1. INJEÇÃO DE FOTOS (Sem o loading="lazy" que trava no navegador)
+                    let fotoFinal = '';
                     if (dados.pictures && dados.pictures.length > 0) {
                         const pegaImg = (pic) => (pic.secure_url || pic.url).replace(/^http:\/\//i, 'https://');
-
+                        
                         if (PRODUCTS[idx]) {
                             PRODUCTS[idx].img1 = pegaImg(dados.pictures[0]);
+                            fotoFinal = PRODUCTS[idx].img1;
+                            
+                            // Guarda as extras pro Modal
                             if (dados.pictures[1]) PRODUCTS[idx].img2 = pegaImg(dados.pictures[1]);
                             if (dados.pictures[2]) PRODUCTS[idx].img3 = pegaImg(dados.pictures[2]);
                             if (dados.pictures[3]) PRODUCTS[idx].img4 = pegaImg(dados.pictures[3]);
+                        }
+                    } else if (dados.thumbnail) {
+                        // Plano B absoluto: usa a miniatura original do ML convertida para alta resolução
+                        fotoFinal = dados.thumbnail.replace('-I.jpg', '-O.jpg').replace(/^http:\/\//i, 'https://');
+                        if (PRODUCTS[idx]) PRODUCTS[idx].img1 = fotoFinal;
+                    }
 
-                            // Navega internamente pelo HTML para achar a foto EXATA deste card específico
-                            const cardAtual = elemento.closest('.product-card');
-                            if (cardAtual) {
-                                const imgWrap = cardAtual.querySelector('.product-img-wrap');
-                                if (imgWrap) {
-                                    imgWrap.innerHTML = '<img src="' + PRODUCTS[idx].img1 + '" alt="' + PRODUCTS[idx].nome + '" loading="lazy" onerror="handleImgError(this)">' +
-                                    (ofertaExpiraEmBreve(PRODUCTS[idx]) ? '<span class="badge-limited">Tempo limitado</span>' : '');
-                                }
+                    if (fotoFinal) {
+                        const cardAtual = elemento.closest('.product-card');
+                        if (cardAtual) {
+                            const imgWrap = cardAtual.querySelector('.product-img-wrap');
+                            if (imgWrap) {
+                                // Força a exibição imediata da imagem e desativa o carregamento preguiçoso
+                                imgWrap.innerHTML = '<img src="' + fotoFinal + '" alt="' + (PRODUCTS[idx]?.nome || 'Produto') + '" onerror="handleImgError(this)">' +
+                                ((PRODUCTS[idx] && ofertaExpiraEmBreve(PRODUCTS[idx])) ? '<span class="badge-limited">Tempo limitado</span>' : '');
                             }
                         }
                     }
@@ -2742,7 +2752,7 @@
                         }
                     }
                 } catch (erro) {
-                    console.log(`Falha ao atualizar via API: ${idMlb}`);
+                    console.log(`Falha ao atualizar via API para o ID: ${idMlb}`);
                 }
             }
         });
