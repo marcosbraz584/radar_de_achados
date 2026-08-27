@@ -2601,7 +2601,7 @@
       return url;
     }
 
-    function fp(v) { return v.toFixed(2).replace(".", ","); }
+    function fp(v) { return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
     function parsePrecoBR(val) {
       var s = (val || '').trim();
