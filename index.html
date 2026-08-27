@@ -2679,7 +2679,7 @@
 
         precosNaTela.forEach(async (elemento) => {
             const idMlb = elemento.getAttribute('data-id');
-            const idx = elemento.getAttribute('data-idx'); // Descobre qual é o produto na tela
+            const idx = parseInt(elemento.getAttribute('data-idx'), 10);
 
             if (idMlb && idMlb.includes('MLB')) {
                 try {
@@ -2690,27 +2690,30 @@
                     if (dados.error === "not_found" || dados.status === 404) {
                         resposta = await fetch(`https://api.mercadolibre.com/products/${idMlb}`);
                         dados = await resposta.json();
-                        // Ajusta o preço do catálogo para a variável certa
                         if (dados.buy_box_winner) {
                             dados.price = dados.buy_box_winner.price;
                             dados.original_price = dados.buy_box_winner.original_price;
                         }
                     }
 
-                    // 1. INJEÇÃO DE FOTOS INTELIGENTE (Resolve o erro dos Destaques duplos)
+                    // 1. INJEÇÃO DE FOTOS (Com filtro forçado de HTTPS para a Vercel não bloquear)
                     if (dados.pictures && dados.pictures.length > 0) {
-                        PRODUCTS[idx].img1 = dados.pictures[0].secure_url || dados.pictures[0].url;
-                        if (dados.pictures[1]) PRODUCTS[idx].img2 = dados.pictures[1].secure_url || dados.pictures[1].url;
-                        if (dados.pictures[2]) PRODUCTS[idx].img3 = dados.pictures[2].secure_url || dados.pictures[2].url;
-                        if (dados.pictures[3]) PRODUCTS[idx].img4 = dados.pictures[3].secure_url || dados.pictures[3].url;
+                        const pegaImg = (pic) => (pic.secure_url || pic.url).replace(/^http:\/\//i, 'https://');
 
-                        // Navega internamente pelo HTML para achar a foto EXATA deste card específico
-                        const cardAtual = elemento.closest('.product-card');
-                        if (cardAtual) {
-                            const imgWrap = cardAtual.querySelector('.product-img-wrap');
-                            if (imgWrap) {
-                                imgWrap.innerHTML = '<img src="' + PRODUCTS[idx].img1 + '" alt="' + PRODUCTS[idx].nome + '" loading="lazy" onerror="handleImgError(this)">' +
-                                (ofertaExpiraEmBreve(PRODUCTS[idx]) ? '<span class="badge-limited">Tempo limitado</span>' : '');
+                        if (PRODUCTS[idx]) {
+                            PRODUCTS[idx].img1 = pegaImg(dados.pictures[0]);
+                            if (dados.pictures[1]) PRODUCTS[idx].img2 = pegaImg(dados.pictures[1]);
+                            if (dados.pictures[2]) PRODUCTS[idx].img3 = pegaImg(dados.pictures[2]);
+                            if (dados.pictures[3]) PRODUCTS[idx].img4 = pegaImg(dados.pictures[3]);
+
+                            // Navega internamente pelo HTML para achar a foto EXATA deste card específico
+                            const cardAtual = elemento.closest('.product-card');
+                            if (cardAtual) {
+                                const imgWrap = cardAtual.querySelector('.product-img-wrap');
+                                if (imgWrap) {
+                                    imgWrap.innerHTML = '<img src="' + PRODUCTS[idx].img1 + '" alt="' + PRODUCTS[idx].nome + '" loading="lazy" onerror="handleImgError(this)">' +
+                                    (ofertaExpiraEmBreve(PRODUCTS[idx]) ? '<span class="badge-limited">Tempo limitado</span>' : '');
+                                }
                             }
                         }
                     }
@@ -2739,7 +2742,7 @@
                         }
                     }
                 } catch (erro) {
-                    console.log(`Dados mantidos da planilha. Falha ao atualizar via API: ${idMlb}`);
+                    console.log(`Falha ao atualizar via API: ${idMlb}`);
                 }
             }
         });
