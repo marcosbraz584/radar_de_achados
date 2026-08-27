@@ -2686,7 +2686,7 @@
                     let resposta = await fetch(`https://api.mercadolibre.com/items/${idMlb}`);
                     let dados = await resposta.json();
 
-                    // Se for um produto de "Catálogo", a API normal dá erro. Buscamos na rota especial!
+                    // Se for um produto de "Catálogo", buscamos na rota especial
                     if (dados.error === "not_found" || dados.status === 404) {
                         resposta = await fetch(`https://api.mercadolibre.com/products/${idMlb}`);
                         dados = await resposta.json();
@@ -2696,34 +2696,36 @@
                         }
                     }
 
-                    // 1. INJEÇÃO DE FOTOS (Sem o loading="lazy" que trava no navegador)
+                    // 1. INJEÇÃO DE FOTOS BLINDADA (Sem o gatilho que apagava a foto)
                     let fotoFinal = '';
                     if (dados.pictures && dados.pictures.length > 0) {
-                        const pegaImg = (pic) => (pic.secure_url || pic.url).replace(/^http:\/\//i, 'https://');
+                        const pegaImg = (pic) => {
+                            let url = pic.secure_url || pic.url || '';
+                            return url.replace(/^http:\/\//i, 'https://');
+                        };
                         
                         if (PRODUCTS[idx]) {
                             PRODUCTS[idx].img1 = pegaImg(dados.pictures[0]);
                             fotoFinal = PRODUCTS[idx].img1;
                             
-                            // Guarda as extras pro Modal
                             if (dados.pictures[1]) PRODUCTS[idx].img2 = pegaImg(dados.pictures[1]);
                             if (dados.pictures[2]) PRODUCTS[idx].img3 = pegaImg(dados.pictures[2]);
                             if (dados.pictures[3]) PRODUCTS[idx].img4 = pegaImg(dados.pictures[3]);
                         }
-                    } else if (dados.thumbnail) {
-                        // Plano B absoluto: usa a miniatura original do ML convertida para alta resolução
-                        fotoFinal = dados.thumbnail.replace('-I.jpg', '-O.jpg').replace(/^http:\/\//i, 'https://');
+                    } else if (dados.thumbnail || dados.secure_thumbnail) {
+                        let t = dados.secure_thumbnail || dados.thumbnail;
+                        fotoFinal = t.replace('-I.jpg', '-O.jpg').replace(/^http:\/\//i, 'https://');
                         if (PRODUCTS[idx]) PRODUCTS[idx].img1 = fotoFinal;
                     }
 
-                    if (fotoFinal) {
+                    // Substitui a caixinha "Sem foto" pela imagem oficial, deixando o navegador carregar em paz
+                    if (fotoFinal && fotoFinal.startsWith('http')) {
                         const cardAtual = elemento.closest('.product-card');
                         if (cardAtual) {
                             const imgWrap = cardAtual.querySelector('.product-img-wrap');
                             if (imgWrap) {
-                                // Força a exibição imediata da imagem e desativa o carregamento preguiçoso
-                                imgWrap.innerHTML = '<img src="' + fotoFinal + '" alt="' + (PRODUCTS[idx]?.nome || 'Produto') + '" onerror="handleImgError(this)">' +
-                                ((PRODUCTS[idx] && ofertaExpiraEmBreve(PRODUCTS[idx])) ? '<span class="badge-limited">Tempo limitado</span>' : '');
+                                let selo = (PRODUCTS[idx] && ofertaExpiraEmBreve(PRODUCTS[idx])) ? '<span class="badge-limited">Tempo limitado</span>' : '';
+                                imgWrap.innerHTML = `<img src="${fotoFinal}" alt="Produto" referrerpolicy="no-referrer" crossorigin="anonymous">${selo}`;
                             }
                         }
                     }
@@ -2752,7 +2754,7 @@
                         }
                     }
                 } catch (erro) {
-                    console.log(`Falha ao atualizar via API para o ID: ${idMlb}`);
+                    console.log(`Falha API na imagem ou preço: ${idMlb}`);
                 }
             }
         });
