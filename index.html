@@ -2159,7 +2159,7 @@
     }
     function filterProducts() { renderProducts(); }
 
-    function productCardHTML(p) {
+   function productCardHTML(p) {
       var idx = PRODUCTS.indexOf(p);
       var hasPromo = p.precoPromo && p.precoPromo > 0 && p.preco > 0 && p.precoPromo < p.preco;
       var priceHTML = '';
@@ -2180,12 +2180,12 @@
       var platName = p.plataforma ? '<div class="ml-platform-text">' + p.plataforma + '</div>' : '';
 
       return '<div class="product-card" onclick="openProductModal(' + idx + ')">' +
-        '<div class="product-img-wrap"><img src="' + p.img1 + '" alt="' + p.nome + '" loading="lazy" onerror="handleImgError(this)">' +
+        '<div class="product-img-wrap" id="wrap-img-' + idx + '"><img src="' + p.img1 + '" alt="' + p.nome + '" loading="lazy" onerror="handleImgError(this)">' +
         (ofertaExpiraEmBreve(p) ? '<span class="badge-limited">Tempo limitado</span>' : '') +
         '</div>' +
         '<div class="product-info">' +
         '<div class="product-name">' + p.nome + '</div>' +
-        '<div class="preco-api-meli" data-id="' + (p.mlb || '') + '">' + priceHTML + '</div>' +
+        '<div class="preco-api-meli" data-id="' + (p.mlb || '') + '" data-idx="' + idx + '">' + priceHTML + '</div>' +
         platName +
         '</div></div>';
     }
@@ -2679,12 +2679,30 @@
 
         precosNaTela.forEach(async (elemento) => {
             const idMlb = elemento.getAttribute('data-id');
+            const idx = elemento.getAttribute('data-idx'); // Descobre qual é o produto na tela
 
             if (idMlb && idMlb.includes('MLB')) {
                 try {
                     const resposta = await fetch(`https://api.mercadolibre.com/items/${idMlb}`);
                     const dados = await resposta.json();
 
+                    // 1. INJEÇÃO DE FOTOS AUTOMÁTICA
+                    if (dados.pictures && dados.pictures.length > 0) {
+                        // Grava até 4 fotos em alta resolução direto na memória para o Modal usar
+                        PRODUCTS[idx].img1 = dados.pictures[0].secure_url || dados.pictures[0].url;
+                        if (dados.pictures[1]) PRODUCTS[idx].img2 = dados.pictures[1].secure_url || dados.pictures[1].url;
+                        if (dados.pictures[2]) PRODUCTS[idx].img3 = dados.pictures[2].secure_url || dados.pictures[2].url;
+                        if (dados.pictures[3]) PRODUCTS[idx].img4 = dados.pictures[3].secure_url || dados.pictures[3].url;
+
+                        // Atualiza a vitrine substituindo o "Sem foto" pela imagem real
+                        const imgWrap = document.getElementById('wrap-img-' + idx);
+                        if (imgWrap) {
+                            imgWrap.innerHTML = '<img src="' + PRODUCTS[idx].img1 + '" alt="' + PRODUCTS[idx].nome + '" loading="lazy" onerror="handleImgError(this)">' +
+                            (ofertaExpiraEmBreve(PRODUCTS[idx]) ? '<span class="badge-limited">Tempo limitado</span>' : '');
+                        }
+                    }
+
+                    // 2. ATUALIZAÇÃO DO PREÇO
                     if (dados.price) {
                         const precoFormatado = dados.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -2708,7 +2726,7 @@
                         }
                     }
                 } catch (erro) {
-                    console.log(`Preço estático mantido. Falha ao atualizar via API: ${idMlb}`);
+                    console.log(`Dados mantidos da planilha. Falha ao atualizar via API: ${idMlb}`);
                 }
             }
         });
