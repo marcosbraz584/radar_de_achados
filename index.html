@@ -1790,18 +1790,19 @@
       const text = await res.text();
       const rows = parseCSV(text);
 
-      // 1. Encontra a linha de cabeçalho da planilha automaticamente
       let headerRow = [];
       let startIdx = 0;
+      
+      // Busca a linha onde estão os títulos das colunas na planilha
       for (let i = 0; i < rows.length; i++) {
         if (rows[i][0] && rows[i][0].toUpperCase().includes('ATIVO')) {
-          headerRow = rows[i].map(h => h.toUpperCase().trim());
+          headerRow = rows[i].map(h => (h || '').toUpperCase().trim());
           startIdx = i + 1;
           break;
         }
       }
 
-      // 2. Mapeamento inteligente: encontra a coluna pelo nome do cabeçalho
+      // Função de busca que independe da posição das colunas
       const findCol = (keywords, defaultIdx) => {
         if (headerRow.length === 0) return defaultIdx;
         for (let i = 0; i < headerRow.length; i++) {
@@ -1811,8 +1812,14 @@
       };
 
       const col = {
-        tipo: 1, plataforma: 2, categoria: 3, subcategoria: 4,
-        nome: 5, descricao: 6, preco: 7,
+        ativo: findCol(['ATIVO'], 0),
+        tipo: findCol(['TIPO'], 1),
+        plataforma: findCol(['PLATAFORMA', 'LOJA'], 2),
+        categoria: findCol(['CATEGORIA'], 3),
+        subcategoria: findCol(['SUBCATEGORIA'], 4),
+        nome: findCol(['NOME', 'PRODUTO'], 5),
+        descricao: findCol(['DESCRIÇÃO', 'DESCRICAO'], 6),
+        preco: findCol(['PREÇO', 'PRECO'], 7),
         precoPromo: findCol(['PROMO'], 8),
         cupom: findCol(['CUPOM'], 9),
         validade: findCol(['VALIDADE', 'OFERTA'], 10),
@@ -1830,15 +1837,15 @@
       const products = [];
       for (let i = startIdx; i < rows.length; i++) {
         const row = rows[i];
-        const first = (row[0] || '').trim().toUpperCase();
+        const first = (row[col.ativo] || '').trim().toUpperCase();
         if (first !== 'SIM') continue;
 
-        // 3. Extração automática do Código MLB (funciona em qualquer coluna e com URL completa)
+        // Extrai o MLB independentemente de onde esteja (na coluna inteira) e remove traços
         let mlbCode = '';
         const celulaMlb = row.find(val => typeof val === 'string' && val.toUpperCase().includes('MLB'));
         if (celulaMlb) {
-          const match = celulaMlb.toUpperCase().match(/MLB\d+/);
-          if (match) mlbCode = match[0];
+          const match = celulaMlb.toUpperCase().match(/MLB\s*-?\s*\d+/);
+          if (match) mlbCode = match[0].replace(/[\s-]/g, '');
         }
 
         products.push({
@@ -1863,39 +1870,6 @@
           ordem: parseInt(row[col.ordem]) || 9999,
           destaque: row[col.destaque] && row[col.destaque].trim().toUpperCase() === 'SIM',
           mlb: mlbCode
-        });
-      }
-      PRODUCTS = products.filter(p => p.nome && p.linkAfiliado && ofertaValida(p));
-    }
-
-      const products = [];
-      for (const row of rows) {
-        const first = (row[0] || '').trim().toUpperCase();
-        if (!first || first === 'ATIVO' || first === 'ATIVO *' || first === 'SIM OU NÃO' || first.includes('CATÁLOGO') || first.includes('CATALOGO') || first.includes('CADA LINHA') || first.includes('DICAS')) continue;
-        if (first !== 'SIM') continue;
-
-        products.push({
-          ativo: true,
-          tipo: ((row[1] || '').trim().toUpperCase() === 'DIGITAL') ? 'DIGITAL' : 'FISICO',
-          plataforma: (row[2] || '').trim(),
-          categoria: (row[3] || '').trim(),
-          subcategoria: (row[4] || '').trim(),
-          nome: (row[5] || '').trim(),
-          descricao: (row[6] || '').trim(),
-          preco: parsePrecoBR(row[7]),
-          precoPromo: row[8] ? (parsePrecoBR(row[8]) || null) : null,
-          cupom: (row[9] || '').trim(),
-          validade: parseDataBR(row[10]),
-          linkAfiliado: (row[11] || '').trim(),
-          textoBotao: (row[12] || '').trim(),
-          video: (row[13] || '').trim(),
-          img1: fixImg((row[14] || '').trim()),
-          img2: fixImg((row[15] || '').trim()),
-          img3: fixImg((row[16] || '').trim()),
-          img4: fixImg((row[17] || '').trim()),
-          ordem: parseInt(row[18]) || 9999,
-          destaque: row.length > 19 && (row[19] || '').trim().toUpperCase() === 'SIM',
-          mlb: row.length > 20 ? (row[20] || '').trim() : '' // Nova coluna para o código MLB lido da planilha
         });
       }
       PRODUCTS = products.filter(p => p.nome && p.linkAfiliado && ofertaValida(p));
@@ -2397,8 +2371,8 @@
       var url = getChannelUrl();
       if (!url) return;
       var isTelegram = !CONFIG.canalWhatsapp && !!CONFIG.canalTelegram;
-      var iconWa = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
-      var iconTg = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>';
+      var iconWa = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>';
+      if (CONFIG.canalTelegram) socialsHTML += '<a href="' + CONFIG.canalTelegram + '" target="_blank" title="Canal no Telegram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg></a>';
       var icon = isTelegram ? iconTg : iconWa;
       var btn = document.getElementById('channelBtn');
       btn.href = url;
@@ -2706,7 +2680,6 @@
         precosNaTela.forEach(async (elemento) => {
             const idMlb = elemento.getAttribute('data-id');
 
-            // Só faz a requisição se você cadastrou o código MLB na planilha
             if (idMlb && idMlb.includes('MLB')) {
                 try {
                     const resposta = await fetch(`https://api.mercadolibre.com/items/${idMlb}`);
@@ -2715,7 +2688,6 @@
                     if (dados.price) {
                         const precoFormatado = dados.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-                        // Mantém a exata mesma estrutura visual e CSS do seu layout original
                         if (dados.original_price && dados.original_price > dados.price) {
                             const desconto = Math.round((1 - (dados.price / dados.original_price)) * 100);
                             const precoAntigo = dados.original_price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -2742,7 +2714,6 @@
         });
     }
 
-    // Escuta a vitrine para atualizar os preços quando o usuário filtra ou clica em categorias
     const observerVitrine = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             if (mutation.addedNodes.length > 0) {
@@ -2751,13 +2722,11 @@
         });
     });
 
-    // Anexa o observador nas áreas de produtos do site
     const gridDestaques = document.getElementById('featuredGrid');
     const gridNormal = document.getElementById('productsGrid');
     if (gridDestaques) observerVitrine.observe(gridDestaques, { childList: true });
     if (gridNormal) observerVitrine.observe(gridNormal, { childList: true });
 
-    // Gatilho inicial ao carregar a página
     setTimeout(atualizarPrecosMercadoLivre, 1500);
   </script>
 </body>
