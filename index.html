@@ -2683,22 +2683,35 @@
 
             if (idMlb && idMlb.includes('MLB')) {
                 try {
-                    const resposta = await fetch(`https://api.mercadolibre.com/items/${idMlb}`);
-                    const dados = await resposta.json();
+                    let resposta = await fetch(`https://api.mercadolibre.com/items/${idMlb}`);
+                    let dados = await resposta.json();
 
-                    // 1. INJEÇÃO DE FOTOS AUTOMÁTICA
+                    // Se for um produto de "Catálogo", a API normal dá erro. Buscamos na rota especial!
+                    if (dados.error === "not_found" || dados.status === 404) {
+                        resposta = await fetch(`https://api.mercadolibre.com/products/${idMlb}`);
+                        dados = await resposta.json();
+                        // Ajusta o preço do catálogo para a variável certa
+                        if (dados.buy_box_winner) {
+                            dados.price = dados.buy_box_winner.price;
+                            dados.original_price = dados.buy_box_winner.original_price;
+                        }
+                    }
+
+                    // 1. INJEÇÃO DE FOTOS INTELIGENTE (Resolve o erro dos Destaques duplos)
                     if (dados.pictures && dados.pictures.length > 0) {
-                        // Grava até 4 fotos em alta resolução direto na memória para o Modal usar
                         PRODUCTS[idx].img1 = dados.pictures[0].secure_url || dados.pictures[0].url;
                         if (dados.pictures[1]) PRODUCTS[idx].img2 = dados.pictures[1].secure_url || dados.pictures[1].url;
                         if (dados.pictures[2]) PRODUCTS[idx].img3 = dados.pictures[2].secure_url || dados.pictures[2].url;
                         if (dados.pictures[3]) PRODUCTS[idx].img4 = dados.pictures[3].secure_url || dados.pictures[3].url;
 
-                        // Atualiza a vitrine substituindo o "Sem foto" pela imagem real
-                        const imgWrap = document.getElementById('wrap-img-' + idx);
-                        if (imgWrap) {
-                            imgWrap.innerHTML = '<img src="' + PRODUCTS[idx].img1 + '" alt="' + PRODUCTS[idx].nome + '" loading="lazy" onerror="handleImgError(this)">' +
-                            (ofertaExpiraEmBreve(PRODUCTS[idx]) ? '<span class="badge-limited">Tempo limitado</span>' : '');
+                        // Navega internamente pelo HTML para achar a foto EXATA deste card específico
+                        const cardAtual = elemento.closest('.product-card');
+                        if (cardAtual) {
+                            const imgWrap = cardAtual.querySelector('.product-img-wrap');
+                            if (imgWrap) {
+                                imgWrap.innerHTML = '<img src="' + PRODUCTS[idx].img1 + '" alt="' + PRODUCTS[idx].nome + '" loading="lazy" onerror="handleImgError(this)">' +
+                                (ofertaExpiraEmBreve(PRODUCTS[idx]) ? '<span class="badge-limited">Tempo limitado</span>' : '');
+                            }
                         }
                     }
 
