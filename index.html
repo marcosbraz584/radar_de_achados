@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carregando... — Planiloja Achadinhos</title>
+  <title>Carregando... — Radar de Achados/title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap"
@@ -1676,7 +1676,7 @@
 
   <script>
     // ============================================
-    // APP ENGINE — Planiloja Achadinhos
+    // APP ENGINE — Radar de Achados
     // ============================================
 
     let CONFIG = {};
@@ -2132,8 +2132,8 @@
         '</div>' +
         '<div class="product-info">' +
         '<div class="product-name">' + p.nome + '</div>' +
-        priceHTML +
-        platName +
+        '<div class="preco-api-meli" data-id="' + (p.mlb || p.MLB || '') + '">' + priceHTML + '</div>' +
+        '<div class="preco-api-meli" data-id="' + (p.mlb || p.MLB || '') + '">' + priceHTML + '</div>' +
         '</div></div>';
     }
 
@@ -2594,6 +2594,68 @@
     }
 
     init();
+    // ==========================================
+// INTEGRAÇÃO DE PREÇOS EM TEMPO REAL (MERCADO LIVRE)
+// ==========================================
+async function atualizarPrecosMercadoLivre() {
+    const precosNaTela = document.querySelectorAll('.preco-api-meli');
+
+    precosNaTela.forEach(async (elemento) => {
+        const idMlb = elemento.getAttribute('data-id');
+
+        // Só faz a requisição se você cadastrou o código MLB na planilha
+        if (idMlb && idMlb.includes('MLB')) {
+            try {
+                const resposta = await fetch(`https://api.mercadolibre.com/items/${idMlb}`);
+                const dados = await resposta.json();
+
+                if (dados.price) {
+                    const precoFormatado = dados.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                    // Mantém a exata mesma estrutura visual e CSS do seu layout original
+                    if (dados.original_price && dados.original_price > dados.price) {
+                        const desconto = Math.round((1 - (dados.price / dados.original_price)) * 100);
+                        const precoAntigo = dados.original_price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                        elemento.innerHTML = `
+                            <div class="product-price">
+                                <div class="price-old-row">
+                                    <span class="ml-badge-discount">${desconto}% OFF</span>
+                                    <span class="price-old">${precoAntigo}</span>
+                                </div>
+                                <div class="price-current">${precoFormatado}</div>
+                            </div>`;
+                    } else {
+                        elemento.innerHTML = `
+                            <div class="product-price">
+                                <div class="price-current">${precoFormatado}</div>
+                            </div>`;
+                    }
+                }
+            } catch (erro) {
+                console.log(`Preço estático mantido. Falha ao atualizar via API: ${idMlb}`);
+            }
+        }
+    });
+}
+
+// Escuta a vitrine para atualizar os preços quando o usuário filtra ou clica em categorias
+const observerVitrine = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.addedNodes.length > 0) {
+            atualizarPrecosMercadoLivre();
+        }
+    });
+});
+
+// Anexa o observador nas áreas de produtos do site
+const gridDestaques = document.getElementById('featuredGrid');
+const gridNormal = document.getElementById('productsGrid');
+if (gridDestaques) observerVitrine.observe(gridDestaques, { childList: true });
+if (gridNormal) observerVitrine.observe(gridNormal, { childList: true });
+
+// Gatilho inicial ao carregar a página
+setTimeout(atualizarPrecosMercadoLivre, 1500);
   </script>
 </body>
 
