@@ -2674,7 +2674,7 @@
     // ==========================================
     // INTEGRAÇÃO DE PREÇOS EM TEMPO REAL (MERCADO LIVRE)
     // ==========================================
-    async function atualizarPrecosMercadoLivre() {
+   async function atualizarPrecosMercadoLivre() {
         const precosNaTela = document.querySelectorAll('.preco-api-meli');
 
         precosNaTela.forEach(async (elemento) => {
@@ -2744,7 +2744,6 @@
             }
         });
     }
-
     const observerVitrine = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             if (mutation.addedNodes.length > 0) {
