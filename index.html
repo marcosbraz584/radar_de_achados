@@ -1790,6 +1790,84 @@
       const text = await res.text();
       const rows = parseCSV(text);
 
+      // 1. Encontra a linha de cabeçalho da planilha automaticamente
+      let headerRow = [];
+      let startIdx = 0;
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i][0] && rows[i][0].toUpperCase().includes('ATIVO')) {
+          headerRow = rows[i].map(h => h.toUpperCase().trim());
+          startIdx = i + 1;
+          break;
+        }
+      }
+
+      // 2. Mapeamento inteligente: encontra a coluna pelo nome do cabeçalho
+      const findCol = (keywords, defaultIdx) => {
+        if (headerRow.length === 0) return defaultIdx;
+        for (let i = 0; i < headerRow.length; i++) {
+          if (keywords.some(k => headerRow[i].includes(k))) return i;
+        }
+        return defaultIdx;
+      };
+
+      const col = {
+        tipo: 1, plataforma: 2, categoria: 3, subcategoria: 4,
+        nome: 5, descricao: 6, preco: 7,
+        precoPromo: findCol(['PROMO'], 8),
+        cupom: findCol(['CUPOM'], 9),
+        validade: findCol(['VALIDADE', 'OFERTA'], 10),
+        linkAfiliado: findCol(['LINK', 'AFILIADO'], 11),
+        textoBotao: findCol(['TEXTO', 'BOTÃO', 'BOTAO'], 12),
+        video: findCol(['VÍDEO', 'VIDEO', 'YOUTUBE'], 13),
+        img1: findCol(['IMAGEM 1', 'FOTO 1'], 14),
+        img2: findCol(['IMAGEM 2', 'FOTO 2'], 15),
+        img3: findCol(['IMAGEM 3', 'FOTO 3'], 16),
+        img4: findCol(['IMAGEM 4', 'FOTO 4'], 17),
+        ordem: findCol(['ORDEM'], 18),
+        destaque: findCol(['DESTAQUE'], 19)
+      };
+
+      const products = [];
+      for (let i = startIdx; i < rows.length; i++) {
+        const row = rows[i];
+        const first = (row[0] || '').trim().toUpperCase();
+        if (first !== 'SIM') continue;
+
+        // 3. Extração automática do Código MLB (funciona em qualquer coluna e com URL completa)
+        let mlbCode = '';
+        const celulaMlb = row.find(val => typeof val === 'string' && val.toUpperCase().includes('MLB'));
+        if (celulaMlb) {
+          const match = celulaMlb.toUpperCase().match(/MLB\d+/);
+          if (match) mlbCode = match[0];
+        }
+
+        products.push({
+          ativo: true,
+          tipo: ((row[col.tipo] || '').trim().toUpperCase() === 'DIGITAL') ? 'DIGITAL' : 'FISICO',
+          plataforma: (row[col.plataforma] || '').trim(),
+          categoria: (row[col.categoria] || '').trim(),
+          subcategoria: (row[col.subcategoria] || '').trim(),
+          nome: (row[col.nome] || '').trim(),
+          descricao: (row[col.descricao] || '').trim(),
+          preco: parsePrecoBR(row[col.preco]),
+          precoPromo: row[col.precoPromo] ? (parsePrecoBR(row[col.precoPromo]) || null) : null,
+          cupom: (row[col.cupom] || '').trim(),
+          validade: parseDataBR(row[col.validade]),
+          linkAfiliado: (row[col.linkAfiliado] || '').trim(),
+          textoBotao: (row[col.textoBotao] || '').trim(),
+          video: (row[col.video] || '').trim(),
+          img1: fixImg((row[col.img1] || '').trim()),
+          img2: fixImg((row[col.img2] || '').trim()),
+          img3: fixImg((row[col.img3] || '').trim()),
+          img4: fixImg((row[col.img4] || '').trim()),
+          ordem: parseInt(row[col.ordem]) || 9999,
+          destaque: row[col.destaque] && row[col.destaque].trim().toUpperCase() === 'SIM',
+          mlb: mlbCode
+        });
+      }
+      PRODUCTS = products.filter(p => p.nome && p.linkAfiliado && ofertaValida(p));
+    }
+
       const products = [];
       for (const row of rows) {
         const first = (row[0] || '').trim().toUpperCase();
