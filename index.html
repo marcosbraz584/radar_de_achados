@@ -2138,7 +2138,9 @@
       const subs = getSubcategories(activeCategory);
       if (!subs.length) { bar.classList.remove("show"); return; }
       bar.classList.add("show");
-      bar.innerHTML = `<button class="subcat-btn ${!activeSubcategory ? 'active' : ''}" onclick="selectSubcategory(null)">Todos</button>` +
+      
+      // Mágica de UX: O botão agora mostra "Tudo em [Nome da Categoria]"
+      bar.innerHTML = `<button class="subcat-btn ${!activeSubcategory ? 'active' : ''}" onclick="selectSubcategory(null)">Tudo em ${activeCategory}</button>` +
         subs.map(s => `<button class="subcat-btn ${activeSubcategory === s ? 'active' : ''}" onclick="selectSubcategory('${s.replace(/'/g, "\\'")}')">${s}</button>`).join("");
     }
     function selectSubcategory(sub) { activeSubcategory = sub; buildSubcategoryBar(); renderProducts(); }
