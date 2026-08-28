@@ -1873,7 +1873,7 @@
     }
 
     function parseDataBR(val) {
-      var s = (val || '').trim();
+      var s = String(val || '').trim();
       if (!s) return null;
       var m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
       if (!m) return null;
@@ -2376,7 +2376,7 @@
       var url = getChannelUrl();
       if (!url) return;
       var isTelegram = !CONFIG.canalWhatsapp && !!CONFIG.canalTelegram;
-      var iconWa = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
+      var iconWa = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>';
       var iconTg = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>';
       var icon = isTelegram ? iconTg : iconWa;
       var btn = document.getElementById('channelBtn');
@@ -2461,7 +2461,7 @@
     });
 
     function darkenColor(hex, factor) {
-      hex = hex.replace('#', '');
+      hex = String(hex).replace('#', '');
       if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
       var r = Math.round(parseInt(hex.substr(0, 2), 16) * factor);
       var g = Math.round(parseInt(hex.substr(2, 2), 16) * factor);
@@ -2538,4 +2538,204 @@
         document.head.appendChild(gaScript);
         const gaInit = document.createElement('script');
         gaInit.textContent = "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','" + CONFIG.googleAnalytics + "');";
-        document.head.appendChild(gaInit);Sou um modelo de linguagem e não consigo ajudar com isso.
+        document.head.appendChild(gaInit);
+      }
+      if (CONFIG.googleAds) {
+        if (!CONFIG.googleAnalytics) {
+          const adsScript = document.createElement('script');
+          adsScript.async = true;
+          adsScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + CONFIG.googleAds;
+          document.head.appendChild(adsScript);
+          const adsInit = document.createElement('script');
+          adsInit.textContent = "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','" + CONFIG.googleAds + "');";
+          document.head.appendChild(adsInit);
+        } else {
+          const adsConfig = document.createElement('script');
+          adsConfig.textContent = "gtag('config','" + CONFIG.googleAds + "');";
+          document.head.appendChild(adsConfig);
+        }
+      }
+    }
+
+    function trackEvent(eventName, data) {
+      if (CONFIG.pixelFacebook && typeof fbq !== 'undefined') {
+        if (eventName === 'ViewContent') fbq('track', 'ViewContent', { content_name: data.name, value: data.value, currency: 'BRL' });
+        else if (eventName === 'ClickOferta') fbq('track', 'Lead', { content_name: data.name, value: data.value, currency: 'BRL' });
+        else if (eventName === 'CopiaCupom') fbq('trackCustom', 'CopiaCupom', { content_name: data.name });
+      }
+      if (CONFIG.googleAnalytics && typeof gtag !== 'undefined') {
+        if (eventName === 'ViewContent') gtag('event', 'view_item', { currency: 'BRL', value: data.value });
+        else if (eventName === 'ClickOferta') gtag('event', 'click_oferta', { item_name: data.name, currency: 'BRL', value: data.value });
+        else if (eventName === 'CopiaCupom') gtag('event', 'copy_coupon', { item_name: data.name });
+      }
+      if (CONFIG.googleAds && typeof gtag !== 'undefined') {
+        if (eventName === 'ClickOferta') gtag('event', 'conversion', { send_to: CONFIG.googleAds, value: data.value, currency: 'BRL' });
+      }
+    }
+
+    function bannerFilter(value) {
+      let categoria, subcategoria = null;
+      if (value.includes('>')) {
+        const parts = value.split('>');
+        categoria = parts[0].trim();
+        subcategoria = parts[1].trim();
+      } else {
+        categoria = value.trim();
+      }
+      selectCategory(categoria);
+      if (subcategoria) {
+        activeSubcategory = subcategoria;
+        buildSubcategoryBar();
+      }
+    }
+
+    function fixImg(url) {
+      if (!url) return '';
+      let m = url.match(/drive\.google\.com\/file\/d\/([^\/\?]+)/);
+      if (m) return 'https://lh3.googleusercontent.com/d/' + m[1];
+      m = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+      if (m) return 'https://lh3.googleusercontent.com/d/' + m[1];
+      m = url.match(/drive\.google\.com\/uc\?.*id=([^&]+)/);
+      if (m) return 'https://lh3.googleusercontent.com/d/' + m[1];
+      return url;
+    }
+
+    function fp(v) { return (v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+    function parsePrecoBR(val) {
+      var s = String(val || '').trim();
+      if (!s) return 0;
+      if (s.indexOf(',') !== -1) return parseFloat(s.replace(/\./g, '').replace(',', '.')) || 0;
+      return parseFloat(s) || 0;
+    }
+
+    function showToast(text, priority) {
+      var el = document.getElementById('toast');
+      document.getElementById('toastImg').style.display = 'none';
+      document.getElementById('toastTitle').textContent = text;
+      document.getElementById('toastSubtitle').textContent = '';
+      if (priority) {
+        el.style.zIndex = '600';
+      } else {
+        el.style.zIndex = '';
+      }
+      el.classList.add('show');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(function() { el.classList.remove('show'); el.style.zIndex = ''; }, 3000);
+    }
+
+    function toggleMobileSearch() { document.getElementById("searchBar").classList.toggle("mobile-open"); }
+
+    window.addEventListener('scroll', function() {
+      var btn = document.getElementById('backToTop');
+      if (btn) {
+        if (window.scrollY > 400) { btn.classList.add('show'); }
+        else { btn.classList.remove('show'); }
+      }
+    });
+
+    // ============================================
+    // INIT
+    // ============================================
+    async function init() {
+      try {
+        await Promise.all([loadConfig(), loadCatalogo()]);
+        if (CONFIG.lojaAtiva === false) {
+          document.getElementById('loadingScreen').classList.add('hidden');
+          document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px"><div style="text-align:center;max-width:480px"><div style="width:64px;height:64px;background:rgba(52,131,250,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px"><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' fill=\'none\' viewBox=\'0 0 24 24\' stroke-width=\'1.5\' stroke=\'#3483FA\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z\'/></svg></div><h1 style="font-family:var(--font);font-size:1.5rem;font-weight:700;color:#1B1B1B;margin-bottom:8px">' + (CONFIG.storeName || 'Nossa Loja') + '</h1><p style="font-family:var(--font);font-size:1rem;color:#6B6760;line-height:1.6;margin-bottom:24px">' + (CONFIG.msgManutencao || 'Estamos temporariamente fechados. Volte em breve!') + '</p>' + (getChannelUrl() ? '<a href="' + getChannelUrl() + '" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:#25D366;color:white;border-radius:8px;font-family:var(--font);font-size:0.9rem;font-weight:600;text-decoration:none"><svg viewBox=\'0 0 24 24\' width=\'20\' height=\'20\' fill=\'currentColor\'><path d=\'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z\'/></svg>Entrar no Canal de Ofertas</a>' : '') + '</div></div>';
+          return;
+        }
+        applyConfig();
+        buildCategoryNav();
+        renderProducts();
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var productSlug = urlParams.get('produto');
+        if (productSlug) {
+          var foundIndex = PRODUCTS.findIndex(function(p) {
+            return p.ativo && toSlug(p.nome) === productSlug;
+          });
+          if (foundIndex !== -1) {
+            setTimeout(function() { openProductModal(foundIndex); }, 300);
+          }
+        }
+        document.getElementById("loadingScreen").classList.add("hidden");
+        setTimeout(() => document.getElementById("loadingScreen").remove(), 500);
+      } catch (err) {
+        console.error("Planiloja Achadinhos Error:", err);
+        document.getElementById("loadingScreen").style.display = "none";
+        document.getElementById("errorScreen").classList.add("show");
+      }
+    }
+
+    init();
+    
+    // ==========================================
+    // INTEGRAÇÃO DE PREÇOS EM TEMPO REAL (MERCADO LIVRE)
+    // ==========================================
+    async function atualizarPrecosMercadoLivre() {
+        const precosNaTela = document.querySelectorAll('.preco-api-meli');
+
+        precosNaTela.forEach(async (elemento) => {
+            const idMlb = elemento.getAttribute('data-id');
+
+            if (idMlb && idMlb.includes('MLB')) {
+                try {
+                    let resposta = await fetch(`https://api.mercadolibre.com/items/${idMlb}`);
+                    let dados = await resposta.json();
+
+                    if (dados.error === "not_found" || dados.status === 404) {
+                        resposta = await fetch(`https://api.mercadolibre.com/products/${idMlb}`);
+                        dados = await resposta.json();
+                        if (dados.buy_box_winner) {
+                            dados.price = dados.buy_box_winner.price;
+                            dados.original_price = dados.buy_box_winner.original_price;
+                        }
+                    }
+
+                    if (dados.price) {
+                        const precoFormatado = dados.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                        if (dados.original_price && dados.original_price > dados.price) {
+                            const desconto = Math.round((1 - (dados.price / dados.original_price)) * 100);
+                            const precoAntigo = dados.original_price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                            elemento.innerHTML = `
+                                <div class="product-price">
+                                    <div class="price-old-row">
+                                        <span class="ml-badge-discount">${desconto}% OFF</span>
+                                        <span class="price-old">${precoAntigo}</span>
+                                    </div>
+                                    <div class="price-current">${precoFormatado}</div>
+                                </div>`;
+                        } else {
+                            elemento.innerHTML = `
+                                <div class="product-price">
+                                    <div class="price-current">${precoFormatado}</div>
+                                </div>`;
+                        }
+                    }
+                } catch (erro) {
+                    console.log(`Falha API de preço: ${idMlb}`);
+                }
+            }
+        });
+    }
+
+    const observerVitrine = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.addedNodes.length > 0) {
+                atualizarPrecosMercadoLivre();
+            }
+        });
+    });
+
+    const gridDestaques = document.getElementById('featuredGrid');
+    const gridNormal = document.getElementById('productsGrid');
+    if (gridDestaques) observerVitrine.observe(gridDestaques, { childList: true });
+    if (gridNormal) observerVitrine.observe(gridNormal, { childList: true });
+
+    setTimeout(atualizarPrecosMercadoLivre, 1500);
+  </script>
+</body>
+</html>
