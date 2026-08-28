@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -1841,7 +1842,7 @@
         let mlbCode = '';
         const celulaMlb = row.find(val => typeof val === 'string' && val.toUpperCase().includes('MLB'));
         if (celulaMlb) {
-          const match = celulaMlb.toUpperCase().match(/MLB[A-Z]*\s*-?\s*\d+/);
+          const match = celulaMlb.toUpperCase().match(/MLB\s*-?\s*\d+/);
           if (match) mlbCode = match[0].replace(/[\s-]/g, '');
         }
 
@@ -2005,6 +2006,376 @@
       const socials = document.getElementById('footerSocials');
       let socialsHTML = '';
       if (CONFIG.canalWhatsapp) socialsHTML += '<a href="' + CONFIG.canalWhatsapp + '" target="_blank" title="Canal de Ofertas no WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>';
+      if (CONFIG.canalTelegram) socialsHTML += '<a href="' + CONFIG.canalTelegram + '" target="_blank" title="Canal no Telegram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg></a>';
+      if (CONFIG.instagram) socialsHTML += `<a href="https://instagram.com/${CONFIG.instagram.replace('@', '')}" target="_blank" title="Instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>`;
+      if (CONFIG.facebook) socialsHTML += `<a href="https://${CONFIG.facebook.replace('https://', '')}" target="_blank" title="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>`;
+      if (CONFIG.tiktok) socialsHTML += `<a href="https://tiktok.com/${CONFIG.tiktok.replace('@', '')}" target="_blank" title="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg></a>`;
+      socials.innerHTML = socialsHTML;
+
+      var footerInfo = '';
+      if (CONFIG.endereco) footerInfo += '<div style="font-size:0.8rem;color:var(--gray-400);margin-bottom:4px">' + CONFIG.endereco + '</div>';
+      if (CONFIG.cnpj) footerInfo += '<div style="font-size:0.8rem;color:var(--gray-500);margin-bottom:4px">CNPJ: ' + CONFIG.cnpj + '</div>';
+      if (CONFIG.email) footerInfo += '<div style="font-size:0.8rem;margin-bottom:4px"><a href="mailto:' + CONFIG.email + '" style="color:var(--gray-400);text-decoration:underline">' + CONFIG.email + '</a></div>';
+      if (footerInfo) {
+        var infoDiv = document.createElement('div');
+        infoDiv.style.marginBottom = '16px';
+        infoDiv.innerHTML = footerInfo;
+        var creditEl = document.querySelector('.footer-credit');
+        creditEl.parentNode.insertBefore(infoDiv, creditEl);
+      }
+
+      var footerEl = document.getElementById('siteFooter');
+      var footerBg = CONFIG.corSecundaria || '#1B1B1B';
+      footerEl.style.background = footerBg;
+      var light = isLightColor(footerBg);
+      var textMain = light ? '#1B1B1B' : '#FFFFFF';
+      var textMuted = light ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.5)';
+      var textLight = light ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.35)';
+      var iconBg = light ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.15)';
+      var iconColor = light ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)';
+      document.querySelector('.footer-name').style.color = textMain;
+      document.querySelector('.footer-credit').style.color = textLight;
+      var socialLinks = document.querySelectorAll('.footer-socials a');
+      socialLinks.forEach(function(a) {
+        a.style.background = iconBg;
+        a.style.color = iconColor;
+        a.addEventListener('mouseenter', function() { this.style.background = 'var(--primary)'; this.style.color = '#FFFFFF'; });
+        a.addEventListener('mouseleave', function() { this.style.background = iconBg; this.style.color = iconColor; });
+      });
+      footerEl.style.color = textMuted;
+      var footerDivs = footerEl.querySelectorAll('div[style*=font-size]');
+      footerDivs.forEach(function(div) {
+        if (div.querySelector('a[href^=mailto]')) {
+          div.querySelector('a').style.color = light ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
+        } else {
+          div.style.color = textMuted;
+        }
+      });
+
+      setupChannel();
+
+      document.getElementById('footerDisclosure').textContent = CONFIG.textoDisclosure || '';
+      document.getElementById('footerAvisoPrecos').textContent = CONFIG.avisoPrecos || '';
+
+      installPixels();
+      
+      if (CONFIG.mensagemTopo) {
+        var topBar = document.getElementById('topBar');
+        topBar.textContent = CONFIG.mensagemTopo;
+        var barBg = resolveColor(CONFIG.corBarraTopo) || '#FFE600';
+        topBar.style.setProperty('background', barBg, 'important');
+        var textColor = resolveColor(CONFIG.corTextoTopo);
+        if (!textColor) {
+          textColor = isLightColor(barBg) ? '#1B1B1B' : '#FFFFFF';
+        }
+        topBar.style.setProperty('color', textColor, 'important');
+        topBar.classList.add('show');
+      }
+      
+      document.getElementById('siteHeader').style.display = '';
+      document.getElementById('catNavWrap').style.display = '';
+      document.getElementById('mainContent').style.display = '';
+      document.getElementById('siteFooter').style.display = '';
+    }
+
+    function getCategories() {
+      return ["Todos", ...new Set(PRODUCTS.map(p => p.categoria).filter(Boolean))];
+    }
+    
+    function getSubcategories(cat) {
+      return [...new Set(PRODUCTS.filter(p => p.categoria === cat && p.subcategoria).map(p => p.subcategoria))];
+    }
+
+    function buildCategoryNav() {
+      const allCats = getCategories();
+      const topCats = allCats.slice(0, 3);
+      
+      let horizontalHTML = topCats.map(c =>
+        `<button class="cat-btn ${c === activeCategory ? 'active' : ''}" onclick="selectCategory('${c.replace(/'/g, "\\'")}')">${c}</button>`
+      ).join("");
+      
+      if (allCats.length > 3) {
+        const isTopCatActive = topCats.includes(activeCategory);
+        const maisActive = !isTopCatActive ? 'active' : '';
+        horizontalHTML += `<button class="cat-btn ${maisActive}" onclick="openSidebar()"><svg style="width:16px;height:16px;vertical-align:-3px;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg> Mais</button>`;
+      }
+      
+      document.getElementById("catNav").innerHTML = horizontalHTML;
+      
+      let sidebarHTML = allCats.map(c =>
+        `<button class="sidebar-cat-btn ${c === activeCategory ? 'active' : ''}" onclick="selectCategory('${c.replace(/'/g, "\\'")}', true)">${c}</button>`
+      ).join("");
+      
+      document.getElementById("sidebarCatList").innerHTML = sidebarHTML;
+    }
+
+    function selectCategory(cat, fromSidebar = false) {
+      activeCategory = cat; 
+      activeSubcategory = null;
+      buildCategoryNav(); 
+      buildSubcategoryBar(); 
+      renderProducts();
+      
+      if (fromSidebar) {
+        closeSidebar();
+      }
+    }
+
+    function openSidebar() {
+      document.getElementById('sidebarOverlay').classList.add('show');
+      document.getElementById('sidebarMenu').classList.add('open');
+      document.body.style.overflow = "hidden"; 
+    }
+    
+    function closeSidebar() {
+      document.getElementById('sidebarOverlay').classList.remove('show');
+      document.getElementById('sidebarMenu').classList.remove('open');
+      document.body.style.overflow = ""; 
+    }
+
+    function buildSubcategoryBar() {
+      const bar = document.getElementById("subcatBar");
+      if (activeCategory === "Todos") { bar.classList.remove("show"); return; }
+      const subs = getSubcategories(activeCategory);
+      if (!subs.length) { bar.classList.remove("show"); return; }
+      bar.classList.add("show");
+      bar.innerHTML = `<button class="subcat-btn ${!activeSubcategory ? 'active' : ''}" onclick="selectSubcategory(null)">Todos</button>` +
+        subs.map(s => `<button class="subcat-btn ${activeSubcategory === s ? 'active' : ''}" onclick="selectSubcategory('${s.replace(/'/g, "\\'")}')">${s}</button>`).join("");
+    }
+    function selectSubcategory(sub) { activeSubcategory = sub; buildSubcategoryBar(); renderProducts(); }
+
+    function getFilteredProducts() {
+      let prods = PRODUCTS.filter(p => p.ativo);
+      const search = (document.getElementById("searchInput")?.value || "").toLowerCase();
+      if (search) prods = prods.filter(p => p.nome.toLowerCase().includes(search) || p.descricao.toLowerCase().includes(search));
+      if (activeCategory !== "Todos") prods = prods.filter(p => p.categoria === activeCategory);
+      if (activeSubcategory) prods = prods.filter(p => p.subcategoria === activeSubcategory);
+      prods.sort((a, b) => a.ordem - b.ordem);
+      return prods;
+    }
+    function filterProducts() { renderProducts(); }
+
+    function productCardHTML(p) {
+      var idx = PRODUCTS.indexOf(p);
+      var hasPromo = p.precoPromo && p.precoPromo > 0 && p.preco > 0 && p.precoPromo < p.preco;
+      var priceHTML = '';
+      
+      if (p.preco > 0) {
+        priceHTML += '<div class="product-price">';
+        if (hasPromo) {
+          var percent = Math.round((1 - p.precoPromo / p.preco) * 100);
+          priceHTML += '<div class="price-old-row"><span class="ml-badge-discount">' + percent + '% OFF</span><span class="price-old">R$ ' + fp(p.preco) + '</span></div>';
+        }
+        var currentPriceVal = fp(hasPromo ? p.precoPromo : p.preco);
+        priceHTML += '<span class="price-current">R$ ' + currentPriceVal + '</span>';
+        priceHTML += '</div>';
+      }
+      
+      var platName = p.plataforma ? '<div class="ml-platform-text">' + p.plataforma + '</div>' : '';
+
+      return '<div class="product-card" onclick="openProductModal(' + idx + ')">' +
+        '<div class="product-img-wrap"><img src="' + p.img1 + '" alt="' + p.nome + '" loading="lazy" onerror="handleImgError(this)">' +
+        (ofertaExpiraEmBreve(p) ? '<span class="badge-limited">Tempo limitado</span>' : '') +
+        '</div>' +
+        '<div class="product-info">' +
+        '<div class="product-name">' + p.nome + '</div>' +
+        '<div class="preco-api-meli" data-id="' + (p.mlb || '') + '">' + priceHTML + '</div>' +
+        platName +
+        '</div></div>';
+    }
+
+    function renderProducts() {
+      var featuredSection = document.getElementById('featuredSection');
+      var featuredGrid = document.getElementById('featuredGrid');
+      var searchVal = document.getElementById('searchInput') ? document.getElementById('searchInput').value : '';
+      if (activeCategory === 'Todos' && !activeSubcategory && !searchVal) {
+        var featured = PRODUCTS.filter(function(p) { return p.ativo && p.destaque; });
+        featured.sort(function(a, b) { return a.ordem - b.ordem; });
+        if (featured.length > 0) {
+          featuredSection.style.display = 'block';
+          featuredGrid.innerHTML = featured.map(productCardHTML).join('');
+        } else { featuredSection.style.display = 'none'; }
+      } else { featuredSection.style.display = 'none'; }
+      const prods = getFilteredProducts();
+      document.getElementById("sectionTitle").textContent = activeCategory === "Todos" ? "Todos os Achadinhos" : activeCategory;
+      document.getElementById("productCount").textContent = `${prods.length} oferta${prods.length !== 1 ? 's' : ''}`;
+      const grid = document.getElementById("productsGrid");
+      if (!prods.length) {
+        grid.innerHTML = `<div class="no-results"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg><p>Nenhum achadinho encontrado</p></div>`;
+        return;
+      }
+      grid.innerHTML = prods.map(productCardHTML).join("");
+    }
+
+    function openProductModal(idx) {
+      var toastEl = document.getElementById('toast');
+      toastEl.classList.remove('show');
+      clearTimeout(window._toastTimer);
+      currentProduct = PRODUCTS[idx];
+      const imgs = [currentProduct.img1, currentProduct.img2, currentProduct.img3, currentProduct.img4].filter(Boolean);
+      document.getElementById("modalMainImg").src = imgs[0] || '';
+      document.getElementById('modalMainImg').onerror = function() { handleImgError(this); };
+      document.getElementById("galleryThumbs").innerHTML = imgs.length > 1 ? imgs.map((img, i) =>
+        `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="switchImage('${img}', this)"><img src="${img}" alt=""></div>`
+      ).join("") : "";
+
+      var catParts = [];
+      if (currentProduct.plataforma) catParts.push(currentProduct.plataforma);
+      if (currentProduct.tipo === 'DIGITAL') catParts.push('Digital');
+      var catText = currentProduct.categoria + (currentProduct.subcategoria ? ' · ' + currentProduct.subcategoria : '');
+      if (catText) catParts.push(catText);
+      document.getElementById("modalCat").textContent = catParts.join(' · ');
+      document.getElementById("modalName").textContent = currentProduct.nome;
+      const hasPromo = currentProduct.precoPromo && currentProduct.precoPromo > 0 && currentProduct.preco > 0 && currentProduct.precoPromo < currentProduct.preco;
+      var priceEl = document.getElementById('modalPrice');
+      
+      if (currentProduct.mlb && currentProduct.mlb.includes('MLB')) {
+          priceEl.style.display = '';
+          priceEl.innerHTML = '<span class="price-current">Buscando preço...</span>';
+          
+          fetch(`https://api.mercadolibre.com/items/${currentProduct.mlb}`)
+            .then(res => res.json())
+            .then(async (dados) => {
+                if (dados.error === "not_found" || dados.status === 404) {
+                    const resCat = await fetch(`https://api.mercadolibre.com/products/${currentProduct.mlb}`);
+                    const dadosCat = await resCat.json();
+                    if (dadosCat.buy_box_winner) {
+                        dados.price = dadosCat.buy_box_winner.price;
+                        dados.original_price = dadosCat.buy_box_winner.original_price;
+                    }
+                }
+
+                if (dados.price) {
+                    const precoFormatado = dados.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    
+                    if (dados.original_price && dados.original_price > dados.price) {
+                        const precoAntigo = dados.original_price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        priceEl.innerHTML = `<span class="price-current">${precoFormatado}</span><span class="price-old">${precoAntigo}</span>`;
+                    } else {
+                        priceEl.innerHTML = `<span class="price-current">${precoFormatado}</span>`;
+                    }
+                } else {
+                    priceEl.innerHTML = '<span class="price-current">R$ ' + fp(hasPromo ? currentProduct.precoPromo : currentProduct.preco) + '</span>';
+                }
+            }).catch(() => {
+                priceEl.innerHTML = '<span class="price-current">R$ ' + fp(hasPromo ? currentProduct.precoPromo : currentProduct.preco) + '</span>';
+            });
+      } else if (currentProduct.preco > 0) {
+        var prefixo = currentProduct.tipo !== 'DIGITAL' ? '<span style="font-size:0.85rem;font-weight:500;color:var(--text-muted)">a partir de </span>' : '';
+        priceEl.style.display = '';
+        priceEl.innerHTML = prefixo + '<span class="price-current">R$ ' + fp(hasPromo ? currentProduct.precoPromo : currentProduct.preco) + '</span>' + (hasPromo ? '<span class="price-old">R$ ' + fp(currentProduct.preco) + '</span>' : '');
+      } else {
+        priceEl.style.display = 'none';
+        priceEl.innerHTML = '';
+      }
+
+      document.getElementById("modalDesc").textContent = currentProduct.descricao;
+      document.getElementById('modalCoupon').innerHTML = currentProduct.cupom
+        ? '<div class="coupon-box"><div><div class="coupon-label">Cupom de desconto</div><div class="coupon-code">' + currentProduct.cupom + '</div></div><button class="coupon-copy" id="btnCopyCoupon" onclick="copyCoupon()">Copiar cupom</button></div>'
+        : '';
+      var embedUrl = ytEmbed(currentProduct.video);
+      document.getElementById('modalVideo').innerHTML = embedUrl
+        ? '<div class="video-embed"><iframe src="' + embedUrl + '" title="Vídeo do produto" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>'
+        : '';
+      document.getElementById('modalCta').textContent = ctaLabel(currentProduct);
+      var note = document.getElementById('modalPriceNote');
+      note.textContent = CONFIG.avisoPrecos || '';
+      note.classList.toggle('show', currentProduct.preco > 0);
+      document.getElementById("productModal").classList.add("open");
+      document.body.style.overflow = "hidden";
+      document.body.classList.add('modal-open');
+      trackEvent('ViewContent', { name: currentProduct.nome, value: hasPromo ? currentProduct.precoPromo : currentProduct.preco });
+    }
+    function closeProductModal() {
+      document.getElementById('productModal').classList.remove('open');
+      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
+    }
+    function switchImage(src, el) { document.getElementById("modalMainImg").src = src; document.querySelectorAll(".gallery-thumb").forEach(t => t.classList.remove("active")); el.classList.add("active"); }
+
+    function ctaLabel(p) {
+      if (p.textoBotao) return p.textoBotao;
+      if (p.tipo === 'DIGITAL') return 'Quero conhecer →';
+      if (p.plataforma) {
+        var plat = p.plataforma.toLowerCase();
+        if (plat.includes('mercado livre') || plat.includes('mercadolivre')) {
+          return 'Compre no Mercado Livre';
+        }
+        return 'Comprar na ' + p.plataforma;
+      }
+      return 'Ver oferta →';
+    }
+
+    function ctaClick() {
+      if (!currentProduct) return;
+      var hasPromo = currentProduct.precoPromo && currentProduct.precoPromo > 0 && currentProduct.preco > 0 && currentProduct.precoPromo < currentProduct.preco;
+      registrarClique(currentProduct);
+      trackEvent('ClickOferta', { name: currentProduct.nome, value: hasPromo ? currentProduct.precoPromo : currentProduct.preco });
+      try {
+        salvarClique(currentProduct.nome, currentProduct.categoria, currentProduct.plataforma);
+      } catch(err) {}
+      window.open(currentProduct.linkAfiliado, '_blank');
+    }
+
+    function copyCoupon() {
+      if (!currentProduct || !currentProduct.cupom) return;
+      var code = currentProduct.cupom;
+      function done() {
+        var btn = document.getElementById('btnCopyCoupon');
+        if (btn) {
+          btn.textContent = 'Copiado!';
+          setTimeout(function() { btn.textContent = 'Copiar cupom'; }, 2500);
+        }
+        trackEvent('CopiaCupom', { name: currentProduct.nome });
+      }
+      navigator.clipboard.writeText(code).then(done).catch(function() {
+        var t = document.createElement('textarea');
+        t.value = code;
+        document.body.appendChild(t);
+        t.select();
+        document.execCommand('copy');
+        document.body.removeChild(t);
+        done();
+      });
+    }
+
+    function ytEmbed(url) {
+      if (!url) return '';
+      var m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+      return m ? 'https://www.youtube.com/embed/' + m[1] : '';
+    }
+
+    function registrarClique(p) {
+      if (typeof ACHADINHOS === 'undefined' || !ACHADINHOS.registrar_cliques) return;
+      try {
+        var utms = [];
+        var params = new URLSearchParams(window.location.search);
+        params.forEach(function(v, k) { if (k.toLowerCase().indexOf('utm_') === 0) utms.push(k + '=' + v); });
+        var origem = [document.referrer, utms.join('&')].filter(Boolean).join(' | ');
+        var dados = {
+          dataHora: new Date().toLocaleString('pt-BR'),
+          produto: p.nome,
+          plataforma: p.plataforma,
+          tipo: p.tipo,
+          categoria: p.categoria,
+          origem: origem
+        };
+        var url = ACHADINHOS.registrar_cliques + '?data=' + encodeURIComponent(JSON.stringify(dados));
+        fetch(url, { mode: 'no-cors' });
+      } catch (err) {
+        console.log('Erro ao registrar clique:', err);
+      }
+    }
+
+    function getChannelUrl() {
+      return CONFIG.canalWhatsapp || CONFIG.canalTelegram || '';
+    }
+
+    function setupChannel() {
+      var url = getChannelUrl();
+      if (!url) return;
+      var isTelegram = !CONFIG.canalWhatsapp && !!CONFIG.canalTelegram;
+      var iconWa = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>';
       if (CONFIG.canalTelegram) socialsHTML += '<a href="' + CONFIG.canalTelegram + '" target="_blank" title="Canal no Telegram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg></a>';
       var icon = isTelegram ? iconTg : iconWa;
       var btn = document.getElementById('channelBtn');
