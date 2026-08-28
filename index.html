@@ -2159,7 +2159,7 @@
     }
     function filterProducts() { renderProducts(); }
 
-   function productCardHTML(p) {
+  function productCardHTML(p) {
       var idx = PRODUCTS.indexOf(p);
       var hasPromo = p.precoPromo && p.precoPromo > 0 && p.preco > 0 && p.precoPromo < p.preco;
       var priceHTML = '';
@@ -2180,11 +2180,12 @@
       var platName = p.plataforma ? '<div class="ml-platform-text">' + p.plataforma + '</div>' : '';
 
       return '<div class="product-card" onclick="openProductModal(' + idx + ')">' +
-        '<div class="product-img-wrap" id="wrap-img-' + idx + '"><img src="' + p.img1 + '" alt="' + p.nome + '" loading="lazy" onerror="handleImgError(this)">' +
+        '<div class="product-img-wrap"><img src="' + p.img1 + '" alt="' + p.nome + '" loading="lazy" onerror="handleImgError(this)">' +
         (ofertaExpiraEmBreve(p) ? '<span class="badge-limited">Tempo limitado</span>' : '') +
         '</div>' +
         '<div class="product-info">' +
         '<div class="product-name">' + p.nome + '</div>' +
+        // A MÁGICA DE COMUNICAÇÃO ESTÁ NESTA LINHA ABAIXO (data-idx)
         '<div class="preco-api-meli" data-id="' + (p.mlb || '') + '" data-idx="' + idx + '">' + priceHTML + '</div>' +
         platName +
         '</div></div>';
