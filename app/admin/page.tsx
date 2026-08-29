@@ -31,7 +31,8 @@ export default async function AdminPage() {
         </div>
         <nav className="admin-nav" aria-label="Menu administrativo">
           <a className="active" href="/admin">Visão geral</a>
-          <span>Produtos</span><span>Categorias</span><span>Cupons</span><span>Banners</span><span>Cliques</span><span>Configurações</span>
+          <a href="/admin/produtos">Produtos</a>
+          <span>Categorias</span><span>Cupons</span><span>Banners</span><span>Cliques</span><span>Configurações</span>
         </nav>
       </aside>
 
