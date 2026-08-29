@@ -36,7 +36,7 @@ export default async function ProdutosPage() {
             <h1>Produtos</h1>
             <p className="admin-subtitle">Cadastre e gerencie os achados publicados na loja.</p>
           </div>
-          <button className="primary-button" type="button">+ Novo produto</button>
+          <a className="primary-button" href="/admin/produtos/novo">+ Novo produto</a>
         </header>
 
         <section className="admin-panel products-panel">
