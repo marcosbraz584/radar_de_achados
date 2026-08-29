@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 async function getProducts() {
   const sql = getDb();
   return sql`
-    SELECT id, title, price, promo_price, affiliate_url, active, featured, updated_at
+    SELECT id, name, regular_price, promo_price, affiliate_url, active, featured, updated_at
     FROM products
     ORDER BY updated_at DESC
     LIMIT 100
@@ -55,8 +55,8 @@ export default async function ProdutosPage() {
             <div className="product-list">
               {products.map((product: any) => (
                 <article className="product-row" key={product.id}>
-                  <div><strong>{product.title}</strong><small>{product.active ? "Ativo" : "Inativo"}{product.featured ? " • Destaque" : ""}</small></div>
-                  <strong>R$ {Number(product.promo_price ?? product.price ?? 0).toFixed(2).replace(".", ",")}</strong>
+                  <div><strong>{product.name}</strong><small>{product.active ? "Ativo" : "Inativo"}{product.featured ? " • Destaque" : ""}</small></div>
+                  <strong>R$ {Number(product.promo_price ?? product.regular_price ?? 0).toFixed(2).replace(".", ",")}</strong>
                 </article>
               ))}
             </div>
