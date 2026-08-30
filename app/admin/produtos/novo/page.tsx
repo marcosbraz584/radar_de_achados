@@ -4,13 +4,24 @@ import ImportadorMercadoLivre from "./ImportadorMercadoLivre";
 
 export const dynamic = "force-dynamic";
 
+function parseBrazilianPrice(value: FormDataEntryValue | null) {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+  const cleaned = raw.replace(/\s/g, "").replace(/^R\$/i, "");
+  const normalized = cleaned.includes(",")
+    ? cleaned.replace(/\./g, "").replace(",", ".")
+    : cleaned;
+  const numeric = Number(normalized);
+  return Number.isFinite(numeric) && numeric >= 0 ? numeric : null;
+}
+
 async function createProduct(formData: FormData) {
   "use server";
-  const name=String(formData.get("name")||"").trim(); const slugInput=String(formData.get("slug")||"").trim(); const regularPrice=String(formData.get("regular_price")||"").replace(",",".").trim(); const promoPrice=String(formData.get("promo_price")||"").replace(",",".").trim(); const affiliateUrl=String(formData.get("affiliate_url")||"").trim(); const marketplaceUrl=String(formData.get("marketplace_url")||"").trim(); const marketplaceItemId=String(formData.get("marketplace_item_id")||"").trim(); const marketplaceProductId=String(formData.get("marketplace_product_id")||"").trim(); const marketplaceReferenceType=String(formData.get("marketplace_reference_type")||"item").trim(); const priceSource=String(formData.get("price_source")||"manual").trim(); const priceSyncStatus=String(formData.get("price_sync_status")||"pending").trim(); const priceCheckedAt=String(formData.get("price_checked_at")||"").trim(); const description=String(formData.get("description")||"").trim(); const active=formData.get("active")==="on"; const featured=formData.get("featured")==="on";
+  const name=String(formData.get("name")||"").trim(); const slugInput=String(formData.get("slug")||"").trim(); const regularPrice=parseBrazilianPrice(formData.get("regular_price")); const promoPrice=parseBrazilianPrice(formData.get("promo_price")); const affiliateUrl=String(formData.get("affiliate_url")||"").trim(); const marketplaceUrl=String(formData.get("marketplace_url")||"").trim(); const marketplaceItemId=String(formData.get("marketplace_item_id")||"").trim(); const marketplaceProductId=String(formData.get("marketplace_product_id")||"").trim(); const marketplaceReferenceType=String(formData.get("marketplace_reference_type")||"item").trim(); const priceSource=String(formData.get("price_source")||"manual").trim(); const priceSyncStatus=String(formData.get("price_sync_status")||"pending").trim(); const priceCheckedAt=String(formData.get("price_checked_at")||"").trim(); const description=String(formData.get("description")||"").trim(); const active=formData.get("active")==="on"; const featured=formData.get("featured")==="on";
   let importedImages:string[]=[]; try { const parsed=JSON.parse(String(formData.get("imported_images")||"[]")); if(Array.isArray(parsed)) importedImages=parsed.filter((url):url is string=>typeof url==="string"&&/^https:\/\//i.test(url)).slice(0,12); } catch {}
   if(!name||!affiliateUrl) throw new Error("Nome e link de afiliado são obrigatórios.");
   const slug=(slugInput||name).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""); const sql=getDb();
-  const inserted=await sql`INSERT INTO products (name, slug, description, regular_price, promo_price, affiliate_url, marketplace_url, marketplace_item_id, marketplace_product_id, marketplace_reference_type, price_source, price_checked_at, price_sync_status, active, featured, updated_at) VALUES (${name}, ${slug}, ${description||null}, ${regularPrice?Number(regularPrice):null}, ${promoPrice?Number(promoPrice):null}, ${affiliateUrl}, ${marketplaceUrl||null}, ${marketplaceItemId||null}, ${marketplaceProductId||null}, ${marketplaceReferenceType}, ${priceSource}, ${priceCheckedAt?new Date(priceCheckedAt):null}, ${priceSyncStatus}, ${active}, ${featured}, NOW()) RETURNING id`;
+  const inserted=await sql`INSERT INTO products (name, slug, description, regular_price, promo_price, affiliate_url, marketplace_url, marketplace_item_id, marketplace_product_id, marketplace_reference_type, price_source, price_checked_at, price_sync_status, active, featured, updated_at) VALUES (${name}, ${slug}, ${description||null}, ${regularPrice}, ${promoPrice}, ${affiliateUrl}, ${marketplaceUrl||null}, ${marketplaceItemId||null}, ${marketplaceProductId||null}, ${marketplaceReferenceType}, ${priceSource}, ${priceCheckedAt?new Date(priceCheckedAt):null}, ${priceSyncStatus}, ${active}, ${featured}, NOW()) RETURNING id`;
   const productId=inserted[0]?.id;
   if(productId){ for(let i=0;i<importedImages.length;i++){ await sql`INSERT INTO product_images (product_id, image_url, alt_text, sort_order) VALUES (${productId}, ${importedImages[i]}, ${name}, ${i})`; } }
   redirect("/admin/produtos");
