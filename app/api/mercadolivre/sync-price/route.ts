@@ -51,10 +51,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, status: "error", pricePreserved: true }, { status: 502 });
   }
 
+  const currentPromo = product.promo_price === null || product.promo_price === undefined ? null : Number(product.promo_price);
+  const currentRegular = product.regular_price === null || product.regular_price === undefined ? null : Number(product.regular_price);
+  const priceChanged = currentPromo !== price;
+
+  if (priceChanged) {
+    await sql`
+      INSERT INTO price_history (product_id, regular_price, promo_price)
+      VALUES (${productId}, ${currentRegular}, ${currentPromo})
+    `;
+  }
+
   await sql`
     UPDATE products SET promo_price=${price}, price_source='automatic', price_sync_status='ok',
       price_checked_at=NOW(), last_synced_at=NOW(), updated_at=NOW()
     WHERE id=${productId}
   `;
-  return NextResponse.json({ ok: true, status: "ok", price });
+  return NextResponse.json({ ok: true, status: "ok", price, historyRecorded: priceChanged });
 }
