@@ -6,6 +6,7 @@ async function getProducts() {
   const sql = getDb();
   return sql`
     SELECT p.id, p.name, p.regular_price, p.promo_price, p.affiliate_url, p.active, p.featured, p.updated_at,
+      p.price_source, p.price_sync_status, p.price_checked_at,
       (SELECT pi.image_url FROM product_images pi WHERE pi.product_id = p.id ORDER BY pi.sort_order ASC, pi.id ASC LIMIT 1) AS image_url
     FROM products p
     ORDER BY p.updated_at DESC
@@ -21,6 +22,24 @@ function formatPrice(value: unknown) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(numeric);
 }
 
+function priceSourceLabel(value: unknown) {
+  return value === "automatic" ? "Automático" : "Manual";
+}
+
+function syncStatusLabel(value: unknown) {
+  if (value === "ok") return "Preço verificado";
+  if (value === "restricted") return "API restrita";
+  if (value === "error") return "Erro na consulta";
+  return "Aguardando verificação";
+}
+
+function formatCheckedAt(value: unknown) {
+  if (!value) return "Ainda não verificado";
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return "Ainda não verificado";
+  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Fortaleza" }).format(date);
+}
+
 export default async function ProdutosPage() {
   const products = await getProducts();
   return (
@@ -28,7 +47,7 @@ export default async function ProdutosPage() {
       <aside className="admin-sidebar"><div className="admin-brand"><span className="admin-logo">RA</span><div><strong>Radar de Achados</strong><small>Painel 2.0</small></div></div><nav className="admin-nav" aria-label="Menu administrativo"><a href="/admin">Visão geral</a><a className="active" href="/admin/produtos">Produtos</a><span>Categorias</span><span>Cupons</span><span>Banners</span><span>Cliques</span><span>Configurações</span></nav></aside>
       <section className="admin-content"><header className="admin-header products-header"><div><p className="eyebrow">CATÁLOGO</p><h1>Produtos</h1><p className="admin-subtitle">Cadastre e gerencie os achados publicados na loja.</p></div><a className="primary-button" href="/admin/produtos/novo">+ Novo produto</a></header>
         <section className="admin-panel products-panel"><div className="products-toolbar"><div><strong>{products.length}</strong> produto{products.length===1?"":"s"} cadastrado{products.length===1?"":"s"}</div><span className="db-status"><i/> Banco conectado</span></div>
-          {products.length===0?<div className="empty-state"><div className="empty-icon">⌕</div><h2>Nenhum produto cadastrado</h2><p>O banco está pronto. O próximo passo será ativar o cadastro de produtos pelo painel.</p></div>:<div className="product-list">{products.map((product:any)=><article className="product-row" key={product.id}><div className="product-row-main">{product.image_url?<img className="product-thumb" src={product.image_url} alt={product.name}/>:<div className="product-thumb product-thumb-empty">RA</div>}<div className="product-row-info"><strong>{product.name}</strong><small>{product.active?"Ativo":"Inativo"}{product.featured?" • Destaque":""}</small></div></div><div style={{display:"flex",alignItems:"center",gap:"16px"}}><strong>{formatPrice(product.promo_price ?? product.regular_price)}</strong><a className="secondary-button" href={`/admin/produtos/${product.id}/editar`}>Editar</a></div></article>)}</div>}
+          {products.length===0?<div className="empty-state"><div className="empty-icon">⌕</div><h2>Nenhum produto cadastrado</h2><p>O banco está pronto. O próximo passo será ativar o cadastro de produtos pelo painel.</p></div>:<div className="product-list">{products.map((product:any)=><article className="product-row" key={product.id}><div className="product-row-main">{product.image_url?<img className="product-thumb" src={product.image_url} alt={product.name}/>:<div className="product-thumb product-thumb-empty">RA</div>}<div className="product-row-info"><strong>{product.name}</strong><small>{product.active?"Ativo":"Inativo"}{product.featured?" • Destaque":""}</small><small style={{display:"flex",gap:"8px",flexWrap:"wrap",marginTop:"5px"}}><span style={{fontWeight:700,color:product.price_source==="automatic"?"#08783e":"#8a5b00"}}>Preço: {priceSourceLabel(product.price_source)}</span><span>•</span><span>{syncStatusLabel(product.price_sync_status)}</span><span>•</span><span>Última consulta: {formatCheckedAt(product.price_checked_at)}</span></small></div></div><div style={{display:"flex",alignItems:"center",gap:"16px"}}><strong>{formatPrice(product.promo_price ?? product.regular_price)}</strong><a className="secondary-button" href={`/admin/produtos/${product.id}/editar`}>Editar</a></div></article>)}</div>}
         </section></section>
     </main>
   );
