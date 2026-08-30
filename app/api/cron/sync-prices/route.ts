@@ -19,7 +19,7 @@ export async function GET(request: Request) {
 
   const sql = getDb();
   const products = await sql`
-    SELECT id, marketplace_item_id
+    SELECT id, marketplace_item_id, regular_price, promo_price
     FROM products
     WHERE active=TRUE AND sync_enabled=TRUE AND marketplace='mercado_livre' AND marketplace_item_id IS NOT NULL
     ORDER BY COALESCE(price_checked_at, '1970-01-01'::timestamptz) ASC
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
   `;
 
   let token = await getMercadoLivreAccessToken();
-  let ok = 0, restricted = 0, errors = 0;
+  let ok = 0, restricted = 0, errors = 0, historyRecorded = 0;
 
   for (const product of products as any[]) {
     let response = await checkPrice(String(product.marketplace_item_id), token);
@@ -49,9 +49,17 @@ export async function GET(request: Request) {
       await sql`UPDATE products SET price_sync_status='error',price_checked_at=NOW(),last_synced_at=NOW() WHERE id=${product.id}`;
       errors++; continue;
     }
+
+    const currentPromo = product.promo_price === null || product.promo_price === undefined ? null : Number(product.promo_price);
+    const currentRegular = product.regular_price === null || product.regular_price === undefined ? null : Number(product.regular_price);
+    if (currentPromo !== price) {
+      await sql`INSERT INTO price_history(product_id,regular_price,promo_price) VALUES (${product.id},${currentRegular},${currentPromo})`;
+      historyRecorded++;
+    }
+
     await sql`UPDATE products SET promo_price=${price},price_source='automatic',price_sync_status='ok',price_checked_at=NOW(),last_synced_at=NOW(),updated_at=NOW() WHERE id=${product.id}`;
     ok++;
   }
 
-  return NextResponse.json({ ok: true, checked: products.length, updated: ok, restricted, errors });
+  return NextResponse.json({ ok: true, checked: products.length, updated: ok, restricted, errors, historyRecorded });
 }
