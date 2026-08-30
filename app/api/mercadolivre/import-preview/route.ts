@@ -6,11 +6,16 @@ export const dynamic = "force-dynamic";
 function extractMercadoLivreReference(value:string){
   try {
     const url = new URL(value);
-    const wid = url.searchParams.get("wid")?.toUpperCase();
+    const widQuery = url.searchParams.get("wid")?.toUpperCase();
+    const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
+    const widHash = hashParams.get("wid")?.toUpperCase();
+    const wid = widQuery || widHash;
     if (wid && /^MLB\d+$/.test(wid)) return { id: wid, type: "item" as const, source: "wid" as const };
   } catch {}
 
   const decoded = decodeURIComponent(value).toUpperCase();
+  const widMatch = decoded.match(/(?:[?#&])WID=(MLB\d+)/)?.[1];
+  if (widMatch) return { id: widMatch, type: "item" as const, source: "wid" as const };
   const id = decoded.match(/MLB\d+/)?.[0] || null;
   if (!id) return null;
   const isCatalogUrl = /mercadolivre\.com\.br\/[^?]*\/p\/MLB\d+/i.test(value);
