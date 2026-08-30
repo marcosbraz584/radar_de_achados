@@ -1,0 +1,57 @@
+import { NextResponse } from "next/server";
+import { getDb } from "@/lib/db";
+import { getMercadoLivreAccessToken } from "@/lib/mercadolivre";
+
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
+async function checkPrice(itemId: string, token: string) {
+  return fetch(`https://api.mercadolibre.com/items/${encodeURIComponent(itemId)}/sale_price?context=channel_marketplace`, {
+    headers: { Authorization: `Bearer ${token}` }, cache: "no-store"
+  });
+}
+
+export async function GET(request: Request) {
+  const secret = process.env.CRON_SECRET;
+  if (secret && request.headers.get("authorization") !== `Bearer ${secret}`) {
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
+
+  const sql = getDb();
+  const products = await sql`
+    SELECT id, marketplace_item_id
+    FROM products
+    WHERE active=TRUE AND sync_enabled=TRUE AND marketplace='mercado_livre' AND marketplace_item_id IS NOT NULL
+    ORDER BY COALESCE(price_checked_at, '1970-01-01'::timestamptz) ASC
+    LIMIT 50
+  `;
+
+  let token = await getMercadoLivreAccessToken();
+  let ok = 0, restricted = 0, errors = 0;
+
+  for (const product of products as any[]) {
+    let response = await checkPrice(String(product.marketplace_item_id), token);
+    if (response.status === 401) {
+      token = await getMercadoLivreAccessToken(true);
+      response = await checkPrice(String(product.marketplace_item_id), token);
+    }
+    if (response.status === 403) {
+      await sql`UPDATE products SET price_sync_status='restricted',price_checked_at=NOW(),last_synced_at=NOW() WHERE id=${product.id}`;
+      restricted++; continue;
+    }
+    if (!response.ok) {
+      await sql`UPDATE products SET price_sync_status='error',price_checked_at=NOW(),last_synced_at=NOW() WHERE id=${product.id}`;
+      errors++; continue;
+    }
+    const data = await response.json();
+    const price = Number(data?.amount ?? data?.price);
+    if (!Number.isFinite(price) || price < 0) {
+      await sql`UPDATE products SET price_sync_status='error',price_checked_at=NOW(),last_synced_at=NOW() WHERE id=${product.id}`;
+      errors++; continue;
+    }
+    await sql`UPDATE products SET promo_price=${price},price_source='automatic',price_sync_status='ok',price_checked_at=NOW(),last_synced_at=NOW(),updated_at=NOW() WHERE id=${product.id}`;
+    ok++;
+  }
+
+  return NextResponse.json({ ok: true, checked: products.length, updated: ok, restricted, errors });
+}
