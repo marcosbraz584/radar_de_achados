@@ -11,9 +11,9 @@ export async function GET(request: NextRequest,{params}:{params:Promise<{id:stri
   }
 
   const sql=getDb();
-  const rows=await sql`SELECT id,affiliate_url,active FROM products WHERE id=${productId} LIMIT 1`;
+  const rows=await sql`SELECT id,COALESCE(destination_url,affiliate_url) AS destination_url,active FROM products WHERE id=${productId} LIMIT 1`;
   const product:any=rows[0];
-  if(!product||!product.active||!product.affiliate_url){
+  if(!product||!product.active||!product.destination_url){
     return NextResponse.redirect(new URL("/",request.url));
   }
 
@@ -22,10 +22,10 @@ export async function GET(request: NextRequest,{params}:{params:Promise<{id:stri
   const userAgent=(request.headers.get("user-agent")||"").slice(0,2000)||null;
 
   try{
-    await sql`INSERT INTO clicks(product_id,destination_url,source,referrer,user_agent,clicked_at) VALUES (${productId},${product.affiliate_url},${source},${referrer},${userAgent},NOW())`;
+    await sql`INSERT INTO clicks(product_id,destination_url,source,referrer,user_agent,clicked_at) VALUES (${productId},${product.destination_url},${source},${referrer},${userAgent},NOW())`;
   }catch(error){
     console.error("Falha ao registrar clique",error);
   }
 
-  return NextResponse.redirect(product.affiliate_url,302);
+  return NextResponse.redirect(product.destination_url,302);
 }
