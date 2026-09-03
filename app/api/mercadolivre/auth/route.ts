@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 
-const REDIRECT_URI = "https://radar-de-achados-2.vercel.app/api/mercadolivre/callback";
+const REDIRECT_URI = "https://purple-alpaca-620001.hostingersite.com/api/mercadolivre/callback";
 
 export async function GET(request: Request) {
   const clientId = process.env.MERCADO_LIVRE_CLIENT_ID;
