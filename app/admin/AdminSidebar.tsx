@@ -9,13 +9,13 @@ export default function AdminSidebar(){
     ["/admin/configuracoes","Configurações"],
   ];
   return <aside className="admin-sidebar">
-    <div className="admin-sidebar-brand">
-      <strong>SHILMASTORE</strong>
-      <small>Painel administrativo</small>
+    <div className="admin-brand">
+      <div className="admin-logo">SS</div>
+      <div><strong>SHILMASTORE</strong><small>Painel administrativo</small></div>
     </div>
-    <nav className="admin-sidebar-nav">
-      {links.map(([href,label])=><a key={href} href={href}>{label}</a>)}
+    <nav className="admin-nav">
+      {links.map(([href,label],index)=><a key={href} className={index===0?"active":undefined} href={href}>{label}</a>)}
+      <a href="/">Ver vitrine</a>
     </nav>
-    <a className="admin-sidebar-store-link" href="/">Ver vitrine</a>
   </aside>;
 }
