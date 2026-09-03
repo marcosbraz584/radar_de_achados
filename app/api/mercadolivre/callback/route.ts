@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   const savedState = cookieHeader.match(/(?:^|;\s*)ml_oauth_state=([^;]+)/)?.[1];
 
   if (error) {
-    return NextResponse.redirect(new URL(`/admin?ml=error&reason=${encodeURIComponent(error)}`, url.origin));
+    return NextResponse.redirect(new URL(`/admin?ml=error&reason=${encodeURIComponent(error)}`, REDIRECT_URI));
   }
 
   if (!code || !state || !savedState || state !== savedState) {
@@ -41,7 +41,7 @@ export async function GET(request: Request) {
   const token = await tokenResponse.json();
   if (!tokenResponse.ok || !token.access_token) {
     console.error("Falha OAuth Mercado Livre", { status: tokenResponse.status, error: token.error, message: token.message });
-    return NextResponse.redirect(new URL("/admin?ml=token_error", url.origin));
+    return NextResponse.redirect(new URL("/admin?ml=token_error", REDIRECT_URI));
   }
 
   const sql = getDb();
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
       updated_at = NOW()
   `;
 
-  const response = NextResponse.redirect(new URL("/admin?ml=connected", url.origin));
+  const response = NextResponse.redirect("https://purple-alpaca-620001.hostingersite.com/admin?ml=connected");
   response.cookies.set("ml_oauth_state", "", { maxAge: 0, path: "/" });
   return response;
 }
