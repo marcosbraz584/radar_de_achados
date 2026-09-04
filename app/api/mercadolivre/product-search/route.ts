@@ -131,14 +131,12 @@ export async function GET(request: Request) {
       const pictures = Array.isArray(product.pictures) ? product.pictures.map((picture) => picture?.secure_url || picture?.url || null).filter((value): value is string => Boolean(value)) : [];
       const features = Array.isArray(product.main_features) ? product.main_features.map((feature) => feature?.text || feature?.value_name || null).filter((value): value is string => Boolean(value)).slice(0, 3) : [];
       const offer = product.id ? await getBestOffer(product.id) : null;
-      return { id: product.id || null, name: product.name || null, status: product.status || null, domain_id: product.domain_id || null, image: pictures[0] || null, pictures, features, permalink: product.id ? `https://www.mercadolivre.com.br/p/${product.id}` : null, offer_item_id: offer?.item_id || null, offer_price: offer?.price ?? null, offer_original_price: offer?.original_price ?? null, currency_id: offer?.currency_id || null, offers_count: offer?.offers_count ?? 0, search_position: original_position, relevance, source: "catalog" as const };
+      return { id: product.id || null, name: product.name || null, status: product.status || null, domain_id: product.domain_id || null, image: pictures[0] || null, pictures, features, permalink: product.id ? `https://www.mercadolivre.com.br/p/${product.id}` : null, offer_item_id: offer?.item_id || null, offer_price: offer?.price ?? null, offer_original_price: offer?.original_price ?? null, currency_id: offer?.currency_id || null, offers_count: offer?.offers_count ?? 0, search_position: original_position, relevance };
     }));
 
     let combined = [...catalogResults];
     const pricedCatalog = catalogResults.filter((product) => product.offer_item_id && product.offer_price != null).length;
 
-    // Se o catálogo não trouxer opções compráveis suficientes, complementamos com anúncios
-    // ativos da busca pública do marketplace e confirmamos o preço de cada ITEM_ID pela API de preços.
     if (pricedCatalog < 8) {
       const marketplaceItems = (await searchMarketplaceItems(q)).filter((item) => item.id && item.title && (!item.condition || item.condition === "new")).slice(0, 20);
       const directResults = await Promise.all(marketplaceItems.map(async (item, index) => {
@@ -152,7 +150,7 @@ export async function GET(request: Request) {
           domain_id: predicted?.domain_id || null,
           image,
           pictures: image ? [image] : [],
-          features: [],
+          features: [] as string[],
           permalink: catalogId ? `https://www.mercadolivre.com.br/p/${catalogId}` : item.permalink || null,
           offer_item_id: item.id || null,
           offer_price: checkedPrice.price,
@@ -161,7 +159,6 @@ export async function GET(request: Request) {
           offers_count: 1,
           search_position: 1000 + index,
           relevance: relevanceScore(item.title || "", q),
-          source: "marketplace" as const,
         };
       }));
 
