@@ -38,37 +38,54 @@ async function mlFetch(url: string) {
   return response;
 }
 
+async function getCurrentItemPrice(itemId: string, fallbackPrice: number | null) {
+  try {
+    const response = await mlFetch(`https://api.mercadolibre.com/items/${itemId}/prices`);
+    if (!response.ok) return { price: fallbackPrice, original_price: null, currency_id: "BRL" };
+    const data = await response.json();
+    const prices = Array.isArray(data?.prices) ? data.prices : [];
+    const marketplacePrices = prices.filter((price: any) => {
+      const restrictions = Array.isArray(price?.conditions?.context_restrictions)
+        ? price.conditions.context_restrictions
+        : [];
+      return restrictions.length === 0 || restrictions.includes("channel_marketplace");
+    });
+    const preferred =
+      marketplacePrices.find((price: any) => price?.type === "promotion" && typeof price?.amount === "number") ||
+      marketplacePrices.find((price: any) => price?.type === "standard" && typeof price?.amount === "number") ||
+      marketplacePrices.find((price: any) => typeof price?.amount === "number");
+    return {
+      price: typeof preferred?.amount === "number" ? preferred.amount : fallbackPrice,
+      original_price: typeof preferred?.regular_amount === "number" ? preferred.regular_amount : null,
+      currency_id: preferred?.currency_id || data?.currency_id || "BRL",
+    };
+  } catch {
+    return { price: fallbackPrice, original_price: null, currency_id: "BRL" };
+  }
+}
+
 async function getBestOffer(productId: string) {
   try {
-    const response = await mlFetch(
-      `https://api.mercadolibre.com/products/${productId}/items`,
-    );
+    const response = await mlFetch(`https://api.mercadolibre.com/products/${productId}/items`);
     if (!response.ok) return null;
-
     const data = await response.json();
-    const offers: MercadoLivreOffer[] = Array.isArray(data?.results)
-      ? data.results
-      : [];
-
+    const offers: MercadoLivreOffer[] = Array.isArray(data?.results) ? data.results : [];
     const valid = offers
-      .filter(
-        (offer) =>
-          typeof offer?.item_id === "string" &&
-          typeof offer?.price === "number" &&
-          offer.price >= 0 &&
-          (!offer.condition || offer.condition === "new"),
-      )
+      .filter((offer) => typeof offer?.item_id === "string" && (!offer.condition || offer.condition === "new"))
       .sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
-
-    const best = valid[0];
-    if (!best) return null;
-
+    const best = valid.find((offer) => typeof offer.price === "number") || valid[0];
+    if (!best?.item_id) return null;
+    const officialPrice = await getCurrentItemPrice(
+      best.item_id,
+      typeof best.price === "number" ? best.price : null,
+    );
     return {
-      item_id: best.item_id || null,
-      price: best.price ?? null,
+      item_id: best.item_id,
+      price: officialPrice.price,
       original_price:
-        typeof best.original_price === "number" ? best.original_price : null,
-      currency_id: best.currency_id || "BRL",
+        officialPrice.original_price ??
+        (typeof best.original_price === "number" ? best.original_price : null),
+      currency_id: officialPrice.currency_id || best.currency_id || "BRL",
       offers_count: offers.length,
     };
   } catch {
@@ -78,62 +95,31 @@ async function getBestOffer(productId: string) {
 
 export async function GET(request: Request) {
   try {
-    const url = new URL(request.url);
-    const q = url.searchParams.get("q")?.trim() || "";
-
+    const q = new URL(request.url).searchParams.get("q")?.trim() || "";
     if (q.length < 2) {
-      return NextResponse.json(
-        { ok: false, error: "Digite pelo menos 2 caracteres para pesquisar." },
-        { status: 400 },
-      );
+      return NextResponse.json({ ok: false, error: "Digite pelo menos 2 caracteres para pesquisar." }, { status: 400 });
     }
 
-    const params = new URLSearchParams({
-      status: "active",
-      site_id: "MLB",
-      q,
-      limit: "12",
-    });
-
-    const response = await mlFetch(
-      `https://api.mercadolibre.com/products/search?${params.toString()}`,
-    );
+    const params = new URLSearchParams({ status: "active", site_id: "MLB", q, limit: "12" });
+    const response = await mlFetch(`https://api.mercadolibre.com/products/search?${params.toString()}`);
     const data = await response.json();
-
     if (!response.ok) {
       return NextResponse.json(
-        {
-          ok: false,
-          error:
-            data?.message ||
-            data?.error ||
-            "Não foi possível pesquisar produtos no Mercado Livre.",
-        },
+        { ok: false, error: data?.message || data?.error || "Não foi possível pesquisar produtos no Mercado Livre." },
         { status: response.status === 404 ? 404 : 502 },
       );
     }
 
-    const rawResults: MercadoLivreProduct[] = Array.isArray(data?.results)
-      ? data.results
-      : [];
-
-    const results = await Promise.all(
-      rawResults.map(async (product) => {
+    const rawResults: MercadoLivreProduct[] = Array.isArray(data?.results) ? data.results : [];
+    const enriched = await Promise.all(
+      rawResults.map(async (product, search_position) => {
         const pictures = Array.isArray(product.pictures)
-          ? product.pictures
-              .map((picture) => picture?.secure_url || picture?.url || null)
-              .filter((value): value is string => Boolean(value))
+          ? product.pictures.map((picture) => picture?.secure_url || picture?.url || null).filter((value): value is string => Boolean(value))
           : [];
-
         const features = Array.isArray(product.main_features)
-          ? product.main_features
-              .map((feature) => feature?.text || feature?.value_name || null)
-              .filter((value): value is string => Boolean(value))
-              .slice(0, 3)
+          ? product.main_features.map((feature) => feature?.text || feature?.value_name || null).filter((value): value is string => Boolean(value)).slice(0, 3)
           : [];
-
         const offer = product.id ? await getBestOffer(product.id) : null;
-
         return {
           id: product.id || null,
           name: product.name || null,
@@ -142,30 +128,34 @@ export async function GET(request: Request) {
           image: pictures[0] || null,
           pictures,
           features,
-          permalink: product.id
-            ? `https://www.mercadolivre.com.br/p/${product.id}`
-            : null,
+          permalink: product.id ? `https://www.mercadolivre.com.br/p/${product.id}` : null,
           offer_item_id: offer?.item_id || null,
           offer_price: offer?.price ?? null,
           offer_original_price: offer?.original_price ?? null,
           currency_id: offer?.currency_id || null,
           offers_count: offer?.offers_count ?? 0,
+          search_position,
         };
       }),
     );
+
+    const results = enriched.sort((a, b) => {
+      const aHasPrice = a.offer_item_id && a.offer_price != null ? 1 : 0;
+      const bHasPrice = b.offer_item_id && b.offer_price != null ? 1 : 0;
+      if (aHasPrice !== bHasPrice) return bHasPrice - aHasPrice;
+      return a.search_position - b.search_position;
+    });
 
     return NextResponse.json({
       ok: true,
       query: q,
       total: data?.paging?.total ?? results.length,
+      priced_results: results.filter((product) => product.offer_item_id && product.offer_price != null).length,
       results,
     });
   } catch (error) {
     console.error("Erro ao pesquisar produtos do Mercado Livre", error);
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Erro interno ao pesquisar produtos.";
+    const message = error instanceof Error ? error.message : "Erro interno ao pesquisar produtos.";
     return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 }
