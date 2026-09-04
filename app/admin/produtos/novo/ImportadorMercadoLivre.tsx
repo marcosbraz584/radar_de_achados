@@ -61,8 +61,12 @@ export default function ImportadorMercadoLivre() {
   const [results, setResults] = useState<SearchResult[]>([]);
 
   function setValue(name: string, value: string) {
-    const el = document.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`);
+    const el = document.querySelector<HTMLInputElement>(`[name="${name}"]`);
     if (el) el.value = value;
+  }
+
+  function setDescription(value: string) {
+    window.dispatchEvent(new CustomEvent<string>("mercadolivre:description", { detail: value }));
   }
 
   function fillForm(data: Preview, fallbackUrl: string) {
@@ -74,7 +78,7 @@ export default function ImportadorMercadoLivre() {
     const itemId = product.id || "";
 
     setValue("name", product.name || "");
-    setValue("description", product.description || "");
+    setDescription(product.description || "");
     setValue("marketplace_item_id", itemId);
     setValue("marketplace_product_id", catalogId);
     setValue("marketplace_reference_type", catalogId && itemId !== catalogId ? "item" : "catalog_product");
@@ -95,9 +99,6 @@ export default function ImportadorMercadoLivre() {
       const data: Preview = await response.json();
       setPreview(data);
       fillForm(data, value.trim());
-      if (data?.ok && data?.product?.description) {
-        window.requestAnimationFrame(() => setValue("description", data.product?.description || ""));
-      }
     } catch { setPreview({ ok: false, error: "Não foi possível consultar o Mercado Livre agora." }); }
     finally { setLoading(false); }
   }
