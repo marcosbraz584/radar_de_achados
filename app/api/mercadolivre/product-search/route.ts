@@ -99,7 +99,12 @@ export async function GET(request: Request) {
     if (!response.ok) return NextResponse.json({ ok: false, error: data?.message || data?.error || "Não foi possível pesquisar produtos no Mercado Livre." }, { status: response.status === 404 ? 404 : 502 });
 
     const rawResults: MercadoLivreProduct[] = Array.isArray(data?.results) ? data.results : [];
-    const rankedRaw = rawResults.map((product, original_position) => ({ product, original_position, relevance: relevanceScore(product.name || "", q) })).sort((a, b) => b.relevance - a.relevance || a.original_position - b.original_position).slice(0, 12);
+    // Consultamos mais candidatos antes de cortar a lista. Isso evita que buscas amplas
+    // (ex.: iPhone) fiquem presas aos primeiros catálogos sem uma oferta ativa com preço.
+    const rankedRaw = rawResults
+      .map((product, original_position) => ({ product, original_position, relevance: relevanceScore(product.name || "", q) }))
+      .sort((a, b) => b.relevance - a.relevance || a.original_position - b.original_position)
+      .slice(0, 24);
 
     const enriched = await Promise.all(rankedRaw.map(async ({ product, original_position, relevance }) => {
       const pictures = Array.isArray(product.pictures) ? product.pictures.map((picture) => picture?.secure_url || picture?.url || null).filter((value): value is string => Boolean(value)) : [];
@@ -108,13 +113,15 @@ export async function GET(request: Request) {
       return { id: product.id || null, name: product.name || null, status: product.status || null, domain_id: product.domain_id || null, image: pictures[0] || null, pictures, features, permalink: product.id ? `https://www.mercadolivre.com.br/p/${product.id}` : null, offer_item_id: offer?.item_id || null, offer_price: offer?.price ?? null, offer_original_price: offer?.original_price ?? null, currency_id: offer?.currency_id || null, offers_count: offer?.offers_count ?? 0, search_position: original_position, relevance };
     }));
 
+    // Para uma vitrine de afiliados, produto comprável vem primeiro. A relevância textual
+    // continua decidindo a ordem dentro do grupo com preço e dentro do grupo sem preço.
     const results = enriched.sort((a, b) => {
-      if (a.relevance !== b.relevance) return b.relevance - a.relevance;
       const aHasPrice = a.offer_item_id && a.offer_price != null ? 1 : 0;
       const bHasPrice = b.offer_item_id && b.offer_price != null ? 1 : 0;
       if (aHasPrice !== bHasPrice) return bHasPrice - aHasPrice;
+      if (a.relevance !== b.relevance) return b.relevance - a.relevance;
       return a.search_position - b.search_position;
-    });
+    }).slice(0, 12);
 
     return NextResponse.json({ ok: true, query: q, predicted_domain: predicted?.domain_id || null, predicted_domain_name: predicted?.domain_name || null, predicted_category: predicted?.category_id || null, predicted_category_name: predicted?.category_name || null, total: data?.paging?.total ?? results.length, priced_results: results.filter((product) => product.offer_item_id && product.offer_price != null).length, results });
   } catch (error) {
