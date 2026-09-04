@@ -28,6 +28,13 @@ type MercadoLivrePrice = {
   conditions?: { context_restrictions?: string[] };
 };
 
+type DomainSuggestion = {
+  domain_id?: string;
+  domain_name?: string;
+  category_id?: string;
+  category_name?: string;
+};
+
 async function mlFetch(url: string) {
   let token = await getMercadoLivreAccessToken();
   let response = await fetch(url, {
@@ -42,6 +49,21 @@ async function mlFetch(url: string) {
     });
   }
   return response;
+}
+
+async function predictDomain(q: string) {
+  try {
+    const params = new URLSearchParams({ q, limit: "1" });
+    const response = await mlFetch(
+      `https://api.mercadolibre.com/sites/MLB/domain_discovery/search?${params.toString()}`,
+    );
+    if (!response.ok) return null;
+    const data = await response.json();
+    const suggestions: DomainSuggestion[] = Array.isArray(data) ? data : [];
+    return suggestions[0] || null;
+  } catch {
+    return null;
+  }
 }
 
 async function getCurrentItemPrice(itemId: string, fallbackPrice: number | null) {
@@ -99,6 +121,14 @@ async function getBestOffer(productId: string) {
   }
 }
 
+async function searchCatalog(q: string, domainId?: string | null) {
+  const params = new URLSearchParams({ status: "active", site_id: "MLB", q, limit: "12" });
+  if (domainId) params.set("domain_id", domainId);
+  const response = await mlFetch(`https://api.mercadolibre.com/products/search?${params.toString()}`);
+  const data = await response.json();
+  return { response, data };
+}
+
 export async function GET(request: Request) {
   try {
     const q = new URL(request.url).searchParams.get("q")?.trim() || "";
@@ -106,9 +136,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ ok: false, error: "Digite pelo menos 2 caracteres para pesquisar." }, { status: 400 });
     }
 
-    const params = new URLSearchParams({ status: "active", site_id: "MLB", q, limit: "12" });
-    const response = await mlFetch(`https://api.mercadolibre.com/products/search?${params.toString()}`);
-    const data = await response.json();
+    const predicted = await predictDomain(q);
+    let { response, data } = await searchCatalog(q, predicted?.domain_id || null);
+
+    if (response.ok && (!Array.isArray(data?.results) || data.results.length === 0) && predicted?.domain_id) {
+      ({ response, data } = await searchCatalog(q));
+    }
+
     if (!response.ok) {
       return NextResponse.json(
         { ok: false, error: data?.message || data?.error || "Não foi possível pesquisar produtos no Mercado Livre." },
@@ -155,6 +189,10 @@ export async function GET(request: Request) {
     return NextResponse.json({
       ok: true,
       query: q,
+      predicted_domain: predicted?.domain_id || null,
+      predicted_domain_name: predicted?.domain_name || null,
+      predicted_category: predicted?.category_id || null,
+      predicted_category_name: predicted?.category_name || null,
       total: data?.paging?.total ?? results.length,
       priced_results: results.filter((product) => product.offer_item_id && product.offer_price != null).length,
       results,
