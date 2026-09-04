@@ -66,6 +66,14 @@ export default function ImportadorMercadoLivre() {
   }
 
   function setDescription(value: string) {
+    const textarea = document.querySelector<HTMLTextAreaElement>('textarea[name="description"]');
+    if (textarea) {
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
+      if (setter) setter.call(textarea, value);
+      else textarea.value = value;
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      textarea.dispatchEvent(new Event("change", { bubbles: true }));
+    }
     window.dispatchEvent(new CustomEvent<string>("mercadolivre:description", { detail: value }));
   }
 
