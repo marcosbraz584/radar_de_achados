@@ -20,13 +20,20 @@ type MercadoLivreOffer = {
   condition?: string;
 };
 
+type MercadoLivrePrice = {
+  type?: string;
+  amount?: number;
+  regular_amount?: number | null;
+  currency_id?: string;
+  conditions?: { context_restrictions?: string[] };
+};
+
 async function mlFetch(url: string) {
   let token = await getMercadoLivreAccessToken();
   let response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
-
   if (response.status === 401) {
     token = await getMercadoLivreAccessToken(true);
     response = await fetch(url, {
@@ -34,7 +41,6 @@ async function mlFetch(url: string) {
       cache: "no-store",
     });
   }
-
   return response;
 }
 
@@ -43,17 +49,17 @@ async function getCurrentItemPrice(itemId: string, fallbackPrice: number | null)
     const response = await mlFetch(`https://api.mercadolibre.com/items/${itemId}/prices`);
     if (!response.ok) return { price: fallbackPrice, original_price: null, currency_id: "BRL" };
     const data = await response.json();
-    const prices = Array.isArray(data?.prices) ? data.prices : [];
-    const marketplacePrices = prices.filter((price: any) => {
+    const prices: MercadoLivrePrice[] = Array.isArray(data?.prices) ? data.prices : [];
+    const marketplacePrices = prices.filter((price) => {
       const restrictions = Array.isArray(price?.conditions?.context_restrictions)
         ? price.conditions.context_restrictions
         : [];
       return restrictions.length === 0 || restrictions.includes("channel_marketplace");
     });
     const preferred =
-      marketplacePrices.find((price: any) => price?.type === "promotion" && typeof price?.amount === "number") ||
-      marketplacePrices.find((price: any) => price?.type === "standard" && typeof price?.amount === "number") ||
-      marketplacePrices.find((price: any) => typeof price?.amount === "number");
+      marketplacePrices.find((price) => price?.type === "promotion" && typeof price?.amount === "number") ||
+      marketplacePrices.find((price) => price?.type === "standard" && typeof price?.amount === "number") ||
+      marketplacePrices.find((price) => typeof price?.amount === "number");
     return {
       price: typeof preferred?.amount === "number" ? preferred.amount : fallbackPrice,
       original_price: typeof preferred?.regular_amount === "number" ? preferred.regular_amount : null,
