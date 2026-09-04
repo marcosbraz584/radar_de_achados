@@ -93,7 +93,11 @@ export default function ImportadorMercadoLivre() {
     try {
       const response = await fetch(`/api/mercadolivre/import-preview?value=${encodeURIComponent(value.trim())}`);
       const data: Preview = await response.json();
-      setPreview(data); fillForm(data, value.trim());
+      setPreview(data);
+      fillForm(data, value.trim());
+      if (data?.ok && data?.product?.description) {
+        window.requestAnimationFrame(() => setValue("description", data.product?.description || ""));
+      }
     } catch { setPreview({ ok: false, error: "Não foi possível consultar o Mercado Livre agora." }); }
     finally { setLoading(false); }
   }
