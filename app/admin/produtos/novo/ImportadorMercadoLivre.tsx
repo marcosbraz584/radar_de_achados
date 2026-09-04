@@ -33,6 +33,11 @@ type SearchResult = {
   pictures?: string[];
   features?: string[];
   permalink?: string | null;
+  offer_item_id?: string | null;
+  offer_price?: number | null;
+  offer_original_price?: number | null;
+  currency_id?: string | null;
+  offers_count?: number;
 };
 
 type SearchResponse = {
@@ -41,6 +46,14 @@ type SearchResponse = {
   total?: number;
   results?: SearchResult[];
 };
+
+function formatPrice(value?: number | null) {
+  if (value == null) return null;
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+}
 
 export default function ImportadorMercadoLivre() {
   const [mode, setMode] = useState<"search" | "link">("search");
@@ -65,13 +78,13 @@ export default function ImportadorMercadoLivre() {
       data?.automation?.item_access_status === 403 ||
       data?.automation?.price_access_status === 403;
     const catalogId = product.catalog_product_id || (data.type === "catalog_product" ? product.id || "" : "");
-    const itemId = data.type === "item" ? product.id || "" : "";
+    const itemId = data.type === "item" ? product.id || "" : product.id || "";
 
     setValue("name", product.name || "");
-    setValue("marketplace_item_id", itemId || catalogId);
+    setValue("marketplace_item_id", itemId);
     setValue("marketplace_product_id", catalogId);
-    setValue("marketplace_reference_type", itemId ? "item" : "catalog_product");
-    setValue("marketplace_url", product.permalink || fallbackUrl);
+    setValue("marketplace_reference_type", catalogId && itemId !== catalogId ? "item" : "catalog_product");
+    setValue("marketplace_url", product.permalink || fallbackUrl.split("#")[0]);
     setValue("imported_images", JSON.stringify(Array.isArray(product.pictures) ? product.pictures : []));
     setValue("price_source", hasAutomaticPrice ? "automatic" : "manual");
     setValue("price_sync_status", hasAutomaticPrice ? "ok" : restricted ? "restricted" : "pending");
@@ -120,8 +133,11 @@ export default function ImportadorMercadoLivre() {
 
   async function selectProduct(product: SearchResult) {
     const url = product.permalink || `https://www.mercadolivre.com.br/p/${product.id}`;
+    const importReference = product.offer_item_id
+      ? `${url}#wid=${product.offer_item_id}`
+      : url;
     setLink(url);
-    await importValue(url);
+    await importValue(importReference);
     setResults([]);
   }
 
@@ -162,7 +178,7 @@ export default function ImportadorMercadoLivre() {
               placeholder="Ex.: ventilador, iPhone, notebook..."
             />
             <button type="button" className="primary-button" onClick={searchProducts} disabled={searching || query.trim().length < 2}>
-              {searching ? "Pesquisando..." : "Pesquisar"}
+              {searching ? "Pesquisando ofertas..." : "Pesquisar"}
             </button>
           </div>
 
@@ -175,15 +191,18 @@ export default function ImportadorMercadoLivre() {
                   key={product.id}
                   type="button"
                   onClick={() => selectProduct(product)}
-                  style={{ textAlign: "left", border: "1px solid #e5e7eb", borderRadius: 14, background: "#fff", padding: 14, cursor: "pointer" }}
+                  disabled={loading}
+                  style={{ textAlign: "left", border: "1px solid #e5e7eb", borderRadius: 14, background: "#fff", padding: 14, cursor: "pointer", display: "flex", flexDirection: "column", gap: 7 }}
                 >
-                  <div style={{ height: 150, display: "grid", placeItems: "center", marginBottom: 10 }}>
+                  <div style={{ height: 150, display: "grid", placeItems: "center", marginBottom: 4 }}>
                     {product.image ? <img src={product.image} alt={product.name || "Produto"} style={{ maxWidth: "100%", maxHeight: 150, objectFit: "contain" }} /> : <span>Sem imagem</span>}
                   </div>
                   <strong style={{ display: "block", lineHeight: 1.35 }}>{product.name || product.id}</strong>
-                  <small style={{ display: "block", marginTop: 7, color: "#6b7280" }}>{product.id}</small>
-                  {product.features?.length ? <small style={{ display: "block", marginTop: 7, color: "#6b7280" }}>{product.features.join(" • ")}</small> : null}
-                  <span style={{ display: "inline-block", marginTop: 12, fontWeight: 800 }}>Selecionar produto →</span>
+                  <small style={{ color: "#6b7280" }}>Catálogo: {product.id}</small>
+                  {product.offer_price != null ? <strong style={{ fontSize: 18 }}>{formatPrice(product.offer_price)}</strong> : <small style={{ color: "#b45309" }}>Sem oferta com preço disponível</small>}
+                  {product.offer_item_id ? <small style={{ color: "#15803d" }}>Oferta: {product.offer_item_id}{product.offers_count ? ` · ${product.offers_count} encontrada(s)` : ""}</small> : null}
+                  {product.features?.length ? <small style={{ color: "#6b7280" }}>{product.features.join(" • ")}</small> : null}
+                  <span style={{ display: "inline-block", marginTop: "auto", paddingTop: 6, fontWeight: 800 }}>Selecionar produto →</span>
                 </button>
               ))}
             </div>
@@ -198,7 +217,7 @@ export default function ImportadorMercadoLivre() {
         </div>
       )}
 
-      {loading ? <p className="admin-subtitle" style={{ marginTop: 14 }}>Carregando dados do produto...</p> : null}
+      {loading ? <p className="admin-subtitle" style={{ marginTop: 14 }}>Carregando produto e preço...</p> : null}
 
       {preview && !preview.ok ? (
         <div className="ml-result ml-error"><strong>Não foi possível importar.</strong><span>{preview.error}</span></div>
@@ -209,8 +228,8 @@ export default function ImportadorMercadoLivre() {
           {preview.product.pictures?.[0] ? <img src={preview.product.pictures[0]} alt="Prévia do produto" /> : null}
           <div>
             <strong>{preview.product.name}</strong>
-            <span>{preview.type === "catalog_product" ? "Produto de catálogo" : "Anúncio individual"} · {preview.product.status === "active" ? "Ativo" : preview.product.status || "Status não informado"}</span>
-            {preview.product.price != null ? <span><strong>Preço encontrado: R$ {preview.product.price.toFixed(2).replace(".", ",")}</strong></span> : null}
+            <span>{preview.type === "catalog_product" ? "Produto de catálogo" : "Oferta do Mercado Livre"} · {preview.product.status === "active" ? "Ativo" : preview.product.status || "Status não informado"}</span>
+            {preview.product.price != null ? <span><strong>Preço encontrado: {formatPrice(preview.product.price)}</strong></span> : null}
             {preview.automation?.note ? <small>{preview.automation.note}</small> : null}
           </div>
         </div>
