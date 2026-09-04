@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDb } from "@/lib/db";
+import ProductGallery from "./ProductGallery";
 
 export const dynamic = "force-dynamic";
 
@@ -71,35 +72,18 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   ` as ImageRow[];
 
   const images = imageRows.map((row) => row.image_url).filter(Boolean);
-  const mainImage = images[0] || null;
   const currentPrice = money(product.promo_price ?? product.regular_price);
   const oldPrice = product.promo_price ? money(product.regular_price) : null;
   const destination = product.destination_url || product.affiliate_url;
 
   return (
     <main style={{ minHeight: "100vh", background: "#f5f5f5", paddingBottom: 56 }}>
-      <style>{`@media(max-width:760px){.product-detail-grid{grid-template-columns:1fr!important}.product-detail-image{min-height:280px!important}.product-detail-card{padding:18px!important}.product-detail-title{font-size:24px!important}.product-thumbs{grid-template-columns:repeat(4,1fr)!important}}`}</style>
+      <style>{`@media(max-width:760px){.product-detail-grid{grid-template-columns:1fr!important}.product-detail-card{padding:18px!important}.product-detail-title{font-size:24px!important}}`}</style>
       <div style={{ maxWidth: 1180, margin: "0 auto", padding: "24px 20px" }}>
         <Link href="/#ofertas" style={{ color: "#1f4e79", textDecoration: "none", fontWeight: 700 }}>← Voltar para a loja</Link>
 
         <section className="product-detail-grid product-detail-card" style={{ marginTop: 20, background: "white", borderRadius: 16, padding: 28, display: "grid", gridTemplateColumns: "minmax(280px, 1fr) minmax(300px, 1fr)", gap: 36 }}>
-          <div>
-            <div className="product-detail-image" style={{ minHeight: 420, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {mainImage ? (
-                <img src={mainImage} alt={product.name} style={{ maxWidth: "100%", maxHeight: 440, objectFit: "contain" }} />
-              ) : <div style={{ color: "#777" }}>Imagem indisponível</div>}
-            </div>
-
-            {images.length > 1 && (
-              <div className="product-thumbs" style={{ marginTop: 14, display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 10 }}>
-                {images.slice(0, 4).map((image, index) => (
-                  <div key={image} style={{ height: 92, border: index === 0 ? "2px solid #3483fa" : "1px solid #ddd", borderRadius: 9, display: "grid", placeItems: "center", padding: 6, background: "#fff" }}>
-                    <img src={image} alt={`${product.name} - imagem ${index + 1}`} style={{ maxWidth: "100%", maxHeight: 78, objectFit: "contain" }} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <ProductGallery images={images} name={product.name} />
 
           <div>
             {product.category_name && <div style={{ color: "#666", marginBottom: 10 }}>{product.category_name}</div>}
