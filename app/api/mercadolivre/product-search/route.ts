@@ -14,6 +14,19 @@ type MercadoLivreProduct = {
 type MercadoLivreOffer = { item_id?: string; price?: number; original_price?: number | null; currency_id?: string; condition?: string };
 type MercadoLivrePrice = { type?: string; amount?: number; regular_amount?: number | null; currency_id?: string; conditions?: { context_restrictions?: string[] } };
 type DomainSuggestion = { domain_id?: string; domain_name?: string; category_id?: string; category_name?: string };
+type MarketplaceItem = {
+  id?: string;
+  title?: string;
+  price?: number;
+  original_price?: number | null;
+  currency_id?: string;
+  condition?: string;
+  permalink?: string;
+  thumbnail?: string;
+  secure_thumbnail?: string;
+  catalog_product_id?: string | null;
+  category_id?: string;
+};
 
 async function mlFetch(url: string) {
   let token = await getMercadoLivreAccessToken();
@@ -72,6 +85,16 @@ async function searchCatalog(q: string, domainId?: string | null) {
   return { response, data: await response.json() };
 }
 
+async function searchMarketplaceItems(q: string) {
+  try {
+    const params = new URLSearchParams({ q, limit: "30" });
+    const response = await mlFetch(`https://api.mercadolibre.com/sites/MLB/search?${params.toString()}`);
+    if (!response.ok) return [] as MarketplaceItem[];
+    const data = await response.json();
+    return (Array.isArray(data?.results) ? data.results : []) as MarketplaceItem[];
+  } catch { return [] as MarketplaceItem[]; }
+}
+
 function normalize(value: string) { return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
 function relevanceScore(name: string, q: string) {
   const title = normalize(name);
@@ -99,23 +122,59 @@ export async function GET(request: Request) {
     if (!response.ok) return NextResponse.json({ ok: false, error: data?.message || data?.error || "Não foi possível pesquisar produtos no Mercado Livre." }, { status: response.status === 404 ? 404 : 502 });
 
     const rawResults: MercadoLivreProduct[] = Array.isArray(data?.results) ? data.results : [];
-    // Consultamos mais candidatos antes de cortar a lista. Isso evita que buscas amplas
-    // (ex.: iPhone) fiquem presas aos primeiros catálogos sem uma oferta ativa com preço.
     const rankedRaw = rawResults
       .map((product, original_position) => ({ product, original_position, relevance: relevanceScore(product.name || "", q) }))
       .sort((a, b) => b.relevance - a.relevance || a.original_position - b.original_position)
       .slice(0, 24);
 
-    const enriched = await Promise.all(rankedRaw.map(async ({ product, original_position, relevance }) => {
+    const catalogResults = await Promise.all(rankedRaw.map(async ({ product, original_position, relevance }) => {
       const pictures = Array.isArray(product.pictures) ? product.pictures.map((picture) => picture?.secure_url || picture?.url || null).filter((value): value is string => Boolean(value)) : [];
       const features = Array.isArray(product.main_features) ? product.main_features.map((feature) => feature?.text || feature?.value_name || null).filter((value): value is string => Boolean(value)).slice(0, 3) : [];
       const offer = product.id ? await getBestOffer(product.id) : null;
-      return { id: product.id || null, name: product.name || null, status: product.status || null, domain_id: product.domain_id || null, image: pictures[0] || null, pictures, features, permalink: product.id ? `https://www.mercadolivre.com.br/p/${product.id}` : null, offer_item_id: offer?.item_id || null, offer_price: offer?.price ?? null, offer_original_price: offer?.original_price ?? null, currency_id: offer?.currency_id || null, offers_count: offer?.offers_count ?? 0, search_position: original_position, relevance };
+      return { id: product.id || null, name: product.name || null, status: product.status || null, domain_id: product.domain_id || null, image: pictures[0] || null, pictures, features, permalink: product.id ? `https://www.mercadolivre.com.br/p/${product.id}` : null, offer_item_id: offer?.item_id || null, offer_price: offer?.price ?? null, offer_original_price: offer?.original_price ?? null, currency_id: offer?.currency_id || null, offers_count: offer?.offers_count ?? 0, search_position: original_position, relevance, source: "catalog" as const };
     }));
 
-    // Para uma vitrine de afiliados, produto comprável vem primeiro. A relevância textual
-    // continua decidindo a ordem dentro do grupo com preço e dentro do grupo sem preço.
-    const results = enriched.sort((a, b) => {
+    let combined = [...catalogResults];
+    const pricedCatalog = catalogResults.filter((product) => product.offer_item_id && product.offer_price != null).length;
+
+    // Se o catálogo não trouxer opções compráveis suficientes, complementamos com anúncios
+    // ativos da busca pública do marketplace e confirmamos o preço de cada ITEM_ID pela API de preços.
+    if (pricedCatalog < 8) {
+      const marketplaceItems = (await searchMarketplaceItems(q)).filter((item) => item.id && item.title && (!item.condition || item.condition === "new")).slice(0, 20);
+      const directResults = await Promise.all(marketplaceItems.map(async (item, index) => {
+        const checkedPrice = await getCurrentItemPrice(String(item.id), typeof item.price === "number" ? item.price : null);
+        const catalogId = item.catalog_product_id || null;
+        const image = item.secure_thumbnail || item.thumbnail || null;
+        return {
+          id: catalogId || item.id || null,
+          name: item.title || null,
+          status: "active",
+          domain_id: predicted?.domain_id || null,
+          image,
+          pictures: image ? [image] : [],
+          features: [],
+          permalink: catalogId ? `https://www.mercadolivre.com.br/p/${catalogId}` : item.permalink || null,
+          offer_item_id: item.id || null,
+          offer_price: checkedPrice.price,
+          offer_original_price: checkedPrice.original_price ?? (typeof item.original_price === "number" ? item.original_price : null),
+          currency_id: checkedPrice.currency_id || item.currency_id || "BRL",
+          offers_count: 1,
+          search_position: 1000 + index,
+          relevance: relevanceScore(item.title || "", q),
+          source: "marketplace" as const,
+        };
+      }));
+
+      const seenOffers = new Set(combined.map((product) => product.offer_item_id).filter(Boolean));
+      for (const product of directResults) {
+        if (product.offer_item_id && !seenOffers.has(product.offer_item_id)) {
+          combined.push(product);
+          seenOffers.add(product.offer_item_id);
+        }
+      }
+    }
+
+    const results = combined.sort((a, b) => {
       const aHasPrice = a.offer_item_id && a.offer_price != null ? 1 : 0;
       const bHasPrice = b.offer_item_id && b.offer_price != null ? 1 : 0;
       if (aHasPrice !== bHasPrice) return bHasPrice - aHasPrice;
