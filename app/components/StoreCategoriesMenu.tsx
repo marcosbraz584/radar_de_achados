@@ -22,7 +22,12 @@ export default function StoreCategoriesMenu({ categories }: { categories: MenuCa
   const wrapperRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roots = categories.filter((category) => category.parent_id === null);
+
+  function isDesktopHover() {
+    return typeof window !== "undefined" && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  }
 
   function updatePanelPosition() {
     if (!triggerRef.current) return;
@@ -36,10 +41,30 @@ export default function StoreCategoriesMenu({ categories }: { categories: MenuCa
     );
 
     setPanelPosition({
-      top: rect.bottom + 8,
+      top: rect.bottom + 4,
       left,
       width,
     });
+  }
+
+  function cancelClose() {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  }
+
+  function openOnHover() {
+    if (!isDesktopHover()) return;
+    cancelClose();
+    updatePanelPosition();
+    setOpen(true);
+  }
+
+  function scheduleClose() {
+    if (!isDesktopHover()) return;
+    cancelClose();
+    closeTimerRef.current = setTimeout(() => setOpen(false), 180);
   }
 
   useEffect(() => {
@@ -63,6 +88,7 @@ export default function StoreCategoriesMenu({ categories }: { categories: MenuCa
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
+      cancelClose();
     };
   }, []);
 
@@ -81,6 +107,7 @@ export default function StoreCategoriesMenu({ categories }: { categories: MenuCa
   }, [open]);
 
   function toggleMenu() {
+    if (isDesktopHover()) return;
     if (!open) updatePanelPosition();
     setOpen((value) => !value);
   }
@@ -91,6 +118,8 @@ export default function StoreCategoriesMenu({ categories }: { categories: MenuCa
         ref={panelRef}
         className="store-categories-panel"
         id="store-categories-panel"
+        onMouseEnter={cancelClose}
+        onMouseLeave={scheduleClose}
         style={{
           position: "fixed",
           top: panelPosition.top,
@@ -133,7 +162,12 @@ export default function StoreCategoriesMenu({ categories }: { categories: MenuCa
     ) : null;
 
   return (
-    <div className="store-categories-menu" ref={wrapperRef}>
+    <div
+      className="store-categories-menu"
+      ref={wrapperRef}
+      onMouseEnter={openOnHover}
+      onMouseLeave={scheduleClose}
+    >
       <button
         ref={triggerRef}
         type="button"
