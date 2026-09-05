@@ -7,7 +7,34 @@ type SearchResult={id:string;name?:string|null;status?:string|null;image?:string
 function formatPrice(value?:number|null){if(value==null)return null;return new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(value)}
 function normalize(value:string){return value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
 function setNativeValue(el:HTMLInputElement|HTMLSelectElement,value:string){const proto=el instanceof HTMLSelectElement?window.HTMLSelectElement.prototype:window.HTMLInputElement.prototype;const setter=Object.getOwnPropertyDescriptor(proto,"value")?.set;if(setter)setter.call(el,value);else el.value=value;el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}))}
-function autoSelectCategory(productName:string){const select=document.querySelector<HTMLSelectElement>('select[name="category_id"]');if(!select)return null;const name=normalize(productName);const rules:[string[],string[]][]=[[["ventilador","ventiladores"],["ventilador"]],[["maquina de lavar","lavadora","lavadoras","lava e seca"],["maquinas de lavar","lavadoras"]]];for(const [terms,labels] of rules){if(!terms.some(t=>name.includes(normalize(t))))continue;const option=Array.from(select.options).find(o=>labels.some(l=>normalize(o.textContent||"").includes(normalize(l))));if(option){setNativeValue(select,option.value);return option.textContent||null}}return null}
+function autoSelectCategory(productName:string){const select=document.querySelector<HTMLSelectElement>('select[name="category_id"]');if(!select)return null;const name=normalize(productName);const rules:[string[],string[]][]=[
+ [["ventilador","ventiladores"],["ventilador"]],
+ [["maquina de lavar","lavadora","lavadoras","lava e seca"],["maquinas de lavar","lavadoras"]],
+ [["geladeira","refrigerador","freezer"],["geladeira","refrigerador","freezer"]],
+ [["micro ondas","microondas"],["micro ondas","microondas"]],
+ [["air fryer","fritadeira eletrica","fritadeira sem oleo"],["air fryer","fritadeira"]],
+ [["televisao","smart tv"," tv "],["televisao","tv"]],
+ [["notebook","laptop"],["notebook","informatica"]],
+ [["computador","desktop","pc gamer"],["computador","informatica"]],
+ [["monitor"],["monitor","informatica"]],
+ [["impressora"],["impressora","informatica"]],
+ [["celular","smartphone","iphone"],["celular","smartphone","telefonia"]],
+ [["tablet","ipad"],["tablet","informatica"]],
+ [["fone de ouvido","headphone","headset","earbuds"],["fone","audio"]],
+ [["caixa de som","speaker"],["caixa de som","audio"]],
+ [["aspirador"],["aspirador","eletrodomesticos"]],
+ [["liquidificador"],["liquidificador","eletrodomesticos"]],
+ [["cafeteira"],["cafeteira","eletrodomesticos"]],
+ [["fogao","cooktop"],["fogao","cooktop","eletrodomesticos"]],
+ [["ar condicionado","climatizador"],["ar condicionado","climatizador"]],
+ [["furadeira","parafusadeira","serra eletrica"],["ferramentas"]],
+ [["sofa","poltrona","mesa","cadeira","guarda roupa","colchao"],["moveis","casa"]],
+ [["panela","frigideira","talheres"],["cozinha","casa"]],
+ [["tenis","sapato","sandalia","chinelo"],["calcados","moda"]],
+ [["camisa","camiseta","vestido","calca","short"],["roupas","moda"]],
+ [["brinquedo","boneca","carrinho"],["brinquedos"]]
+ ];for(const [terms,labels] of rules){if(!terms.some(t=>name.includes(normalize(t))))continue;const option=Array.from(select.options).find(o=>labels.some(l=>normalize(o.textContent||"").includes(normalize(l))));if(option){setNativeValue(select,option.value);return option.textContent||null}}
+ const words=name.split(" ").filter(w=>w.length>=4);const option=Array.from(select.options).find(o=>{const label=normalize(o.textContent||"");return words.some(w=>label.includes(w)||w.includes(label))});if(option){setNativeValue(select,option.value);return option.textContent||null}return null}
 export default function ImportadorMercadoLivre(){const[mode,setMode]=useState<"search"|"link">("search"),[query,setQuery]=useState(""),[link,setLink]=useState(""),[loading,setLoading]=useState(false),[searching,setSearching]=useState(false),[preview,setPreview]=useState<Preview|null>(null),[searchError,setSearchError]=useState(""),[results,setResults]=useState<SearchResult[]>([]),[categorySuggestion,setCategorySuggestion]=useState<string|null>(null);
 function setValue(name:string,value:string){const el=document.querySelector<HTMLInputElement>(`[name="${name}"]`);if(el)el.value=value}
 function setDescription(value:string){const textarea=document.querySelector<HTMLTextAreaElement>('textarea[name="description"]');if(textarea){const setter=Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,"value")?.set;if(setter)setter.call(textarea,value);else textarea.value=value;textarea.dispatchEvent(new Event("input",{bubbles:true}));textarea.dispatchEvent(new Event("change",{bubbles:true}))}window.dispatchEvent(new CustomEvent<string>("mercadolivre:description",{detail:value}))}
