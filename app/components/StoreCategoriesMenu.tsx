@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 type MenuCategory = {
   id: number;
@@ -9,14 +10,45 @@ type MenuCategory = {
   parent_id: number | null;
 };
 
+type PanelPosition = {
+  top: number;
+  left: number;
+  width: number;
+};
+
 export default function StoreCategoriesMenu({ categories }: { categories: MenuCategory[] }) {
   const [open, setOpen] = useState(false);
+  const [panelPosition, setPanelPosition] = useState<PanelPosition | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const roots = categories.filter((category) => category.parent_id === null);
+
+  function updatePanelPosition() {
+    if (!triggerRef.current) return;
+
+    const rect = triggerRef.current.getBoundingClientRect();
+    const margin = 10;
+    const width = Math.min(300, Math.max(220, window.innerWidth - margin * 2));
+    const left = Math.min(
+      Math.max(rect.left, margin),
+      Math.max(margin, window.innerWidth - width - margin),
+    );
+
+    setPanelPosition({
+      top: rect.bottom + 8,
+      left,
+      width,
+    });
+  }
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent | TouchEvent) {
-      if (!wrapperRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      const clickedTriggerArea = wrapperRef.current?.contains(target);
+      const clickedPanel = panelRef.current?.contains(target);
+
+      if (!clickedTriggerArea && !clickedPanel) setOpen(false);
     }
 
     function handleKeyDown(event: KeyboardEvent) {
@@ -34,52 +66,86 @@ export default function StoreCategoriesMenu({ categories }: { categories: MenuCa
     };
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+
+    updatePanelPosition();
+
+    window.addEventListener("resize", updatePanelPosition);
+    window.addEventListener("scroll", updatePanelPosition, true);
+
+    return () => {
+      window.removeEventListener("resize", updatePanelPosition);
+      window.removeEventListener("scroll", updatePanelPosition, true);
+    };
+  }, [open]);
+
+  function toggleMenu() {
+    if (!open) updatePanelPosition();
+    setOpen((value) => !value);
+  }
+
+  const panel =
+    open && panelPosition ? (
+      <div
+        ref={panelRef}
+        className="store-categories-panel"
+        id="store-categories-panel"
+        style={{
+          position: "fixed",
+          top: panelPosition.top,
+          left: panelPosition.left,
+          width: panelPosition.width,
+          zIndex: 1000,
+        }}
+      >
+        {roots.length === 0 ? (
+          <span className="store-categories-empty">Nenhuma categoria cadastrada.</span>
+        ) : (
+          roots.map((root) => {
+            const children = categories.filter((category) => category.parent_id === root.id);
+
+            return (
+              <div className="store-category-root" key={root.id}>
+                <a href={`/categoria/${encodeURIComponent(root.slug)}`} onClick={() => setOpen(false)}>
+                  <span>{root.name}</span>
+                  {children.length > 0 ? <span aria-hidden="true">›</span> : null}
+                </a>
+
+                {children.length > 0 ? (
+                  <div className="store-category-submenu">
+                    {children.map((child) => (
+                      <a
+                        key={child.id}
+                        href={`/categoria/${encodeURIComponent(child.slug)}`}
+                        onClick={() => setOpen(false)}
+                      >
+                        {child.name}
+                      </a>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })
+        )}
+      </div>
+    ) : null;
+
   return (
     <div className="store-categories-menu" ref={wrapperRef}>
       <button
+        ref={triggerRef}
         type="button"
         className="store-categories-trigger"
         aria-expanded={open}
         aria-controls="store-categories-panel"
-        onClick={() => setOpen((value) => !value)}
+        onClick={toggleMenu}
       >
         Categorias <span aria-hidden="true">{open ? "▴" : "▾"}</span>
       </button>
 
-      {open ? (
-        <div className="store-categories-panel" id="store-categories-panel">
-          {roots.length === 0 ? (
-            <span className="store-categories-empty">Nenhuma categoria cadastrada.</span>
-          ) : (
-            roots.map((root) => {
-              const children = categories.filter((category) => category.parent_id === root.id);
-
-              return (
-                <div className="store-category-root" key={root.id}>
-                  <a href={`/categoria/${encodeURIComponent(root.slug)}`} onClick={() => setOpen(false)}>
-                    <span>{root.name}</span>
-                    {children.length > 0 ? <span aria-hidden="true">›</span> : null}
-                  </a>
-
-                  {children.length > 0 ? (
-                    <div className="store-category-submenu">
-                      {children.map((child) => (
-                        <a
-                          key={child.id}
-                          href={`/categoria/${encodeURIComponent(child.slug)}`}
-                          onClick={() => setOpen(false)}
-                        >
-                          {child.name}
-                        </a>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })
-          )}
-        </div>
-      ) : null}
+      {panel && typeof document !== "undefined" ? createPortal(panel, document.body) : null}
     </div>
   );
 }
