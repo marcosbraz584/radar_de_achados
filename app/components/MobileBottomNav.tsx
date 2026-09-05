@@ -1,11 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function MobileBottomNav() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target as Node;
+      if (menuRef.current && !menuRef.current.contains(target)) setMenuOpen(false);
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenuOpen(false);
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuOpen]);
 
   function focusSearch() {
+    setMenuOpen(false);
     const input = document.querySelector<HTMLInputElement>('input[name="q"]');
     if (input) {
       input.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -14,6 +36,7 @@ export default function MobileBottomNav() {
   }
 
   function openCategories() {
+    setMenuOpen(false);
     const trigger = document.querySelector<HTMLButtonElement>(".store-categories-trigger");
     if (trigger) {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -37,10 +60,9 @@ export default function MobileBottomNav() {
         }
       `}</style>
       {menuOpen ? (
-        <div className="sh-mobile-more">
-          <a href="/">Página inicial</a>
-          <a href="/#ofertas">Todas as ofertas</a>
-          <a href="/admin">Área administrativa</a>
+        <div ref={menuRef} className="sh-mobile-more" role="menu">
+          <a href="/" role="menuitem" onClick={() => setMenuOpen(false)}>Página inicial</a>
+          <a href="/#ofertas" role="menuitem" onClick={() => setMenuOpen(false)}>Todas as ofertas</a>
         </div>
       ) : null}
       <nav className="sh-mobile-bottom-nav" aria-label="Navegação principal no celular">
