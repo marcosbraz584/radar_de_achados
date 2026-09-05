@@ -1,12 +1,9 @@
 import { getDb } from "@/lib/db";
-import {
-  isBannerFile,
-  isBannerStorageConfigured,
-  uploadBannerImage,
-} from "@/lib/banner-storage";
+import { isBannerStorageConfigured } from "@/lib/banner-storage";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import AdminSidebar from "../AdminSidebar";
+import BannerImageUpload from "./BannerImageUpload";
 import ExcluirBannerButton from "./ExcluirBannerButton";
 
 export const dynamic = "force-dynamic";
@@ -46,20 +43,15 @@ async function createBanner(formData: FormData) {
   try {
     const title = String(formData.get("title") || "").trim();
     const subtitle = String(formData.get("subtitle") || "").trim();
-    let imageUrl = String(formData.get("image_url") || "").trim();
-    const imageFile = formData.get("image_file");
+    const imageUrl = String(formData.get("image_url") || "").trim();
     const targetUrl = String(formData.get("target_url") || "").trim();
     const sortRaw = Number(formData.get("sort_order") || 9999);
     const sortOrder = Number.isInteger(sortRaw) && sortRaw >= 0 ? sortRaw : 9999;
     const startsAt = parseDate(formData.get("starts_at"));
     const expiresAt = parseDate(formData.get("expires_at"));
 
-    if (isBannerFile(imageFile)) {
-      imageUrl = await uploadBannerImage(imageFile);
-    }
-
     if (!imageUrl || !/^https:\/\//i.test(imageUrl)) {
-      throw new Error("Selecione uma imagem do computador ou informe uma URL HTTPS válida.");
+      throw new Error("Selecione uma imagem do computador e aguarde o envio terminar, ou informe uma URL HTTPS válida.");
     }
     if (targetUrl && !/^https:\/\//i.test(targetUrl)) {
       throw new Error("Informe uma URL HTTPS válida para o destino.");
@@ -176,17 +168,7 @@ export default async function BannersPage({
               <input name="subtitle" placeholder="Ex.: Achados selecionados para você" />
             </label>
 
-            <label className="field field-full">
-              <span>Imagem do computador — {BANNER_SIZE}</span>
-              <input name="image_file" type="file" accept="image/jpeg,image/png,image/webp" />
-              <small>JPG, PNG ou WEBP. Máximo 4 MB.</small>
-            </label>
-
-            <label className="field field-full">
-              <span>Ou use uma URL da imagem</span>
-              <input name="image_url" type="url" placeholder="https://..." />
-              <small>Se você selecionar um arquivo acima, ele terá prioridade sobre a URL.</small>
-            </label>
+            <BannerImageUpload />
 
             <label className="field field-full">
               <span>Link de destino</span>
