@@ -22,7 +22,7 @@ function parseDate(value: FormDataEntryValue | null) {
 function formatDate(value: unknown) {
   if (!value) return "Sem data";
   const d = new Date(String(value));
-  if (Number.isNaN(d.getTime()) return "Sem data";
+  if (Number.isNaN(d.getTime())) return "Sem data";
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
