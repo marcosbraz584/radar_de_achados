@@ -1,5 +1,6 @@
 import { getDb } from "@/lib/db";
 import { isBannerFile, uploadBannerImage } from "@/lib/banner-storage";
+import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import AdminSidebar from "../../../AdminSidebar";
 
@@ -69,6 +70,8 @@ async function updateBanner(formData: FormData) {
 
   const sql = getDb();
   await sql`UPDATE banners SET title=${title || null},subtitle=${subtitle || null},image_url=${imageUrl},target_url=${targetUrl || null},sort_order=${sortOrder},starts_at=${startsAt},expires_at=${expiresAt},active=${active},updated_at=NOW() WHERE id=${id}`;
+  revalidatePath("/admin/banners");
+  revalidatePath("/");
   redirect("/admin/banners");
 }
 
