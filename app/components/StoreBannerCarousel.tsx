@@ -34,7 +34,16 @@ export default function StoreBannerCarousel({ banners }: { banners: Banner[] }) 
   }
 
   return (
-    <div className="sh-banner-wrap" style={{ position: "relative", width: "100%", height: "clamp(180px,24vw,330px)", overflow: "hidden" }}>
+    <div
+      className="sh-banner-wrap"
+      style={{
+        position: "relative",
+        width: "100%",
+        aspectRatio: "936 / 260",
+        overflow: "hidden",
+        background: "#eee",
+      }}
+    >
       {banners.map((banner, index) => (
         <a
           className="sh-banner"
@@ -54,7 +63,14 @@ export default function StoreBannerCarousel({ banners }: { banners: Banner[] }) 
           <img
             src={banner.image_url}
             alt={banner.title || "Oferta SHILMASTORE"}
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            draggable={false}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              objectPosition: "center",
+              display: "block",
+            }}
           />
         </a>
       ))}
