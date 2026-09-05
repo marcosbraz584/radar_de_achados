@@ -22,12 +22,17 @@ function parseDate(value: FormDataEntryValue | null) {
 function formatDate(value: unknown) {
   if (!value) return "Sem data";
   const d = new Date(String(value));
-  if (Number.isNaN(d.getTime())) return "Sem data";
+  if (Number.isNaN(d.getTime()) return "Sem data";
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
     timeZone: "America/Fortaleza",
   }).format(d);
+}
+
+function errorMessage(error: unknown) {
+  if (error instanceof Error && error.message) return error.message;
+  return "Não foi possível criar o banner.";
 }
 
 async function getBanners() {
@@ -38,34 +43,41 @@ async function getBanners() {
 async function createBanner(formData: FormData) {
   "use server";
 
-  const title = String(formData.get("title") || "").trim();
-  const subtitle = String(formData.get("subtitle") || "").trim();
-  let imageUrl = String(formData.get("image_url") || "").trim();
-  const imageFile = formData.get("image_file");
-  const targetUrl = String(formData.get("target_url") || "").trim();
-  const sortRaw = Number(formData.get("sort_order") || 9999);
-  const sortOrder = Number.isInteger(sortRaw) && sortRaw >= 0 ? sortRaw : 9999;
-  const startsAt = parseDate(formData.get("starts_at"));
-  const expiresAt = parseDate(formData.get("expires_at"));
+  try {
+    const title = String(formData.get("title") || "").trim();
+    const subtitle = String(formData.get("subtitle") || "").trim();
+    let imageUrl = String(formData.get("image_url") || "").trim();
+    const imageFile = formData.get("image_file");
+    const targetUrl = String(formData.get("target_url") || "").trim();
+    const sortRaw = Number(formData.get("sort_order") || 9999);
+    const sortOrder = Number.isInteger(sortRaw) && sortRaw >= 0 ? sortRaw : 9999;
+    const startsAt = parseDate(formData.get("starts_at"));
+    const expiresAt = parseDate(formData.get("expires_at"));
 
-  if (isBannerFile(imageFile)) {
-    imageUrl = await uploadBannerImage(imageFile);
+    if (isBannerFile(imageFile)) {
+      imageUrl = await uploadBannerImage(imageFile);
+    }
+
+    if (!imageUrl || !/^https:\/\//i.test(imageUrl)) {
+      throw new Error("Selecione uma imagem do computador ou informe uma URL HTTPS válida.");
+    }
+    if (targetUrl && !/^https:\/\//i.test(targetUrl)) {
+      throw new Error("Informe uma URL HTTPS válida para o destino.");
+    }
+    if (startsAt && expiresAt && expiresAt <= startsAt) {
+      throw new Error("A validade final deve ser posterior ao início.");
+    }
+
+    const sql = getDb();
+    await sql`INSERT INTO banners(title,subtitle,image_url,target_url,active,sort_order,starts_at,expires_at,updated_at) VALUES (${title || null},${subtitle || null},${imageUrl},${targetUrl || null},TRUE,${sortOrder},${startsAt},${expiresAt},NOW())`;
+  } catch (error) {
+    const message = encodeURIComponent(errorMessage(error));
+    redirect(`/admin/banners?upload=error&message=${message}`);
   }
 
-  if (!imageUrl || !/^https:\/\//i.test(imageUrl)) {
-    throw new Error("Selecione uma imagem do computador ou informe uma URL HTTPS válida.");
-  }
-  if (targetUrl && !/^https:\/\//i.test(targetUrl)) {
-    throw new Error("Informe uma URL HTTPS válida para o destino.");
-  }
-  if (startsAt && expiresAt && expiresAt <= startsAt) {
-    throw new Error("A validade final deve ser posterior ao início.");
-  }
-
-  const sql = getDb();
-  await sql`INSERT INTO banners(title,subtitle,image_url,target_url,active,sort_order,starts_at,expires_at,updated_at) VALUES (${title || null},${subtitle || null},${imageUrl},${targetUrl || null},TRUE,${sortOrder},${startsAt},${expiresAt},NOW())`;
   revalidatePath("/admin/banners");
   revalidatePath("/");
+  redirect("/admin/banners?upload=success");
 }
 
 async function toggleBanner(formData: FormData) {
@@ -91,17 +103,22 @@ async function deleteBanner(formData: FormData) {
 export default async function BannersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ delete?: string }>;
+  searchParams: Promise<{ delete?: string; upload?: string; message?: string }>;
 }) {
   const query = await searchParams;
   const banners: any[] = (await getBanners()) as any[];
   const storageConfigured = isBannerStorageConfigured();
   const message =
-    query.delete === "success"
-      ? "Banner excluído com sucesso."
-      : query.delete === "invalid"
-        ? "Não foi possível identificar o banner para exclusão."
-        : null;
+    query.upload === "success"
+      ? "Banner criado com sucesso."
+      : query.upload === "error"
+        ? `Erro ao criar banner: ${query.message || "falha no envio da imagem."}`
+        : query.delete === "success"
+          ? "Banner excluído com sucesso."
+          : query.delete === "invalid"
+            ? "Não foi possível identificar o banner para exclusão."
+            : null;
+  const messageIsError = query.upload === "error" || query.delete === "invalid";
 
   return (
     <main className="admin-shell">
@@ -116,7 +133,7 @@ export default async function BannersPage({
         </header>
 
         {message ? (
-          <div style={{ marginBottom: 18, padding: "14px 16px", borderRadius: 12, border: "1px solid #bbf7d0", background: "#f0fdf4", color: "#166534", fontWeight: 700 }}>
+          <div style={{ marginBottom: 18, padding: "14px 16px", borderRadius: 12, border: messageIsError ? "1px solid #fecaca" : "1px solid #bbf7d0", background: messageIsError ? "#fef2f2" : "#f0fdf4", color: messageIsError ? "#991b1b" : "#166534", fontWeight: 700 }}>
             {message}
           </div>
         ) : null}
