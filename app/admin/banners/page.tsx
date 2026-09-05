@@ -1,5 +1,9 @@
 import { getDb } from "@/lib/db";
-import { isBannerFile, uploadBannerImage } from "@/lib/banner-storage";
+import {
+  isBannerFile,
+  isBannerStorageConfigured,
+  uploadBannerImage,
+} from "@/lib/banner-storage";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import AdminSidebar from "../AdminSidebar";
@@ -61,6 +65,7 @@ async function createBanner(formData: FormData) {
   const sql = getDb();
   await sql`INSERT INTO banners(title,subtitle,image_url,target_url,active,sort_order,starts_at,expires_at,updated_at) VALUES (${title || null},${subtitle || null},${imageUrl},${targetUrl || null},TRUE,${sortOrder},${startsAt},${expiresAt},NOW())`;
   revalidatePath("/admin/banners");
+  revalidatePath("/");
 }
 
 async function toggleBanner(formData: FormData) {
@@ -70,6 +75,7 @@ async function toggleBanner(formData: FormData) {
   const sql = getDb();
   await sql`UPDATE banners SET active=NOT active,updated_at=NOW() WHERE id=${id}`;
   revalidatePath("/admin/banners");
+  revalidatePath("/");
 }
 
 async function deleteBanner(formData: FormData) {
@@ -78,6 +84,7 @@ async function deleteBanner(formData: FormData) {
   if (!Number.isInteger(id) || id <= 0) redirect("/admin/banners?delete=invalid");
   const sql = getDb();
   await sql`DELETE FROM banners WHERE id=${id}`;
+  revalidatePath("/");
   redirect("/admin/banners?delete=success");
 }
 
@@ -88,6 +95,7 @@ export default async function BannersPage({
 }) {
   const query = await searchParams;
   const banners: any[] = (await getBanners()) as any[];
+  const storageConfigured = isBannerStorageConfigured();
   const message =
     query.delete === "success"
       ? "Banner excluído com sucesso."
@@ -112,6 +120,22 @@ export default async function BannersPage({
             {message}
           </div>
         ) : null}
+
+        <div
+          style={{
+            marginBottom: 16,
+            padding: "12px 14px",
+            borderRadius: 10,
+            border: storageConfigured ? "1px solid #bbf7d0" : "1px solid #fde68a",
+            background: storageConfigured ? "#f0fdf4" : "#fffbeb",
+            color: storageConfigured ? "#166534" : "#92400e",
+            fontWeight: 700,
+          }}
+        >
+          {storageConfigured
+            ? "✓ Upload pelo computador conectado ao Cloudinary."
+            : "⚠ Upload pelo computador aguardando conexão do Cloudinary na Hostinger."}
+        </div>
 
         <section className="form-card">
           <h2>Novo banner</h2>
