@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 
 const MAX_BANNER_FILE_SIZE = 4 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const BANNER_FOLDER = "shilmastore/banners";
 
 export function isBannerStorageConfigured() {
   return Boolean(
@@ -25,6 +26,21 @@ function cloudinaryConfig() {
   return { cloudName, apiKey, apiSecret };
 }
 
+export function createBannerUploadSignature() {
+  const { cloudName, apiKey, apiSecret } = cloudinaryConfig();
+  const timestamp = Math.floor(Date.now() / 1000);
+  const toSign = `folder=${BANNER_FOLDER}&timestamp=${timestamp}${apiSecret}`;
+  const signature = createHash("sha1").update(toSign).digest("hex");
+
+  return {
+    cloudName,
+    apiKey,
+    timestamp,
+    folder: BANNER_FOLDER,
+    signature,
+  };
+}
+
 export function isBannerFile(value: FormDataEntryValue | null): value is File {
   return value instanceof File && value.size > 0;
 }
@@ -38,11 +54,7 @@ export async function uploadBannerImage(file: File) {
     throw new Error("A imagem deve ter no máximo 4 MB.");
   }
 
-  const { cloudName, apiKey, apiSecret } = cloudinaryConfig();
-  const timestamp = Math.floor(Date.now() / 1000);
-  const folder = "shilmastore/banners";
-  const toSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
-  const signature = createHash("sha1").update(toSign).digest("hex");
+  const { cloudName, apiKey, timestamp, folder, signature } = createBannerUploadSignature();
 
   const body = new FormData();
   body.append("file", file);
