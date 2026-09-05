@@ -1,8 +1,8 @@
 import { getDb } from "@/lib/db";
-import { isBannerFile, uploadBannerImage } from "@/lib/banner-storage";
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import AdminSidebar from "../../../AdminSidebar";
+import BannerImageUpload from "../../BannerImageUpload";
 
 export const dynamic = "force-dynamic";
 const BANNER_SIZE = "936 × 260 px";
@@ -43,8 +43,7 @@ async function updateBanner(formData: FormData) {
   const id = Number(formData.get("id"));
   const title = String(formData.get("title") || "").trim();
   const subtitle = String(formData.get("subtitle") || "").trim();
-  let imageUrl = String(formData.get("image_url") || "").trim();
-  const imageFile = formData.get("image_file");
+  const imageUrl = String(formData.get("image_url") || "").trim();
   const targetUrl = String(formData.get("target_url") || "").trim();
   const sortRaw = Number(formData.get("sort_order") || 9999);
   const sortOrder = Number.isInteger(sortRaw) && sortRaw >= 0 ? sortRaw : 9999;
@@ -53,13 +52,8 @@ async function updateBanner(formData: FormData) {
   const active = formData.get("active") === "on";
 
   if (!Number.isInteger(id) || id <= 0) throw new Error("Banner inválido.");
-
-  if (isBannerFile(imageFile)) {
-    imageUrl = await uploadBannerImage(imageFile);
-  }
-
   if (!imageUrl || !/^https:\/\//i.test(imageUrl)) {
-    throw new Error("Selecione uma imagem do computador ou informe uma URL HTTPS válida.");
+    throw new Error("Selecione uma imagem do computador e aguarde o envio terminar, ou informe uma URL HTTPS válida.");
   }
   if (targetUrl && !/^https:\/\//i.test(targetUrl)) {
     throw new Error("Informe uma URL HTTPS válida para o destino.");
@@ -124,17 +118,11 @@ export default async function EditarBannerPage({ params }: { params: Promise<{ i
                 <img src={banner.image_url} alt={banner.title || "Banner atual"} style={{ width: "100%", maxWidth: 468, aspectRatio: "936 / 260", objectFit: "cover", borderRadius: 10, border: "1px solid #e2e8f0", marginTop: 8 }} />
               </div>
 
-              <label className="field field-full">
-                <span>Substituir por imagem do computador — {BANNER_SIZE}</span>
-                <input name="image_file" type="file" accept="image/jpeg,image/png,image/webp" />
-                <small>JPG, PNG ou WEBP. Máximo 4 MB. Deixe vazio para manter a imagem atual.</small>
-              </label>
-
-              <label className="field field-full">
-                <span>URL da imagem</span>
-                <input name="image_url" type="url" required defaultValue={banner.image_url} />
-                <small>Se selecionar um arquivo acima, ele substituirá esta URL.</small>
-              </label>
+              <BannerImageUpload
+                defaultUrl={banner.image_url}
+                label={`Substituir por imagem do computador — ${BANNER_SIZE}`}
+                helper="JPG, PNG ou WEBP. Máximo 4 MB. Deixe sem escolher arquivo para manter a imagem atual."
+              />
 
               <label className="field field-full">
                 <span>Link de destino</span>
