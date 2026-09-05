@@ -3,6 +3,14 @@ import { createHash } from "node:crypto";
 const MAX_BANNER_FILE_SIZE = 4 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
+export function isBannerStorageConfigured() {
+  return Boolean(
+    process.env.CLOUDINARY_CLOUD_NAME?.trim() &&
+      process.env.CLOUDINARY_API_KEY?.trim() &&
+      process.env.CLOUDINARY_API_SECRET?.trim()
+  );
+}
+
 function cloudinaryConfig() {
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim();
   const apiKey = process.env.CLOUDINARY_API_KEY?.trim();
