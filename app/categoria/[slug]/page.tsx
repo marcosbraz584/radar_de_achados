@@ -13,7 +13,19 @@ export default async function CategoryPage({params}:{params:Promise<{slug:string
  const {slug}=await params;const sql=getDb();
  const rows=await sql`SELECT c.id,c.name,c.slug,p.name parent_name FROM categories c LEFT JOIN categories p ON p.id=c.parent_id WHERE c.slug=${slug} AND c.active=TRUE LIMIT 1`;
  const category=rows[0] as Category|undefined;if(!category)notFound();
- const products=await sql`SELECT p.id,p.slug,p.name,p.regular_price,p.promo_price,p.platform,(SELECT pi.image_url FROM product_images pi WHERE pi.product_id=p.id ORDER BY pi.sort_order,pi.id LIMIT 1) image_url FROM products p WHERE p.active=TRUE AND (p.category_id=${category.id} OR p.category_id IN (SELECT id FROM categories WHERE parent_id=${category.id} AND active=TRUE)) ORDER BY p.featured DESC,p.sort_order,p.updated_at DESC` as Product[];
+ // Recursive tree: a parent category must also show products assigned to any active descendant subcategory.
+ const products=await sql`
+  WITH RECURSIVE category_tree AS (
+   SELECT id FROM categories WHERE id=${category.id} AND active=TRUE
+   UNION ALL
+   SELECT c.id FROM categories c JOIN category_tree ct ON c.parent_id=ct.id WHERE c.active=TRUE
+  )
+  SELECT p.id,p.slug,p.name,p.regular_price,p.promo_price,p.platform,
+   (SELECT pi.image_url FROM product_images pi WHERE pi.product_id=p.id ORDER BY pi.sort_order,pi.id LIMIT 1) image_url
+  FROM products p
+  WHERE p.active=TRUE AND p.category_id IN (SELECT id FROM category_tree)
+  ORDER BY p.featured DESC,p.sort_order,p.updated_at DESC
+ ` as Product[];
  return <main style={{minHeight:"100vh",background:"#f5f5f5",color:"#172554"}}>
   <style>{`*{box-sizing:border-box}body{margin:0}.cat-card{transition:.2s}.cat-card:hover{transform:translateY(-2px);box-shadow:0 10px 28px #0002}@media(max-width:720px){.cat-head{padding:18px 12px!important}.cat-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}.cat-wrap{padding:18px 9px 36px!important}.cat-img{height:150px!important}.cat-name{font-size:12px!important;min-height:45px}.cat-price{font-size:19px!important}}`}</style>
   <header style={{background:"#ffe600"}}><div className="cat-head" style={{maxWidth:1200,margin:"auto",padding:"22px"}}><a href="/" style={{textDecoration:"none",color:"#172554",fontWeight:900,fontSize:22}}>SHILMASTORE</a><div style={{marginTop:12,fontSize:13}}><a href="/" style={{color:"#174ea6"}}>Início</a> <span>›</span> {category.parent_name?<><span>{category.parent_name}</span> <span>›</span> </>:null}<b>{category.name}</b></div></div></header>
