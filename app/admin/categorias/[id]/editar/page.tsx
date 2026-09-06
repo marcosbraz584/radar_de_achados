@@ -1,6 +1,6 @@
 import { getDb } from "@/lib/db";
 import { notFound,redirect } from "next/navigation";
-import AdminSidebar from "../../AdminSidebar";
+import AdminSidebar from "../../../AdminSidebar";
 export const dynamic="force-dynamic";
 function makeSlug(value:string){return value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");}
 async function getCategory(id:number){const sql=getDb();const rows=await sql`SELECT id,name,slug,parent_id,active FROM categories WHERE id=${id} LIMIT 1`;return rows[0]||null;}
