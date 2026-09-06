@@ -5,6 +5,7 @@ import { useRef,useState } from "react";
 const MAX_FILE_SIZE=4*1024*1024;
 const ALLOWED_TYPES=new Set(["image/jpeg","image/png","image/webp"]);
 type SignatureResponse={cloudName?:string;apiKey?:string;timestamp?:number;folder?:string;signature?:string;error?:string};
+type PersistResponse={ok?:boolean;id?:number;name?:string;image_url?:string|null;error?:string};
 
 export default function CategoryImageUpload({categoryId,defaultUrl=""}:{categoryId:number;defaultUrl?:string}){
  const[imageUrl,setImageUrl]=useState(defaultUrl);
@@ -14,9 +15,11 @@ export default function CategoryImageUpload({categoryId,defaultUrl=""}:{category
  const fileInputRef=useRef<HTMLInputElement>(null);
 
  async function persistImage(url:string){
-  const response=await fetch(`/api/admin/categories/${categoryId}/image`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image_url:url})});
-  const data=(await response.json()) as {ok?:boolean;error?:string};
+  const response=await fetch(`/api/admin/categories/${categoryId}/image`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image_url:url}),cache:"no-store"});
+  const data=(await response.json()) as PersistResponse;
   if(!response.ok||!data.ok)throw new Error(data.error||"Não foi possível salvar a imagem.");
+  if(Number(data.id)!==categoryId)throw new Error("A imagem foi salva em uma categoria diferente. Tente novamente.");
+  return data;
  }
 
  async function handleFile(file:File|undefined){
@@ -26,7 +29,7 @@ export default function CategoryImageUpload({categoryId,defaultUrl=""}:{category
   setUploading(true);
   setStatus("Enviando imagem...");
   try{
-   const response=await fetch("/api/admin/banners/cloudinary-signature",{method:"POST"});
+   const response=await fetch("/api/admin/banners/cloudinary-signature",{method:"POST",cache:"no-store"});
    const data=(await response.json()) as SignatureResponse;
    if(!response.ok||!data.cloudName||!data.apiKey||!data.timestamp||!data.folder||!data.signature)throw new Error(data.error||"Não foi possível preparar o envio.");
    const body=new FormData();
@@ -38,10 +41,10 @@ export default function CategoryImageUpload({categoryId,defaultUrl=""}:{category
    const upload=await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(data.cloudName)}/image/upload`,{method:"POST",body});
    const result=(await upload.json()) as {secure_url?:string;error?:{message?:string}};
    if(!upload.ok||!result.secure_url)throw new Error(result.error?.message||"Não foi possível enviar a imagem.");
-   await persistImage(result.secure_url);
-   setImageUrl(result.secure_url);
+   const saved=await persistImage(result.secure_url);
+   setImageUrl(saved.image_url||result.secure_url);
    setPreviewVersion(Date.now());
-   setStatus("✓ Imagem enviada e salva na categoria.");
+   setStatus(`✓ Imagem salva em ${saved.name||"categoria"} (ID ${categoryId}).`);
   }catch(error){
    setStatus(error instanceof Error?error.message:"Não foi possível enviar a imagem.");
   }finally{
@@ -53,10 +56,10 @@ export default function CategoryImageUpload({categoryId,defaultUrl=""}:{category
  async function removeImage(){
   setUploading(true);
   try{
-   await persistImage("");
+   const saved=await persistImage("");
    setImageUrl("");
    setPreviewVersion(Date.now());
-   setStatus("✓ Imagem removida da categoria.");
+   setStatus(`✓ Imagem removida de ${saved.name||"categoria"} (ID ${categoryId}).`);
   }catch(error){
    setStatus(error instanceof Error?error.message:"Não foi possível remover a imagem.");
   }finally{
