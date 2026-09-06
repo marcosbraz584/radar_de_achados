@@ -32,10 +32,10 @@ export default function StoreCategoryCarousel({categories}:{categories:Category[
     <div className="sh-category-carousel-wrap">
       <button className="sh-category-arrow sh-category-arrow-left" type="button" aria-label="Categorias anteriores" onClick={()=>scroll(-1)}>‹</button>
       <div className="sh-category-track" ref={trackRef}>
-        {categories.map(c=><a className="sh-category-tile" key={c.id} href={`/categoria/${encodeURIComponent(c.slug)}`}>
-          <div className="sh-category-thumb" aria-hidden="true">{c.image_url?<img src={c.image_url} alt=""/>:<span style={{fontSize:36,lineHeight:1}}>{categoryIcon(c.name)}</span>}</div>
-          <strong>{c.name}</strong>
-          <small>{c.product_count} {c.product_count===1?"item":"itens"}</small>
+        {categories.map(c=><a className="sh-category-tile" style={{padding:"7px 7px 8px"}} key={c.id} href={`/categoria/${encodeURIComponent(c.slug)}`}>
+          <div className="sh-category-thumb" style={{width:92,height:76,marginBottom:5,padding:4}} aria-hidden="true">{c.image_url?<img src={c.image_url} alt="" style={{width:"100%",height:"100%",objectFit:"contain",display:"block"}}/>:<span style={{fontSize:32,lineHeight:1}}>{categoryIcon(c.name)}</span>}</div>
+          <strong style={{lineHeight:1.1}}>{c.name}</strong>
+          <small style={{marginTop:1,lineHeight:1.1}}>{c.product_count} {c.product_count===1?"item":"itens"}</small>
         </a>)}
       </div>
       <button className="sh-category-arrow sh-category-arrow-right" type="button" aria-label="Próximas categorias" onClick={()=>scroll(1)}>›</button>
