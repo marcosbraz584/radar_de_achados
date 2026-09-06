@@ -22,7 +22,9 @@ export default async function CategoryPage({params}:{params:Promise<{slug:string
   SELECT p.id,p.slug,p.name,p.regular_price,p.promo_price,p.platform,p.destination_url,p.affiliate_url,
    (SELECT pi.image_url FROM product_images pi WHERE pi.product_id=p.id ORDER BY pi.sort_order,pi.id LIMIT 1) image_url
   FROM products p
-  WHERE p.active=TRUE AND p.category_id IN (SELECT id FROM category_tree)
+  WHERE p.active=TRUE
+   AND (p.platform IS DISTINCT FROM 'mercado_livre' OR p.sale_mode='OWN' OR p.availability_status IS NULL OR p.availability_status='available')
+   AND p.category_id IN (SELECT id FROM category_tree)
   ORDER BY p.featured DESC,p.sort_order,p.updated_at DESC
  ` as Product[];
  return <main style={{minHeight:"100vh",background:"#f5f5f5",color:"#172554"}}>
