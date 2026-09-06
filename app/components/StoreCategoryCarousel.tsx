@@ -4,6 +4,26 @@ import { useRef } from "react";
 
 type Category={id:number;name:string;slug:string;product_count:number;category_image:string|null};
 
+function categoryIcon(name:string){
+  const n=name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+  if(/celular|smartphone|telefone/.test(n))return "📱";
+  if(/eletrodomest|casa|lar/.test(n))return "🏠";
+  if(/game|console|playstation|xbox|nintendo/.test(n))return "🎮";
+  if(/informat|comput|notebook/.test(n))return "💻";
+  if(/tv|televis/.test(n))return "📺";
+  if(/audio|fone|som/.test(n))return "🎧";
+  if(/cozinha|panela/.test(n))return "🍳";
+  if(/moda|roupa/.test(n))return "👕";
+  if(/calcado|tenis|sapato/.test(n))return "👟";
+  if(/brinquedo/.test(n))return "🧸";
+  if(/ferrament/.test(n))return "🛠️";
+  if(/moveis|movel/.test(n))return "🛋️";
+  if(/beleza|perfume|cosmetic/.test(n))return "✨";
+  if(/esporte/.test(n))return "⚽";
+  if(/livro/.test(n))return "📚";
+  return "🛍️";
+}
+
 export default function StoreCategoryCarousel({categories}:{categories:Category[]}){
   const trackRef=useRef<HTMLDivElement>(null);
   function scroll(direction:number){trackRef.current?.scrollBy({left:direction*520,behavior:"smooth"});}
@@ -13,7 +33,7 @@ export default function StoreCategoryCarousel({categories}:{categories:Category[
       <button className="sh-category-arrow sh-category-arrow-left" type="button" aria-label="Categorias anteriores" onClick={()=>scroll(-1)}>‹</button>
       <div className="sh-category-track" ref={trackRef}>
         {categories.map(c=><a className="sh-category-tile" key={c.id} href={`/categoria/${encodeURIComponent(c.slug)}`}>
-          <div className="sh-category-thumb">{c.category_image?<img src={c.category_image} alt=""/>:<span>{c.name.slice(0,1).toUpperCase()}</span>}</div>
+          <div className="sh-category-thumb" aria-hidden="true"><span style={{fontSize:36,lineHeight:1}}>{categoryIcon(c.name)}</span></div>
           <strong>{c.name}</strong>
           <small>{c.product_count} {c.product_count===1?"item":"itens"}</small>
         </a>)}
