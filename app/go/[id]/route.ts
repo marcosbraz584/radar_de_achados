@@ -37,12 +37,9 @@ export async function GET(request: NextRequest,{params}:{params:Promise<{id:stri
 
   const source=(request.nextUrl.searchParams.get("source")||"site").slice(0,80);
 
-  // Mercado Livre: quando o anúncio original foi importado, o cliente vai
-  // diretamente para ele. O /go existe apenas para registrar o clique.
-  // Outras plataformas continuam usando o destino já cadastrado.
-  const destination = product.platform === "mercado_livre"
-    ? (product.marketplace_url || product.destination_url || product.affiliate_url)
-    : (product.destination_url || product.affiliate_url || product.marketplace_url);
+  // Preserve affiliate attribution whenever an affiliate link is available.
+  // marketplace_url remains as a fallback/reference to the original listing.
+  const destination = product.affiliate_url || product.destination_url || product.marketplace_url;
 
   if(!destination){
     if(product.slug){
