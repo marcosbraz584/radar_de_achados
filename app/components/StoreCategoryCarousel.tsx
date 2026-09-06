@@ -32,7 +32,7 @@ export default function StoreCategoryCarousel({categories}:{categories:Category[
     <div className="sh-category-carousel-wrap">
       <button className="sh-category-arrow sh-category-arrow-left" type="button" aria-label="Categorias anteriores" onClick={()=>scroll(-1)}>‹</button>
       <div className="sh-category-track" ref={trackRef}>
-        {categories.map(c=><a className="sh-category-tile" style={{padding:"1px 7px 3px",justifyContent:"flex-start"}} key={c.id} href={`/categoria/${encodeURIComponent(c.slug)}`}>
+        {categories.map(c=><a className="sh-category-tile" style={{flex:"0 0 118px",padding:"1px 7px 3px",justifyContent:"flex-start"}} key={c.id} href={`/categoria/${encodeURIComponent(c.slug)}`}>
           <div className="sh-category-thumb" style={{width:100,height:68,marginBottom:2,padding:0,overflow:"hidden"}} aria-hidden="true">{c.image_url?<img src={c.image_url} alt="" style={{width:"100%",height:"100%",maxWidth:"100%",objectFit:"contain",display:"block",transform:"none"}}/>:<span style={{fontSize:32,lineHeight:1}}>{categoryIcon(c.name)}</span>}</div>
           <strong style={{lineHeight:1.02,margin:0}}>{c.name}</strong>
           <small style={{marginTop:1,lineHeight:1}}>{c.product_count} {c.product_count===1?"item":"itens"}</small>
