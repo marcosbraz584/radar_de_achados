@@ -34,8 +34,8 @@ export default function StoreCategoryCarousel({categories}:{categories:Category[
       <button className="sh-category-arrow sh-category-arrow-left" type="button" aria-label="Categorias anteriores" onClick={()=>scroll(-1)}>‹</button>
       <div className="sh-category-track" ref={trackRef}>
         {categories.map(c=><a className="sh-category-tile" style={{flex:"0 0 118px",padding:0,background:"transparent",border:"0",borderRadius:0,boxShadow:"none",overflow:"visible",display:"flex",flexDirection:"column",alignItems:"center",textAlign:"center",textDecoration:"none"}} key={c.id} href={`/categoria/${encodeURIComponent(c.slug)}`}>
-          <div style={{width:96,height:96,borderRadius:"50%",background:"#f1f3f5",display:"grid",placeItems:"center",overflow:"hidden",flexShrink:0}} aria-hidden="true">
-            {c.image_url?<img src={c.image_url} alt="" style={{width:"86%",height:"86%",objectFit:"contain",display:"block"}}/>:<span style={{fontSize:40,lineHeight:1}}>{categoryIcon(c.name)}</span>}
+          <div style={{width:96,height:96,background:"transparent",display:"grid",placeItems:"center",overflow:"visible",flexShrink:0}} aria-hidden="true">
+            {c.image_url?<img src={c.image_url} alt="" style={{width:"100%",height:"100%",objectFit:"contain",display:"block"}}/>:<span style={{fontSize:40,lineHeight:1}}>{categoryIcon(c.name)}</span>}
           </div>
           <div style={{width:"100%",marginTop:-3,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",background:"transparent"}}>
             <strong style={{fontSize:12,lineHeight:1.15,margin:0,color:"#172554",fontWeight:600}}>{c.name}</strong>
