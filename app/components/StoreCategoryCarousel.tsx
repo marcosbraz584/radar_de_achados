@@ -27,15 +27,29 @@ function categoryIcon(name:string){
 export default function StoreCategoryCarousel({categories}:{categories:Category[]}){
   const trackRef=useRef<HTMLDivElement>(null);
   function scroll(direction:number){trackRef.current?.scrollBy({left:direction*520,behavior:"smooth"});}
+
   return <section className="sh-category-carousel" aria-label="Categorias em destaque">
     <div className="sh-category-head"><h2>Categorias</h2></div>
     <div className="sh-category-carousel-wrap">
       <button className="sh-category-arrow sh-category-arrow-left" type="button" aria-label="Categorias anteriores" onClick={()=>scroll(-1)}>‹</button>
       <div className="sh-category-track" ref={trackRef}>
-        {categories.map(c=><a className="sh-category-tile" style={{flex:"0 0 118px",padding:"1px 7px 3px",justifyContent:"flex-start"}} key={c.id} href={`/categoria/${encodeURIComponent(c.slug)}`}>
-          <div className="sh-category-thumb" style={{width:100,height:68,marginBottom:2,padding:0,overflow:"hidden"}} aria-hidden="true">{c.image_url?<img src={c.image_url} alt="" style={{width:"100%",height:"100%",maxWidth:"100%",objectFit:"contain",display:"block",transform:"none"}}/>:<span style={{fontSize:32,lineHeight:1}}>{categoryIcon(c.name)}</span>}</div>
-          <strong style={{lineHeight:1.02,margin:0}}>{c.name}</strong>
-          <small style={{marginTop:1,lineHeight:1}}>{c.product_count} {c.product_count===1?"item":"itens"}</small>
+        {categories.map(c=><a
+          className="sh-category-tile"
+          style={{flex:"0 0 118px",padding:0,overflow:"hidden",display:"block",textAlign:"center"}}
+          key={c.id}
+          href={`/categoria/${encodeURIComponent(c.slug)}`}
+        >
+          <div style={{height:80,display:"flex",alignItems:"center",justifyContent:"center",padding:"4px 6px 0",background:"#fff"}}>
+            <div className="sh-category-thumb" style={{width:96,height:72,margin:0,padding:0,overflow:"hidden",background:"#f8fafc"}} aria-hidden="true">
+              {c.image_url
+                ?<img src={c.image_url} alt="" style={{width:"100%",height:"100%",maxWidth:"100%",objectFit:"contain",display:"block",transform:"none"}}/>
+                :<span style={{fontSize:32,lineHeight:1}}>{categoryIcon(c.name)}</span>}
+            </div>
+          </div>
+          <div style={{minHeight:42,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"4px 5px 5px",background:"#fff"}}>
+            <strong style={{fontSize:12,lineHeight:1.08,margin:0,display:"block"}}>{c.name}</strong>
+            <small style={{fontSize:9,color:"#64748b",marginTop:3,lineHeight:1,display:"block"}}>{c.product_count} {c.product_count===1?"item":"itens"}</small>
+          </div>
         </a>)}
       </div>
       <button className="sh-category-arrow sh-category-arrow-right" type="button" aria-label="Próximas categorias" onClick={()=>scroll(1)}>›</button>
