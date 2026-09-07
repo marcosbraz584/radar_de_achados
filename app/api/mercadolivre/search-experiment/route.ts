@@ -3,19 +3,169 @@ import { getMercadoLivreAccessToken } from "@/lib/mercadolivre";
 
 export const dynamic = "force-dynamic";
 
-type DomainSuggestion={domain_id?:string;domain_name?:string;category_id?:string;category_name?:string};
-type Trend={keyword?:string;url?:string};
-type Product={id?:string;name?:string;status?:string;domain_id?:string;pictures?:Array<{url?:string;secure_url?:string}>;main_features?:Array<{text?:string;value_name?:string}>};
-type Offer={item_id?:string;price?:number;original_price?:number|null;currency_id?:string;condition?:string};
-type Row={id:string;name:string|null,status:string|null,domain_id:string|null,image:string|null,pictures:string[],features:string[],permalink:string,offer_item_id:string|null,offer_price:number|null,offer_original_price:number|null,currency_id:string|null,offers_count:number,source_query:string};
+type MercadoLivreProduct = {
+  id?: string;
+  name?: string;
+  status?: string;
+  domain_id?: string;
+  pictures?: Array<{ id?: string; url?: string; secure_url?: string }>;
+  main_features?: Array<{ text?: string; value_name?: string }>;
+};
 
-async function mlFetch(url:string){let token=await getMercadoLivreAccessToken();let response=await fetch(url,{headers:{Authorization:`Bearer ${token}`},cache:"no-store"});if(response.status===401){token=await getMercadoLivreAccessToken(true);response=await fetch(url,{headers:{Authorization:`Bearer ${token}`},cache:"no-store"})}return response}
-async function json(url:string){const response=await mlFetch(url);let data:any=null;try{data=await response.json()}catch{}return{response,data}}
-async function predict(q:string){const params=new URLSearchParams({q,limit:"3"});const{response,data}=await json(`https://api.mercadolibre.com/sites/MLB/domain_discovery/search?${params}`);return response.ok&&Array.isArray(data)?data as DomainSuggestion[]:[]}
-async function trends(categoryId:string){const{response,data}=await json(`https://api.mercadolibre.com/trends/MLB/${encodeURIComponent(categoryId)}`);return response.ok&&Array.isArray(data)?data as Trend[]:[]}
-async function catalog(q:string,domainId:string){const params=new URLSearchParams({status:"active",site_id:"MLB",q,domain_id:domainId,limit:"30"});const{response,data}=await json(`https://api.mercadolibre.com/products/search?${params}`);return{response,data}}
-async function bestOffer(id:string){try{const{response,data}=await json(`https://api.mercadolibre.com/products/${encodeURIComponent(id)}/items`);if(!response.ok)return null;const offers:Offer[]=Array.isArray(data?.results)?data.results:[];return offers.filter(o=>o.item_id&&typeof o.price==="number"&&(!o.condition||o.condition==="new")).sort((a,b)=>(a.price??Infinity)-(b.price??Infinity))[0]??null}catch{return null}}
-function norm(v:string){return v.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
-function related(keyword:string,q:string){const k=norm(keyword),query=norm(q),words=query.split(/\s+/).filter(w=>w.length>2);return k.includes(query)||query.includes(k)||words.some(w=>k.includes(w))}
+type MercadoLivreOffer = {
+  item_id?: string;
+  price?: number;
+  original_price?: number | null;
+  currency_id?: string;
+  condition?: string;
+};
 
-export async function GET(request:Request){try{const q=new URL(request.url).searchParams.get("q")?.trim()||"";if(q.length<2)return NextResponse.json({ok:false,error:"Digite pelo menos 2 caracteres."},{status:400});const suggestions=await predict(q);const predicted=suggestions[0]??null;if(!predicted?.domain_id||!predicted.category_id)return NextResponse.json({ok:false,error:"O Mercado Livre não identificou categoria/domínio para esta pesquisa."},{status:404});const categoryTrends=await trends(predicted.category_id);const trendQueries=categoryTrends.map(t=>t.keyword?.trim()).filter((x):x is string=>Boolean(x)&&related(x!,q)).slice(0,6);const queries=[q,...trendQueries.filter(x=>norm(x)!==norm(q))];const collected=new Map<string,{product:Product;source:string}>();for(const query of queries){const{response,data}=await catalog(query,predicted.domain_id);if(!response.ok)continue;const products:Product[]=Array.isArray(data?.results)?data.results:[];for(const product of products){if(product.id&&product.domain_id===predicted.domain_id&&!collected.has(product.id))collected.set(product.id,{product,source:query})}if(collected.size>=30)break}const selected=[...collected.values()].slice(0,24);const rows:Row[]=await Promise.all(selected.map(async({product:p,source})=>{const offer=await bestOffer(p.id!);const pictures=Array.isArray(p.pictures)?p.pictures.map(x=>x.secure_url||x.url).filter((x):x is string=>Boolean(x)):[];return{id:p.id!,name:p.name||null,status:p.status||null,domain_id:p.domain_id||null,image:pictures[0]||null,pictures,features:Array.isArray(p.main_features)?p.main_features.map(x=>x.text||x.value_name).filter((x):x is string=>Boolean(x)).slice(0,3):[],permalink:`https://www.mercadolivre.com.br/p/${p.id}`,offer_item_id:offer?.item_id||null,offer_price:typeof offer?.price==="number"?offer.price:null,offer_original_price:typeof offer?.original_price==="number"?offer.original_price:null,currency_id:offer?.currency_id||null,offers_count:offer?1:0,source_query:source}}));const priced=rows.filter(x=>x.offer_item_id&&x.offer_price!=null);return NextResponse.json({ok:true,query:q,search_strategy:"category_trends_plus_catalog",prediction:{domain_id:predicted.domain_id,domain_name:predicted.domain_name||null,category_id:predicted.category_id,category_name:predicted.category_name||null},category_trends:categoryTrends.slice(0,20).map(t=>t.keyword).filter(Boolean),trend_queries_used:trendQueries,catalog_queries:queries,priced_results:priced.length,results:priced.slice(0,12)})}catch(error){console.error("Erro no experimento trends + catalog",error);return NextResponse.json({ok:false,error:error instanceof Error?error.message:"Erro interno."},{status:500})}}
+async function mlFetch(url: string) {
+  let token = await getMercadoLivreAccessToken();
+  let response = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+
+  if (response.status === 401) {
+    token = await getMercadoLivreAccessToken(true);
+    response = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+  }
+
+  return response;
+}
+
+async function getBestOffer(productId: string) {
+  try {
+    const response = await mlFetch(
+      `https://api.mercadolibre.com/products/${encodeURIComponent(productId)}/items`,
+    );
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    const offers: MercadoLivreOffer[] = Array.isArray(data?.results)
+      ? data.results
+      : [];
+
+    const valid = offers
+      .filter(
+        (offer) =>
+          typeof offer?.item_id === "string" &&
+          typeof offer?.price === "number" &&
+          offer.price >= 0 &&
+          (!offer.condition || offer.condition === "new"),
+      )
+      .sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
+
+    const best = valid[0];
+    if (!best) return null;
+
+    return {
+      item_id: best.item_id || null,
+      price: best.price ?? null,
+      original_price:
+        typeof best.original_price === "number" ? best.original_price : null,
+      currency_id: best.currency_id || "BRL",
+      offers_count: offers.length,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const q = new URL(request.url).searchParams.get("q")?.trim() || "";
+
+    if (q.length < 2) {
+      return NextResponse.json(
+        { ok: false, error: "Digite pelo menos 2 caracteres para pesquisar." },
+        { status: 400 },
+      );
+    }
+
+    const params = new URLSearchParams({
+      status: "active",
+      site_id: "MLB",
+      q,
+      limit: "12",
+    });
+
+    const response = await mlFetch(
+      `https://api.mercadolibre.com/products/search?${params.toString()}`,
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            data?.message ||
+            data?.error ||
+            "Não foi possível pesquisar produtos no Mercado Livre.",
+        },
+        { status: response.status === 404 ? 404 : 502 },
+      );
+    }
+
+    const rawResults: MercadoLivreProduct[] = Array.isArray(data?.results)
+      ? data.results
+      : [];
+
+    const results = await Promise.all(
+      rawResults.map(async (product) => {
+        const pictures = Array.isArray(product.pictures)
+          ? product.pictures
+              .map((picture) => picture?.secure_url || picture?.url || null)
+              .filter((value): value is string => Boolean(value))
+          : [];
+
+        const features = Array.isArray(product.main_features)
+          ? product.main_features
+              .map((feature) => feature?.text || feature?.value_name || null)
+              .filter((value): value is string => Boolean(value))
+              .slice(0, 3)
+          : [];
+
+        const offer = product.id ? await getBestOffer(product.id) : null;
+
+        return {
+          id: product.id || null,
+          name: product.name || null,
+          status: product.status || null,
+          domain_id: product.domain_id || null,
+          image: pictures[0] || null,
+          pictures,
+          features,
+          permalink: product.id
+            ? `https://www.mercadolivre.com.br/p/${product.id}`
+            : null,
+          offer_item_id: offer?.item_id || null,
+          offer_price: offer?.price ?? null,
+          offer_original_price: offer?.original_price ?? null,
+          currency_id: offer?.currency_id || null,
+          offers_count: offer?.offers_count ?? 0,
+        };
+      }),
+    );
+
+    return NextResponse.json({
+      ok: true,
+      query: q,
+      search_strategy: "original_direct_catalog_with_prices",
+      total: data?.paging?.total ?? results.length,
+      results,
+    });
+  } catch (error) {
+    console.error("Erro no experimento original de busca Mercado Livre", error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Erro interno ao pesquisar produtos.";
+    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+  }
+}
