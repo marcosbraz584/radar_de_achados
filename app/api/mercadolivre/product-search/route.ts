@@ -12,16 +12,31 @@ async function mlFetch(url:string){let token=await getMercadoLivreAccessToken();
 async function predictDomain(q:string){try{const params=new URLSearchParams({q,limit:"1"});const response=await mlFetch(`https://api.mercadolibre.com/sites/MLB/domain_discovery/search?${params.toString()}`);if(!response.ok)return null;const data=await response.json();const suggestions:DomainSuggestion[]=Array.isArray(data)?data:[];return suggestions[0]||null}catch{return null}}
 async function searchCatalog(q:string,domainId:string|null,offset:number,limit=30){const params=new URLSearchParams({status:"active",site_id:"MLB",q,limit:String(limit),offset:String(offset)});if(domainId)params.set("domain_id",domainId);const response=await mlFetch(`https://api.mercadolibre.com/products/search?${params.toString()}`);const data=await response.json();return{response,data}}
 async function getBestCatalogOffer(productId:string){try{const response=await mlFetch(`https://api.mercadolibre.com/products/${encodeURIComponent(productId)}/items`);if(!response.ok)return null;const data=await response.json();const offers:MercadoLivreOffer[]=Array.isArray(data?.results)?data.results:[];const valid=offers.filter(o=>typeof o.item_id==="string"&&(!o.condition||o.condition==="new")&&typeof o.price==="number").sort((a,b)=>(a.price??Infinity)-(b.price??Infinity));const best=valid[0];if(!best?.item_id||typeof best.price!=="number")return null;return{item_id:best.item_id,price:best.price,original_price:typeof best.original_price==="number"?best.original_price:null,currency_id:best.currency_id||"BRL",offers_count:offers.length}}catch{return null}}
-function normalize(value:string){return value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
-function relevanceScore(name:string,q:string){const title=normalize(name),query=normalize(q),words=query.split(/\s+/).filter(w=>w.length>1);let score=0;if(title===query)score+=100;if(title.startsWith(query))score+=50;if(title.includes(query))score+=35;for(const word of words){if(title.includes(word))score+=12;if(title.startsWith(word))score+=6}return score}
+function normalize(value:string){return value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
+function relevanceScore(name:string,q:string){
+ const title=normalize(name),query=normalize(q),words=query.split(/\s+/).filter(w=>w.length>1);let score=0;
+ if(!title||!query)return score;
+ if(title===query)score+=120;
+ if(title.startsWith(query+" ")||title.startsWith(query))score+=70;
+ if(title.includes(` ${query} `)||title.endsWith(` ${query}`))score+=30;
+ if(title.includes(query))score+=25;
+ const titleWords=title.split(/\s+/);
+ const matched=words.filter(w=>titleWords.includes(w)||title.includes(w));
+ score+=matched.length*14;
+ if(words.length>0&&matched.length===words.length)score+=24;
+ const firstQueryIndex=title.indexOf(query);
+ if(firstQueryIndex===0)score+=25;else if(firstQueryIndex>0&&firstQueryIndex<title.length*.35)score+=10;
+ const accessoryTerms=["acessorio","acessorios","capa","capinha","suporte","base","cabo","carregador","adaptador","refil","peca","pecas","kit","organizador","protetor","eliminador","balde","estojo","bolsa","controle remoto","pelicula","fonte","bateria","sensor","filtro","tampa"];
+ for(const term of accessoryTerms){const normalizedTerm=normalize(term);if(title.includes(normalizedTerm)&&!query.includes(normalizedTerm))score-=28;}
+ if(title.includes(" para ")&&firstQueryIndex>title.indexOf(" para "))score-=22;
+ if(title.includes(" compativel ")&&firstQueryIndex>0)score-=18;
+ return score;
+}
 async function enrichProducts(products:MercadoLivreProduct[],q:string,basePosition:number):Promise<SearchRow[]>{return Promise.all(products.map(async(product,index)=>{const pictures=Array.isArray(product.pictures)?product.pictures.map(p=>p?.secure_url||p?.url||null).filter((v):v is string=>Boolean(v)):[];const features=Array.isArray(product.main_features)?product.main_features.map(f=>f?.text||f?.value_name||null).filter((v):v is string=>Boolean(v)).slice(0,3):[];const offer=product.id?await getBestCatalogOffer(product.id):null;return{id:product.id||null,name:product.name||null,status:product.status||null,domain_id:product.domain_id||null,image:pictures[0]||null,pictures,features,permalink:product.id?`https://www.mercadolivre.com.br/p/${product.id}`:null,offer_item_id:offer?.item_id||null,offer_price:offer?.price??null,offer_original_price:offer?.original_price??null,currency_id:offer?.currency_id||null,offers_count:offer?.offers_count??0,search_position:basePosition+index,relevance:relevanceScore(product.name||"",q)}}))}
 
 export async function GET(request:Request){try{const q=new URL(request.url).searchParams.get("q")?.trim()||"";if(q.length<2)return NextResponse.json({ok:false,error:"Digite pelo menos 2 caracteres para pesquisar."},{status:400});const predicted=await predictDomain(q),domainId=predicted?.domain_id||null;let collected:SearchRow[]=[],total=0,scannedCatalogs=0;
 for(const offset of [0,30,60]){let{response,data}=await searchCatalog(q,domainId,offset,30);if(offset===0&&domainId&&response.ok&&(!Array.isArray(data?.results)||data.results.length===0))({response,data}=await searchCatalog(q,null,0,30));if(!response.ok){if(offset===0)return NextResponse.json({ok:false,error:data?.message||data?.error||"Não foi possível pesquisar produtos no Mercado Livre."},{status:response.status===404?404:502});break}const page:MercadoLivreProduct[]=Array.isArray(data?.results)?data.results:[];if(offset===0)total=data?.paging?.total??page.length;if(!page.length)break;scannedCatalogs+=page.length;collected=collected.concat(await enrichProducts(page,q,offset));if(collected.filter(p=>p.offer_item_id&&p.offer_price!=null).length>=12)break}
 const priced=collected.filter(p=>p.offer_item_id&&p.offer_price!=null).sort((a,b)=>b.relevance-a.relevance||a.search_position-b.search_position);const withoutPrice=collected.filter(p=>!(p.offer_item_id&&p.offer_price!=null)).sort((a,b)=>b.relevance-a.relevance||a.search_position-b.search_position);
-// Se encontramos uma quantidade razoável de ofertas compráveis, não poluímos a grade
-// com catálogos sem preço. Quando há poucas ofertas, completamos a tela com os demais
-// resultados para que o administrador ainda possa visualizar alternativas.
 const enoughPriced=priced.length>=6;
 const results=(enoughPriced?priced:[...priced,...withoutPrice]).slice(0,12);
 return NextResponse.json({ok:true,query:q,predicted_domain:predicted?.domain_id||null,predicted_domain_name:predicted?.domain_name||null,predicted_category:predicted?.category_id||null,predicted_category_name:predicted?.category_name||null,total,scanned_catalogs:scannedCatalogs,priced_results:priced.length,showing_only_priced:enoughPriced,results})}catch(error){console.error("Erro ao pesquisar produtos do Mercado Livre",error);return NextResponse.json({ok:false,error:error instanceof Error?error.message:"Erro interno ao pesquisar produtos."},{status:500})}}
