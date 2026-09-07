@@ -3,18 +3,23 @@ import { getMercadoLivreAccessToken } from "@/lib/mercadolivre";
 
 export const dynamic = "force-dynamic";
 
-type CatalogProduct = {
-  id?: string;
-  name?: string;
-  domain_id?: string;
-  status?: string;
-};
-
 type DomainSuggestion = {
   domain_id?: string;
   domain_name?: string;
   category_id?: string;
   category_name?: string;
+};
+
+type MarketplaceItem = {
+  id?: string;
+  title?: string;
+  price?: number;
+  original_price?: number | null;
+  currency_id?: string;
+  category_id?: string;
+  catalog_product_id?: string | null;
+  permalink?: string;
+  thumbnail?: string;
 };
 
 async function mlFetch(url: string) {
@@ -23,7 +28,6 @@ async function mlFetch(url: string) {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
-
   if (response.status === 401) {
     token = await getMercadoLivreAccessToken(true);
     response = await fetch(url, {
@@ -31,97 +35,65 @@ async function mlFetch(url: string) {
       cache: "no-store",
     });
   }
-
   return response;
 }
 
-async function predictDomain(q: string) {
+async function predict(q: string) {
   const params = new URLSearchParams({ q, limit: "3" });
-  const response = await mlFetch(
-    `https://api.mercadolibre.com/sites/MLB/domain_discovery/search?${params.toString()}`,
-  );
+  const response = await mlFetch(`https://api.mercadolibre.com/sites/MLB/domain_discovery/search?${params}`);
   const data = await response.json();
-  return {
-    ok: response.ok,
-    suggestions: (Array.isArray(data) ? data : []) as DomainSuggestion[],
-  };
+  return (Array.isArray(data) ? data : []) as DomainSuggestion[];
 }
 
-async function searchCatalog(q: string, domainId?: string) {
-  const params = new URLSearchParams({
-    site_id: "MLB",
-    status: "active",
-    q,
-    limit: "50",
-  });
-
-  if (domainId) params.set("domain_id", domainId);
-
-  const response = await mlFetch(
-    `https://api.mercadolibre.com/products/search?${params.toString()}`,
-  );
+async function searchMarketplace(q: string, categoryId: string) {
+  const params = new URLSearchParams({ q, category: categoryId, limit: "50" });
+  const response = await mlFetch(`https://api.mercadolibre.com/sites/MLB/search?${params}`);
   const data = await response.json();
-
+  const results: MarketplaceItem[] = Array.isArray(data?.results) ? data.results : [];
   return {
     ok: response.ok,
     status: response.status,
-    total: data?.paging?.total ?? 0,
-    results: (Array.isArray(data?.results) ? data.results : []).map(
-      (product: CatalogProduct) => ({
-        id: product.id ?? null,
-        name: product.name ?? null,
-        domain_id: product.domain_id ?? null,
-        status: product.status ?? null,
-      }),
-    ),
+    total: data?.paging?.total ?? results.length,
     error: response.ok ? null : data?.message || data?.error || "Erro na consulta",
+    results: results.slice(0, 24).map((item) => ({
+      item_id: item.id ?? null,
+      catalog_product_id: item.catalog_product_id ?? null,
+      name: item.title ?? null,
+      price: typeof item.price === "number" ? item.price : null,
+      original_price: typeof item.original_price === "number" ? item.original_price : null,
+      currency_id: item.currency_id ?? null,
+      category_id: item.category_id ?? null,
+      permalink: item.permalink ?? null,
+      image: item.thumbnail ?? null,
+    })),
   };
 }
 
 export async function GET(request: Request) {
   try {
     const q = new URL(request.url).searchParams.get("q")?.trim() || "";
+    if (q.length < 2) return NextResponse.json({ ok: false, error: "Digite pelo menos 2 caracteres." }, { status: 400 });
 
-    if (q.length < 2) {
-      return NextResponse.json(
-        { ok: false, error: "Digite pelo menos 2 caracteres." },
-        { status: 400 },
-      );
-    }
+    const suggestions = await predict(q);
+    const predicted = suggestions[0] ?? null;
+    const categoryId = predicted?.category_id;
+    if (!categoryId) return NextResponse.json({ ok: false, query: q, error: "Categoria não prevista pelo Mercado Livre.", suggestions });
 
-    // Experimento isolado. Usa o preditor oficial para descobrir o dominio
-    // e compara a busca ampla com a busca restrita ao dominio previsto.
-    const prediction = await predictDomain(q);
-    const predicted = prediction.suggestions[0] ?? null;
-    const predictedDomain = predicted?.domain_id || undefined;
-
-    const [broad, predictedDomainSearch] = await Promise.all([
-      searchCatalog(q),
-      searchCatalog(q, predictedDomain),
-    ]);
-
+    const marketplace = await searchMarketplace(q, categoryId);
     return NextResponse.json({
-      ok: broad.ok || predictedDomainSearch.ok,
+      ok: marketplace.ok,
       query: q,
-      experiment: "official_predicted_domain_comparison",
+      experiment: "marketplace_search_by_predicted_category",
       prediction: {
         domain_id: predicted?.domain_id ?? null,
         domain_name: predicted?.domain_name ?? null,
-        category_id: predicted?.category_id ?? null,
+        category_id: categoryId,
         category_name: predicted?.category_name ?? null,
-        suggestions: prediction.suggestions,
       },
-      broad,
-      predicted_domain: predictedDomainSearch,
+      marketplace,
     });
   } catch (error) {
     console.error("Erro no experimento de busca Mercado Livre", error);
-    return NextResponse.json(
-      {
-        ok: false,
-        error: error instanceof Error ? error.message : "Erro interno.",
-      },
-      { status: 500 },
-    );
+    return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Erro interno." }, { status: 500 });
   }
 }
