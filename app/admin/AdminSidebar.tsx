@@ -7,6 +7,7 @@ export default function AdminSidebar(){
   const links=[
     ["/admin","Visão geral"],
     ["/admin/produtos","Produtos"],
+    ["/admin/vendedores","Vendedores"],
     ["/admin/categorias","Categorias"],
     ["/admin/cupons","Cupons"],
     ["/admin/banners","Banners"],
