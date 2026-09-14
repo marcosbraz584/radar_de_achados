@@ -58,7 +58,12 @@ export default async function MinhaContaPage() {
               <div><strong>Status:</strong> {sellerStatusLabel(String(seller.approval_status))}</div>
               {seller.approval_status === "pending" ? <p style={{ margin: 0, color: "#8a5b00" }}>Sua solicitação está aguardando análise do administrador.</p> : null}
               {seller.approval_status === "rejected" && seller.approval_notes ? <p style={{ margin: 0, color: "#9f1239" }}>{seller.approval_notes}</p> : null}
-              {seller.approval_status === "approved" ? <p style={{ margin: 0, color: "#08783e", fontWeight: 700 }}>Sua conta de vendedor foi aprovada.</p> : null}
+              {seller.approval_status === "approved" ? (
+                <>
+                  <p style={{ margin: 0, color: "#08783e", fontWeight: 700 }}>Sua conta de vendedor foi aprovada.</p>
+                  <a href="/vendedor" style={{ display: "inline-block", width: "fit-content", marginTop: 8, textDecoration: "none", borderRadius: 10, padding: "12px 16px", background: "#174ea6", color: "white", fontWeight: 900 }}>Acessar painel do vendedor</a>
+                </>
+              ) : null}
             </div>
           )}
         </div>
