@@ -1,7 +1,13 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
+import { destroySession, getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
+
+async function logout() {
+  "use server";
+  await destroySession();
+  redirect("/entrar");
+}
 
 export default async function MinhaContaPage() {
   const user = await getCurrentUser();
@@ -20,6 +26,25 @@ export default async function MinhaContaPage() {
           <div><strong>Telefone:</strong> {user.phone || "Não informado"}</div>
           <div><strong>Perfil:</strong> {user.role === "admin" ? "Administrador" : user.role === "seller" ? "Vendedor" : "Cliente"}</div>
         </div>
+
+        <form action={logout} style={{ marginTop: 22 }}>
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              border: 0,
+              borderRadius: 10,
+              padding: "12px 16px",
+              background: "#172554",
+              color: "white",
+              fontWeight: 900,
+              fontSize: 15,
+              cursor: "pointer",
+            }}
+          >
+            Sair da conta
+          </button>
+        </form>
       </section>
     </main>
   );
