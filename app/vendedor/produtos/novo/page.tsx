@@ -76,6 +76,9 @@ async function createSellerProduct(formData: FormData) {
   if (!seller || seller.approval_status !== "approved") redirect("/minha-conta");
 
   const name = String(formData.get("name") || "").trim();
+  const productTypeRaw = String(formData.get("product_type") || "FISICO").toUpperCase();
+  const productType = productTypeRaw === "DIGITAL" ? "DIGITAL" : "FISICO";
+  const isPhysical = productType === "FISICO";
   const shortDescription = String(formData.get("short_description") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const sku = String(formData.get("sku") || "").trim();
@@ -83,11 +86,11 @@ async function createSellerProduct(formData: FormData) {
   const promoPrice = parsePrice(formData.get("promo_price"));
   const stockQuantity = Math.floor(parseNumber(formData.get("stock_quantity")) || 0);
   const minimumStock = Math.floor(parseNumber(formData.get("minimum_stock")) || 0);
-  const weight = parseNumber(formData.get("weight"));
-  const length = parseNumber(formData.get("length"));
-  const width = parseNumber(formData.get("width"));
-  const height = parseNumber(formData.get("height"));
-  const originZip = String(formData.get("origin_zip") || "").replace(/\D/g, "").slice(0, 8);
+  const weight = isPhysical ? parseNumber(formData.get("weight")) : null;
+  const length = isPhysical ? parseNumber(formData.get("length")) : null;
+  const width = isPhysical ? parseNumber(formData.get("width")) : null;
+  const height = isPhysical ? parseNumber(formData.get("height")) : null;
+  const originZip = isPhysical ? String(formData.get("origin_zip") || "").replace(/\D/g, "").slice(0, 8) : "";
   const images = formData.getAll("images").filter((item): item is File => item instanceof File && item.size > 0);
 
   if (!name) throw new Error("Informe o nome do produto.");
@@ -110,9 +113,9 @@ async function createSellerProduct(formData: FormData) {
       weight, length, width, height, origin_zip,
       active, featured, updated_at
     ) VALUES (
-      ${name}, ${slug}, ${shortDescription || null}, ${description || null}, 'FISICO', 'OWN', 'proprio',
+      ${name}, ${slug}, ${shortDescription || null}, ${description || null}, ${productType}, 'OWN', 'proprio',
       ${regularPrice}, ${promoPrice}, ${seller.seller_id}, 'pending',
-      ${sku || null}, ${stockQuantity}, ${minimumStock}, TRUE,
+      ${sku || null}, ${stockQuantity}, ${minimumStock}, ${isPhysical},
       ${weight}, ${length}, ${width}, ${height}, ${originZip || null},
       FALSE, FALSE, NOW()
     ) RETURNING id
@@ -153,6 +156,7 @@ export default async function NovoProdutoVendedorPage() {
             <div style={gridStyle}>
               <label style={fieldStyle}><span style={labelStyle}>Nome do produto *</span><input name="name" required style={inputStyle}/></label>
               <label style={fieldStyle}><span style={labelStyle}>SKU</span><input name="sku" style={inputStyle}/></label>
+              <label style={{...fieldStyle, gridColumn:"1 / -1"}}><span style={labelStyle}>Tipo de produto *</span><select name="product_type" required defaultValue="FISICO" style={inputStyle}><option value="FISICO">Físico</option><option value="DIGITAL">Digital</option></select><small style={{color:"#64748b"}}>Produtos físicos usam dados de envio. Produtos digitais não exigem peso, dimensões ou CEP.</small></label>
               <label style={{...fieldStyle, gridColumn:"1 / -1"}}><span style={labelStyle}>Descrição curta</span><textarea name="short_description" rows={2} maxLength={300} placeholder="Resumo do produto para cartões e listagens. Máximo de 300 caracteres." style={inputStyle}/></label>
               <label style={{...fieldStyle, gridColumn:"1 / -1"}}><span style={labelStyle}>Descrição completa</span><textarea name="description" rows={5} style={inputStyle}/></label>
             </div>
@@ -171,7 +175,8 @@ export default async function NovoProdutoVendedorPage() {
             </div>
           </section>
           <section style={cardStyle}>
-            <h2 style={titleStyle}>Envio do produto físico</h2>
+            <h2 style={titleStyle}>Envio — somente para produto físico</h2>
+            <p style={{margin:"-6px 0 14px",color:"#64748b",fontSize:13}}>Se você selecionou <strong>Digital</strong>, deixe estes campos em branco. O sistema não gravará dados de frete para o produto digital.</p>
             <div style={gridStyle}>
               <label style={fieldStyle}><span style={labelStyle}>Peso (kg)</span><input name="weight" inputMode="decimal" placeholder="Ex.: 0,5" style={inputStyle}/></label>
               <label style={fieldStyle}><span style={labelStyle}>Comprimento (cm)</span><input name="length" inputMode="decimal" style={inputStyle}/></label>
