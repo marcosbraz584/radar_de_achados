@@ -16,7 +16,7 @@ async function createOrder(formData:FormData){
  const items=await sql`SELECT ci.quantity,p.id product_id,p.name,p.product_type,p.regular_price,p.promo_price,p.seller_id FROM carts c JOIN cart_items ci ON ci.cart_id=c.id JOIN products p ON p.id=ci.product_id WHERE c.user_id=${Number(user.id)} AND p.active=TRUE AND p.approval_status='approved' ORDER BY ci.created_at`;
  if(!items.length) redirect("/carrinho");
  const subtotal=items.reduce((sum:number,item:any)=>sum+Number(item.promo_price??item.regular_price??0)*Number(item.quantity),0);
- const orderRows=await sql`INSERT INTO orders (user_id,status,payment_status,subtotal,shipping_total,total) VALUES (${Number(user.id)},'pending_payment','pending',${subtotal},0,${subtotal}) RETURNING id`;
+ const orderRows=await sql`INSERT INTO orders (user_id,customer_name,customer_email,status,payment_status,subtotal,shipping_total,total) VALUES (${Number(user.id)},${user.full_name},${user.email},'pending_payment','pending',${subtotal},0,${subtotal}) RETURNING id`;
  const orderId=Number((orderRows[0] as any).id);
  try{
   for(const item of items as any[]){const unitPrice=Number(item.promo_price??item.regular_price??0),quantity=Number(item.quantity),itemSubtotal=unitPrice*quantity;await sql`INSERT INTO order_items (order_id,product_id,seller_id,product_name,product_type,quantity,unit_price,subtotal,platform_commission,seller_amount) VALUES (${orderId},${Number(item.product_id)},${item.seller_id?Number(item.seller_id):null},${String(item.name)},${String(item.product_type)},${quantity},${unitPrice},${itemSubtotal},0,${itemSubtotal})`;}
