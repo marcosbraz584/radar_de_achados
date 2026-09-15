@@ -56,7 +56,17 @@ async function uploadToCloudinary(file: File, productName: string) {
   body.append("context", `alt=${productName}`);
 
   const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body });
-  if (!response.ok) throw new Error("Não foi possível enviar uma das imagens para o Cloudinary.");
+  if (!response.ok) {
+    let cloudinaryMessage = `HTTP ${response.status}`;
+    try {
+      const errorBody = await response.json();
+      cloudinaryMessage = String(errorBody?.error?.message || cloudinaryMessage);
+    } catch {
+      // Mantém apenas o status HTTP se a resposta não vier em JSON.
+    }
+    console.error("Cloudinary upload recusado:", cloudinaryMessage);
+    throw new Error(`Falha no upload para o Cloudinary: ${cloudinaryMessage}`);
+  }
   const result = await response.json();
   return String(result.secure_url || "");
 }
