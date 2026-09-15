@@ -86,11 +86,11 @@ export default async function VendedorPage() {
         <div style={{ marginTop: 18, background: "white", border: "1px solid #e2e8f0", borderRadius: 16, padding: 22, boxShadow: "0 10px 30px #0000000a" }}>
           <h2 style={{ margin: "0 0 8px", fontSize: 22 }}>Produtos da loja</h2>
           <p style={{ margin: "0 0 16px", color: "#64748b", lineHeight: 1.5 }}>
-            Sua conta já está autorizada a cadastrar produtos. O cadastro do vendedor será conectado ao fluxo de aprovação na próxima etapa.
+            Cadastre seus produtos. Todo novo produto ficará pendente até a análise e aprovação da SHILMASTORE.
           </p>
-          <span style={{ display: "inline-block", borderRadius: 10, padding: "12px 16px", background: "#e2e8f0", color: "#64748b", fontWeight: 900 }}>
-            Cadastro de produto — próxima etapa
-          </span>
+          <a href="/vendedor/produtos/novo" style={{ display: "inline-block", borderRadius: 10, padding: "12px 16px", background: "#1f5bbb", color: "white", fontWeight: 900, textDecoration: "none" }}>
+            Cadastrar novo produto
+          </a>
         </div>
       </section>
     </main>
