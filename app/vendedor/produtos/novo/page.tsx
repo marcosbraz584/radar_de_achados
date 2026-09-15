@@ -70,6 +70,7 @@ async function createSellerProduct(formData: FormData) {
   if (!seller || seller.approval_status !== "approved") redirect("/minha-conta");
 
   const name = String(formData.get("name") || "").trim();
+  const shortDescription = String(formData.get("short_description") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const sku = String(formData.get("sku") || "").trim();
   const regularPrice = parsePrice(formData.get("regular_price"));
@@ -83,6 +84,7 @@ async function createSellerProduct(formData: FormData) {
   const images = formData.getAll("images").filter((item): item is File => item instanceof File && item.size > 0);
 
   if (!name) throw new Error("Informe o nome do produto.");
+  if (shortDescription.length > 300) throw new Error("A descrição curta pode ter no máximo 300 caracteres.");
   if (regularPrice === null) throw new Error("Informe o preço do produto.");
   if (images.length === 0) throw new Error("Selecione pelo menos uma imagem do produto.");
   if (images.length > 6) throw new Error("Selecione no máximo 6 imagens.");
@@ -95,13 +97,13 @@ async function createSellerProduct(formData: FormData) {
   const slug = `${slugify(name)}-${seller.seller_id}-${Date.now()}`;
   const inserted = await sql`
     INSERT INTO products (
-      name, slug, description, product_type, sale_mode, platform,
+      name, slug, short_description, description, product_type, sale_mode, platform,
       regular_price, promo_price, seller_id, approval_status,
       sku, stock_quantity, stock_tracking,
       weight, length, width, height, origin_zip,
       active, featured, updated_at
     ) VALUES (
-      ${name}, ${slug}, ${description || null}, 'FISICO', 'OWN', 'proprio',
+      ${name}, ${slug}, ${shortDescription || null}, ${description || null}, 'FISICO', 'OWN', 'proprio',
       ${regularPrice}, ${promoPrice}, ${seller.seller_id}, 'pending',
       ${sku || null}, ${stockQuantity}, TRUE,
       ${weight}, ${length}, ${width}, ${height}, ${originZip || null},
@@ -145,7 +147,8 @@ export default async function NovoProdutoVendedorPage() {
             <div style={gridStyle}>
               <label style={fieldStyle}><span style={labelStyle}>Nome do produto *</span><input name="name" required style={inputStyle}/></label>
               <label style={fieldStyle}><span style={labelStyle}>SKU</span><input name="sku" style={inputStyle}/></label>
-              <label style={{...fieldStyle, gridColumn:"1 / -1"}}><span style={labelStyle}>Descrição</span><textarea name="description" rows={5} style={inputStyle}/></label>
+              <label style={{...fieldStyle, gridColumn:"1 / -1"}}><span style={labelStyle}>Descrição curta</span><textarea name="short_description" rows={2} maxLength={300} placeholder="Resumo do produto para cartões e listagens. Máximo de 300 caracteres." style={inputStyle}/></label>
+              <label style={{...fieldStyle, gridColumn:"1 / -1"}}><span style={labelStyle}>Descrição completa</span><textarea name="description" rows={5} style={inputStyle}/></label>
             </div>
           </section>
 
