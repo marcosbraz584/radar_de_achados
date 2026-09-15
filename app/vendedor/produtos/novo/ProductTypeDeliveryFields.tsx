@@ -9,6 +9,7 @@ const gridStyle = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minm
 
 export default function ProductTypeDeliveryFields() {
   const [type, setType] = useState("FISICO");
+  const [deliveryType, setDeliveryType] = useState("LINK");
 
   return (
     <>
@@ -25,16 +26,24 @@ export default function ProductTypeDeliveryFields() {
           <h3 style={{margin:"0 0 12px"}}>Entrega do produto digital</h3>
           <label style={fieldStyle}>
             <span style={labelStyle}>Forma de entrega *</span>
-            <select name="digital_delivery_type" defaultValue="LINK" style={inputStyle}>
+            <select name="digital_delivery_type" value={deliveryType} onChange={(e) => setDeliveryType(e.target.value)} style={inputStyle}>
               <option value="LINK">Link de acesso/download</option>
-              <option value="FILE" disabled>Arquivo hospedado na SHILMASTORE — será habilitado depois</option>
+              <option value="FILE">Arquivo para download</option>
             </select>
           </label>
-          <label style={{...fieldStyle, marginTop:12}}>
-            <span style={labelStyle}>Link privado do produto *</span>
-            <input name="digital_delivery_url" type="url" placeholder="https://..." style={inputStyle}/>
-            <small style={{color:"#64748b"}}>Este link não será exibido na vitrine. A liberação ao comprador será ligada ao checkout.</small>
-          </label>
+          {deliveryType === "LINK" ? (
+            <label style={{...fieldStyle, marginTop:12}}>
+              <span style={labelStyle}>Link privado do produto *</span>
+              <input name="digital_delivery_url" type="url" required placeholder="https://..." style={inputStyle}/>
+              <small style={{color:"#64748b"}}>Este link não será exibido na vitrine. A liberação ao comprador será ligada ao checkout.</small>
+            </label>
+          ) : (
+            <label style={{...fieldStyle, marginTop:12}}>
+              <span style={labelStyle}>Arquivo do produto *</span>
+              <input name="digital_file" type="file" required style={inputStyle}/>
+              <small style={{color:"#64748b"}}>O arquivo será armazenado para entrega privada ao comprador após a confirmação do pagamento.</small>
+            </label>
+          )}
         </section>
       ) : (
         <section style={{ gridColumn:"1 / -1", background:"#f8fafc", border:"1px solid #cbd5e1", borderRadius:12, padding:16 }}>
