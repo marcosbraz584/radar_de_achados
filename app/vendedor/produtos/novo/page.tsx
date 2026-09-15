@@ -76,6 +76,7 @@ async function createSellerProduct(formData: FormData) {
   const regularPrice = parsePrice(formData.get("regular_price"));
   const promoPrice = parsePrice(formData.get("promo_price"));
   const stockQuantity = Math.floor(parseNumber(formData.get("stock_quantity")) || 0);
+  const minimumStock = Math.floor(parseNumber(formData.get("minimum_stock")) || 0);
   const weight = parseNumber(formData.get("weight"));
   const length = parseNumber(formData.get("length"));
   const width = parseNumber(formData.get("width"));
@@ -99,13 +100,13 @@ async function createSellerProduct(formData: FormData) {
     INSERT INTO products (
       name, slug, short_description, description, product_type, sale_mode, platform,
       regular_price, promo_price, seller_id, approval_status,
-      sku, stock_quantity, stock_tracking,
+      sku, stock_quantity, minimum_stock, stock_tracking,
       weight, length, width, height, origin_zip,
       active, featured, updated_at
     ) VALUES (
       ${name}, ${slug}, ${shortDescription || null}, ${description || null}, 'FISICO', 'OWN', 'proprio',
       ${regularPrice}, ${promoPrice}, ${seller.seller_id}, 'pending',
-      ${sku || null}, ${stockQuantity}, TRUE,
+      ${sku || null}, ${stockQuantity}, ${minimumStock}, TRUE,
       ${weight}, ${length}, ${width}, ${height}, ${originZip || null},
       FALSE, FALSE, NOW()
     ) RETURNING id
@@ -167,6 +168,7 @@ export default async function NovoProdutoVendedorPage() {
               <label style={fieldStyle}><span style={labelStyle}>Preço *</span><input name="regular_price" required inputMode="decimal" placeholder="Ex.: 199,90" style={inputStyle}/></label>
               <label style={fieldStyle}><span style={labelStyle}>Preço promocional</span><input name="promo_price" inputMode="decimal" placeholder="Opcional" style={inputStyle}/></label>
               <label style={fieldStyle}><span style={labelStyle}>Estoque *</span><input name="stock_quantity" required type="number" min="0" defaultValue="0" style={inputStyle}/></label>
+              <label style={fieldStyle}><span style={labelStyle}>Estoque mínimo *</span><input name="minimum_stock" required type="number" min="0" defaultValue="0" style={inputStyle}/></label>
             </div>
           </section>
 
