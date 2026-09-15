@@ -1,0 +1,53 @@
+"use client";
+
+import { useState } from "react";
+
+const inputStyle = { width: "100%", boxSizing: "border-box" as const, border: "1px solid #cbd5e1", borderRadius: 10, padding: "12px 13px", font: "inherit", background: "white" };
+const fieldStyle = { display: "grid", gap: 7 };
+const labelStyle = { fontWeight: 800, color: "#172554" };
+const gridStyle = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14 };
+
+export default function ProductTypeDeliveryFields() {
+  const [type, setType] = useState("FISICO");
+
+  return (
+    <>
+      <label style={{...fieldStyle, gridColumn:"1 / -1"}}>
+        <span style={labelStyle}>Tipo de produto *</span>
+        <select name="product_type" required value={type} onChange={(e) => setType(e.target.value)} style={inputStyle}>
+          <option value="FISICO">Físico</option>
+          <option value="DIGITAL">Digital</option>
+        </select>
+      </label>
+
+      {type === "DIGITAL" ? (
+        <section style={{ gridColumn:"1 / -1", background:"#f8fafc", border:"1px solid #cbd5e1", borderRadius:12, padding:16 }}>
+          <h3 style={{margin:"0 0 12px"}}>Entrega do produto digital</h3>
+          <label style={fieldStyle}>
+            <span style={labelStyle}>Forma de entrega *</span>
+            <select name="digital_delivery_type" defaultValue="LINK" style={inputStyle}>
+              <option value="LINK">Link de acesso/download</option>
+              <option value="FILE" disabled>Arquivo hospedado na SHILMASTORE — será habilitado depois</option>
+            </select>
+          </label>
+          <label style={{...fieldStyle, marginTop:12}}>
+            <span style={labelStyle}>Link privado do produto *</span>
+            <input name="digital_delivery_url" type="url" placeholder="https://..." style={inputStyle}/>
+            <small style={{color:"#64748b"}}>Este link não será exibido na vitrine. A liberação ao comprador será ligada ao checkout.</small>
+          </label>
+        </section>
+      ) : (
+        <section style={{ gridColumn:"1 / -1", background:"#f8fafc", border:"1px solid #cbd5e1", borderRadius:12, padding:16 }}>
+          <h3 style={{margin:"0 0 12px"}}>Dados para envio</h3>
+          <div style={gridStyle}>
+            <label style={fieldStyle}><span style={labelStyle}>Peso (kg)</span><input name="weight" inputMode="decimal" placeholder="Ex.: 0,5" style={inputStyle}/></label>
+            <label style={fieldStyle}><span style={labelStyle}>Comprimento (cm)</span><input name="length" inputMode="decimal" style={inputStyle}/></label>
+            <label style={fieldStyle}><span style={labelStyle}>Largura (cm)</span><input name="width" inputMode="decimal" style={inputStyle}/></label>
+            <label style={fieldStyle}><span style={labelStyle}>Altura (cm)</span><input name="height" inputMode="decimal" style={inputStyle}/></label>
+            <label style={fieldStyle}><span style={labelStyle}>CEP de origem</span><input name="origin_zip" inputMode="numeric" maxLength={9} placeholder="00000-000" style={inputStyle}/></label>
+          </div>
+        </section>
+      )}
+    </>
+  );
+}
