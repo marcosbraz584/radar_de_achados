@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import ProductTypeDeliveryFields from "./ProductTypeDeliveryFields";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,15 @@ function parseNumber(value: FormDataEntryValue | null) {
 
 function slugify(value: string) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function isHttpUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 async function getApprovedSeller(userId: number) {
@@ -61,7 +71,6 @@ async function uploadToCloudinary(file: File, productName: string) {
       const errorBody = await response.json();
       cloudinaryMessage = String(errorBody?.error?.message || cloudinaryMessage);
     } catch {}
-    console.error("Cloudinary upload recusado:", cloudinaryMessage);
     throw new Error(`Falha no upload para o Cloudinary: ${cloudinaryMessage}`);
   }
   const result = await response.json();
@@ -79,6 +88,8 @@ async function createSellerProduct(formData: FormData) {
   const productTypeRaw = String(formData.get("product_type") || "FISICO").toUpperCase();
   const productType = productTypeRaw === "DIGITAL" ? "DIGITAL" : "FISICO";
   const isPhysical = productType === "FISICO";
+  const digitalDeliveryType = String(formData.get("digital_delivery_type") || "").toUpperCase();
+  const digitalDeliveryUrl = String(formData.get("digital_delivery_url") || "").trim();
   const shortDescription = String(formData.get("short_description") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const sku = String(formData.get("sku") || "").trim();
@@ -96,6 +107,10 @@ async function createSellerProduct(formData: FormData) {
   if (!name) throw new Error("Informe o nome do produto.");
   if (shortDescription.length > 300) throw new Error("A descrição curta pode ter no máximo 300 caracteres.");
   if (regularPrice === null) throw new Error("Informe o preço do produto.");
+  if (!isPhysical) {
+    if (digitalDeliveryType !== "LINK") throw new Error("Selecione uma forma de entrega digital disponível.");
+    if (!digitalDeliveryUrl || !isHttpUrl(digitalDeliveryUrl)) throw new Error("Informe um link válido para entrega do produto digital.");
+  }
   if (images.length === 0) throw new Error("Selecione pelo menos uma imagem do produto.");
   if (images.length > 6) throw new Error("Selecione no máximo 6 imagens.");
   for (const image of images) {
@@ -123,6 +138,12 @@ async function createSellerProduct(formData: FormData) {
   const productId = Number((inserted[0] as any).id);
 
   try {
+    if (!isPhysical) {
+      await sql`
+        INSERT INTO product_digital_delivery (product_id, delivery_type, delivery_url)
+        VALUES (${productId}, 'LINK', ${digitalDeliveryUrl})
+      `;
+    }
     for (let index = 0; index < images.length; index++) {
       const imageUrl = await uploadToCloudinary(images[index], name);
       await sql`
@@ -156,7 +177,7 @@ export default async function NovoProdutoVendedorPage() {
             <div style={gridStyle}>
               <label style={fieldStyle}><span style={labelStyle}>Nome do produto *</span><input name="name" required style={inputStyle}/></label>
               <label style={fieldStyle}><span style={labelStyle}>SKU</span><input name="sku" style={inputStyle}/></label>
-              <label style={{...fieldStyle, gridColumn:"1 / -1"}}><span style={labelStyle}>Tipo de produto *</span><select name="product_type" required defaultValue="FISICO" style={inputStyle}><option value="FISICO">Físico</option><option value="DIGITAL">Digital</option></select><small style={{color:"#64748b"}}>Produtos físicos usam dados de envio. Produtos digitais não exigem peso, dimensões ou CEP.</small></label>
+              <ProductTypeDeliveryFields />
               <label style={{...fieldStyle, gridColumn:"1 / -1"}}><span style={labelStyle}>Descrição curta</span><textarea name="short_description" rows={2} maxLength={300} placeholder="Resumo do produto para cartões e listagens. Máximo de 300 caracteres." style={inputStyle}/></label>
               <label style={{...fieldStyle, gridColumn:"1 / -1"}}><span style={labelStyle}>Descrição completa</span><textarea name="description" rows={5} style={inputStyle}/></label>
             </div>
@@ -172,17 +193,6 @@ export default async function NovoProdutoVendedorPage() {
               <label style={fieldStyle}><span style={labelStyle}>Preço promocional</span><input name="promo_price" inputMode="decimal" placeholder="Opcional" style={inputStyle}/></label>
               <label style={fieldStyle}><span style={labelStyle}>Estoque *</span><input name="stock_quantity" required type="number" min="0" defaultValue="0" style={inputStyle}/></label>
               <label style={fieldStyle}><span style={labelStyle}>Estoque mínimo *</span><input name="minimum_stock" required type="number" min="0" defaultValue="0" style={inputStyle}/></label>
-            </div>
-          </section>
-          <section style={cardStyle}>
-            <h2 style={titleStyle}>Envio — somente para produto físico</h2>
-            <p style={{margin:"-6px 0 14px",color:"#64748b",fontSize:13}}>Se você selecionou <strong>Digital</strong>, deixe estes campos em branco. O sistema não gravará dados de frete para o produto digital.</p>
-            <div style={gridStyle}>
-              <label style={fieldStyle}><span style={labelStyle}>Peso (kg)</span><input name="weight" inputMode="decimal" placeholder="Ex.: 0,5" style={inputStyle}/></label>
-              <label style={fieldStyle}><span style={labelStyle}>Comprimento (cm)</span><input name="length" inputMode="decimal" style={inputStyle}/></label>
-              <label style={fieldStyle}><span style={labelStyle}>Largura (cm)</span><input name="width" inputMode="decimal" style={inputStyle}/></label>
-              <label style={fieldStyle}><span style={labelStyle}>Altura (cm)</span><input name="height" inputMode="decimal" style={inputStyle}/></label>
-              <label style={fieldStyle}><span style={labelStyle}>CEP de origem</span><input name="origin_zip" inputMode="numeric" maxLength={9} placeholder="00000-000" style={inputStyle}/></label>
             </div>
           </section>
           <div style={{ background: "#fff7ed", border: "1px solid #fed7aa", borderRadius: 12, padding: 14, color: "#9a3412" }}>Ao salvar, o produto ficará <strong>pendente</strong>. Ele só poderá aparecer na vitrine depois da aprovação do administrador.</div>
