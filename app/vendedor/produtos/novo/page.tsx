@@ -59,23 +59,23 @@ async function createSellerProduct(formData: FormData) {
   if (regularPrice === null) throw new Error("Informe o preço do produto.");
 
   const sql = getDb();
-  let slug = `${slugify(name)}-${seller.seller_id}-${Date.now()}`;
+  const slug = `${slugify(name)}-${seller.seller_id}-${Date.now()}`;
 
   await sql`
     INSERT INTO products (
       name, slug, description, product_type, sale_mode, platform,
       regular_price, promo_price, seller_id, approval_status,
-      sku, stock_quantity, stock_tracking, active, featured, updated_at
+      sku, stock_quantity, stock_tracking,
+      weight, length, width, height, origin_zip,
+      active, featured, updated_at
     ) VALUES (
       ${name}, ${slug}, ${description || null}, 'FISICO', 'OWN', 'proprio',
       ${regularPrice}, ${promoPrice}, ${seller.seller_id}, 'pending',
-      ${sku || null}, ${stockQuantity}, TRUE, FALSE, FALSE, NOW()
+      ${sku || null}, ${stockQuantity}, TRUE,
+      ${weight}, ${length}, ${width}, ${height}, ${originZip || null},
+      FALSE, FALSE, NOW()
     )
   `;
-
-  // Os campos de logística são mantidos no formulário nesta etapa. Eles serão
-  // persistidos assim que as colunas correspondentes do schema forem confirmadas.
-  void weight; void length; void width; void height; void originZip;
 
   redirect("/vendedor");
 }
