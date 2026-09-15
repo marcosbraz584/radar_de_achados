@@ -53,7 +53,6 @@ async function uploadToCloudinary(file: File, productName: string) {
   body.append("timestamp", String(timestamp));
   body.append("folder", folder);
   body.append("signature", signature);
-  body.append("context", `alt=${productName}`);
 
   const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: "POST", body });
   if (!response.ok) {
@@ -61,9 +60,7 @@ async function uploadToCloudinary(file: File, productName: string) {
     try {
       const errorBody = await response.json();
       cloudinaryMessage = String(errorBody?.error?.message || cloudinaryMessage);
-    } catch {
-      // Mantém apenas o status HTTP se a resposta não vier em JSON.
-    }
+    } catch {}
     console.error("Cloudinary upload recusado:", cloudinaryMessage);
     throw new Error(`Falha no upload para o Cloudinary: ${cloudinaryMessage}`);
   }
@@ -75,7 +72,6 @@ async function createSellerProduct(formData: FormData) {
   "use server";
   const user = await getCurrentUser();
   if (!user) redirect("/entrar");
-
   const seller = await getApprovedSeller(Number(user.id));
   if (!seller || seller.approval_status !== "approved") redirect("/minha-conta");
 
@@ -151,7 +147,6 @@ export default async function NovoProdutoVendedorPage() {
         <a href="/vendedor" style={{ textDecoration: "none", color: "#174ea6", fontWeight: 800 }}>← Painel do vendedor</a>
         <h1 style={{ margin: "14px 0 4px", fontSize: 34 }}>Cadastrar novo produto</h1>
         <p style={{ margin: "0 0 22px", color: "#64748b" }}>Loja: {seller.store_name || "Minha loja"}. O produto será enviado para aprovação da SHILMASTORE.</p>
-
         <form action={createSellerProduct} style={{ display: "grid", gap: 18 }}>
           <section style={cardStyle}>
             <h2 style={titleStyle}>Informações do produto</h2>
@@ -162,16 +157,10 @@ export default async function NovoProdutoVendedorPage() {
               <label style={{...fieldStyle, gridColumn:"1 / -1"}}><span style={labelStyle}>Descrição completa</span><textarea name="description" rows={5} style={inputStyle}/></label>
             </div>
           </section>
-
           <section style={cardStyle}>
             <h2 style={titleStyle}>Imagens do produto</h2>
-            <label style={fieldStyle}>
-              <span style={labelStyle}>Fotos *</span>
-              <input name="images" type="file" accept="image/*" multiple required style={inputStyle}/>
-              <small style={{color:"#64748b"}}>Selecione de 1 a 6 imagens do seu computador. Máximo de 5 MB por imagem. A primeira será a principal.</small>
-            </label>
+            <label style={fieldStyle}><span style={labelStyle}>Fotos *</span><input name="images" type="file" accept="image/*" multiple required style={inputStyle}/><small style={{color:"#64748b"}}>Selecione de 1 a 6 imagens do seu computador. Máximo de 5 MB por imagem. A primeira será a principal.</small></label>
           </section>
-
           <section style={cardStyle}>
             <h2 style={titleStyle}>Preço e estoque</h2>
             <div style={gridStyle}>
@@ -181,7 +170,6 @@ export default async function NovoProdutoVendedorPage() {
               <label style={fieldStyle}><span style={labelStyle}>Estoque mínimo *</span><input name="minimum_stock" required type="number" min="0" defaultValue="0" style={inputStyle}/></label>
             </div>
           </section>
-
           <section style={cardStyle}>
             <h2 style={titleStyle}>Envio do produto físico</h2>
             <div style={gridStyle}>
@@ -192,11 +180,7 @@ export default async function NovoProdutoVendedorPage() {
               <label style={fieldStyle}><span style={labelStyle}>CEP de origem</span><input name="origin_zip" inputMode="numeric" maxLength={9} placeholder="00000-000" style={inputStyle}/></label>
             </div>
           </section>
-
-          <div style={{ background: "#fff7ed", border: "1px solid #fed7aa", borderRadius: 12, padding: 14, color: "#9a3412" }}>
-            Ao salvar, o produto ficará <strong>pendente</strong>. Ele só poderá aparecer na vitrine depois da aprovação do administrador.
-          </div>
-
+          <div style={{ background: "#fff7ed", border: "1px solid #fed7aa", borderRadius: 12, padding: 14, color: "#9a3412" }}>Ao salvar, o produto ficará <strong>pendente</strong>. Ele só poderá aparecer na vitrine depois da aprovação do administrador.</div>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <a href="/vendedor" style={{ ...buttonStyle, background: "#e2e8f0", color: "#334155", textDecoration: "none" }}>Cancelar</a>
             <button type="submit" style={{ ...buttonStyle, background: "#1f5bbb", color: "white", border: 0 }}>Enviar produto para aprovação</button>
