@@ -30,6 +30,8 @@ export default async function MinhaContaPage() {
     LIMIT 1
   `;
   const seller = sellerRows[0] as any | undefined;
+  const orderRows = await sql`SELECT COUNT(*)::int AS total FROM orders WHERE user_id=${Number(user.id)}`;
+  const orderCount = Number((orderRows[0] as any)?.total || 0);
 
   return (
     <main style={{ minHeight: "100vh", background: "#f5f7fb", padding: "36px 16px", color: "#172554" }}>
@@ -44,6 +46,11 @@ export default async function MinhaContaPage() {
           <div><strong>Telefone:</strong> {user.phone || "Não informado"}</div>
           <div><strong>Perfil:</strong> {user.role === "admin" ? "Administrador" : user.role === "seller" ? "Vendedor" : "Cliente"}</div>
         </div>
+
+        <a href="/minha-conta/pedidos" style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:20,padding:18,borderRadius:12,border:"1px solid #e2e8f0",background:"#fff",textDecoration:"none",color:"#172554"}}>
+          <div><strong style={{fontSize:20}}>Meus pedidos</strong><div style={{marginTop:5,color:"#64748b",fontSize:14}}>Acompanhe suas compras e pagamentos.</div></div>
+          <strong>{orderCount}</strong>
+        </a>
 
         <div style={{ marginTop: 20, padding: 18, borderRadius: 12, border: "1px solid #e2e8f0", background: "#ffffff" }}>
           <h2 style={{ margin: "0 0 8px", fontSize: 20 }}>Área de vendedor</h2>
