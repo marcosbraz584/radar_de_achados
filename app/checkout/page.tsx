@@ -16,10 +16,13 @@ async function createOrder(formData:FormData){
  const items=await sql`SELECT ci.quantity,p.id product_id,p.name,p.product_type,p.regular_price,p.promo_price,p.seller_id FROM carts c JOIN cart_items ci ON ci.cart_id=c.id JOIN products p ON p.id=ci.product_id WHERE c.user_id=${Number(user.id)} AND p.active=TRUE AND p.approval_status='approved' ORDER BY ci.created_at`;
  if(!items.length) redirect("/carrinho");
  const subtotal=items.reduce((sum:number,item:any)=>sum+Number(item.promo_price??item.regular_price??0)*Number(item.quantity),0);
- const orderRows=await sql`INSERT INTO orders (user_id,customer_name,customer_email,status,payment_status,subtotal,shipping_total,total) VALUES (${Number(user.id)},${user.full_name},${user.email},'pending_payment','pending',${subtotal},0,${subtotal}) RETURNING id`;
+ const orderRows=await sql`INSERT INTO orders (user_id,customer_name,customer_email,status,payment_status,subtotal,shipping_amount,discount_amount,total_amount,platform_commission_total,seller_net_total,shipping_total,total) VALUES (${Number(user.id)},${user.full_name},${user.email},'pending_payment','pending',${subtotal},0,0,${subtotal},0,${subtotal},0,${subtotal}) RETURNING id`;
  const orderId=Number((orderRows[0] as any).id);
  try{
-  for(const item of items as any[]){const unitPrice=Number(item.promo_price??item.regular_price??0),quantity=Number(item.quantity),itemSubtotal=unitPrice*quantity;await sql`INSERT INTO order_items (order_id,product_id,seller_id,product_name,product_type,quantity,unit_price,subtotal,platform_commission,seller_amount) VALUES (${orderId},${Number(item.product_id)},${item.seller_id?Number(item.seller_id):null},${String(item.name)},${String(item.product_type)},${quantity},${unitPrice},${itemSubtotal},0,${itemSubtotal})`;}
+  for(const item of items as any[]){
+   const unitPrice=Number(item.promo_price??item.regular_price??0),quantity=Number(item.quantity),itemSubtotal=unitPrice*quantity;
+   await sql`INSERT INTO order_items (order_id,product_id,seller_id,product_name,product_type,quantity,unit_price,line_subtotal,commission_percent,commission_fixed_fee,commission_amount,seller_net_amount,subtotal,platform_commission,seller_amount) VALUES (${orderId},${Number(item.product_id)},${item.seller_id?Number(item.seller_id):null},${String(item.name)},${String(item.product_type)},${quantity},${unitPrice},${itemSubtotal},0,0,0,${itemSubtotal},${itemSubtotal},0,${itemSubtotal})`;
+  }
   await sql`DELETE FROM cart_items WHERE cart_id IN (SELECT id FROM carts WHERE user_id=${Number(user.id)})`;
  }catch(error){await sql`DELETE FROM orders WHERE id=${orderId}`;throw error;}
  redirect(`/pedido/${orderId}`);
