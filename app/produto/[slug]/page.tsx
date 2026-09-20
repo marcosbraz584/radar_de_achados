@@ -14,7 +14,7 @@ function platformLabel(value:string|null){const labels:Record<string,string>={me
 async function addToCart(formData:FormData){
  "use server";
  const user=await getCurrentUser();
- if(!user) redirect("/entrar");
+ if(!user){const productId=Number(formData.get("product_id"));redirect(`/entrar?next=${encodeURIComponent(`/produto/${productId}?adicionar=1`)}`);}
  const productId=Number(formData.get("product_id"));
  if(!Number.isInteger(productId)||productId<=0) redirect("/");
  const sql=getDb();
