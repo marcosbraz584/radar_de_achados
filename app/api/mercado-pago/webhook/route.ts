@@ -39,7 +39,11 @@ export async function POST(request:NextRequest){
 
     const status=String(payment.status||"");
     if(status==="approved"){
+      const wasApproved=String(order.payment_status)==="approved";
       await sql`UPDATE orders SET payment_status='approved',status='paid',payment_provider='mercado_pago',payment_reference=${paymentId},paid_at=COALESCE(paid_at,NOW()),updated_at=NOW() WHERE id=${orderId}`;
+      if(!wasApproved){
+        await sql`UPDATE products p SET stock_quantity=GREATEST(0,p.stock_quantity-oi.qty),updated_at=NOW() FROM (SELECT product_id,SUM(quantity)::int qty FROM order_items WHERE order_id=${orderId} AND product_type='FISICO' AND product_id IS NOT NULL GROUP BY product_id) oi WHERE p.id=oi.product_id`;
+      }
     }else if(status==="pending"||status==="in_process"){
       await sql`UPDATE orders SET payment_status='pending',payment_provider='mercado_pago',payment_reference=${paymentId},updated_at=NOW() WHERE id=${orderId} AND payment_status<>'approved'`;
     }else if(["rejected","cancelled","refunded","charged_back"].includes(status)){
