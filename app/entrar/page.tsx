@@ -13,6 +13,8 @@ async function login(formData: FormData) {
 
   const email = cleanEmail(formData.get("email"));
   const password = String(formData.get("password") || "");
+  const requestedNext = String(formData.get("next") || "");
+  const next = requestedNext.startsWith("/") && !requestedNext.startsWith("//") ? requestedNext : "/minha-conta";
 
   if (!email || !password) {
     redirect("/entrar?erro=Informe%20e-mail%20e%20senha.");
@@ -34,13 +36,14 @@ async function login(formData: FormData) {
 
   await sql`UPDATE app_users SET last_login_at = NOW(), updated_at = NOW() WHERE id = ${Number(user.id)}`;
   await createSession(Number(user.id));
-  redirect("/minha-conta");
+  redirect(next);
 }
 
-export default async function EntrarPage({ searchParams }: { searchParams: Promise<{ erro?: string }> }) {
+export default async function EntrarPage({ searchParams }: { searchParams: Promise<{ erro?: string; next?: string }> }) {
   const currentUser = await getCurrentUser();
-  if (currentUser) redirect("/minha-conta");
   const params = await searchParams;
+  const next = params.next && params.next.startsWith("/") && !params.next.startsWith("//") ? params.next : "/minha-conta";
+  if (currentUser) redirect(next);
 
   return (
     <main style={{ minHeight: "100vh", background: "#f5f7fb", padding: "36px 16px", color: "#172554" }}>
@@ -52,6 +55,7 @@ export default async function EntrarPage({ searchParams }: { searchParams: Promi
         {params.erro ? <div style={{ padding: 12, marginBottom: 18, borderRadius: 10, background: "#fff1f2", border: "1px solid #fecdd3", color: "#9f1239", fontWeight: 700 }}>{params.erro}</div> : null}
 
         <form action={login} style={{ display: "grid", gap: 15 }}>
+          <input type="hidden" name="next" value={next}/>
           <label style={{ display: "grid", gap: 6 }}><strong>E-mail</strong><input name="email" type="email" required autoComplete="email" style={inputStyle}/></label>
           <label style={{ display: "grid", gap: 6 }}><strong>Senha</strong><input name="password" type="password" required autoComplete="current-password" style={inputStyle}/></label>
           <button type="submit" style={buttonStyle}>Entrar</button>
