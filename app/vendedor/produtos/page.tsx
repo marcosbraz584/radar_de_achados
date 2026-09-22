@@ -1,0 +1,12 @@
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { getCurrentUser } from "@/lib/auth";
+import { getDb } from "@/lib/db";
+export const dynamic="force-dynamic";
+export default async function SellerProducts(){
+ const user=await getCurrentUser(); if(!user)redirect("/entrar"); const sql=getDb();
+ const sr=await sql`SELECT s.id FROM sellers s WHERE s.user_id=${user.id} AND s.approval_status='approved' LIMIT 1`; if(!sr.length)redirect("/vendedor");
+ const sellerId=Number((sr[0] as any).id);
+ const products=await sql`SELECT id,name,product_type,sku,stock_quantity,approval_status FROM products WHERE seller_id=${sellerId} ORDER BY updated_at DESC,id DESC`;
+ return <main style={{minHeight:"100vh",background:"#f5f7fb",padding:"32px 16px",color:"#172554"}}><section style={{maxWidth:1000,margin:"auto"}}><Link href="/vendedor">← Painel do vendedor</Link><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}><h1>Meus produtos</h1><Link href="/vendedor/produtos/novo" style={{background:"#1f5bbb",color:"white",padding:"11px 15px",borderRadius:9,textDecoration:"none",fontWeight:800}}>Cadastrar novo produto</Link></div><div style={{display:"grid",gap:12}}>{products.map((p:any)=><article key={p.id} style={{background:"white",border:"1px solid #e2e8f0",borderRadius:14,padding:18,display:"flex",justifyContent:"space-between",gap:16,alignItems:"center",flexWrap:"wrap"}}><div><strong style={{fontSize:18}}>{p.name}</strong><div style={{color:"#64748b",marginTop:5}}>{p.product_type==="DIGITAL"?"Digital":"Físico"}{p.sku?` • SKU: ${p.sku}`:""} • {p.approval_status==="approved"?"Aprovado":p.approval_status==="pending"?"Pendente":"Rejeitado"}</div></div><div style={{fontWeight:800}}>{p.product_type==="DIGITAL"?"Produto digital":`Estoque: ${Number(p.stock_quantity||0)}`}</div></article>)}</div></section></main>
+}
