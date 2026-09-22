@@ -13,8 +13,9 @@ async function createOrder(formData:FormData){
  const sql=getDb();
  const expectedUserId=Number(formData.get("user_id"));
  if(expectedUserId!==Number(user.id)) redirect("/checkout");
- const items=await sql`SELECT ci.quantity,p.id product_id,p.name,p.product_type,p.regular_price,p.promo_price,p.seller_id FROM carts c JOIN cart_items ci ON ci.cart_id=c.id JOIN products p ON p.id=ci.product_id WHERE c.user_id=${Number(user.id)} AND p.active=TRUE AND p.approval_status='approved' ORDER BY ci.created_at`;
+ const items=await sql`SELECT ci.quantity,p.id product_id,p.name,p.product_type,p.regular_price,p.promo_price,p.seller_id,p.stock_quantity FROM carts c JOIN cart_items ci ON ci.cart_id=c.id JOIN products p ON p.id=ci.product_id WHERE c.user_id=${Number(user.id)} AND p.active=TRUE AND p.approval_status='approved' ORDER BY ci.created_at`;
  if(!items.length) redirect("/carrinho");
+ for(const item of items as any[]){if(item.product_type==='FISICO'&&Number(item.quantity)>Number(item.stock_quantity??0))redirect('/carrinho?stock_error=1');}
  const subtotal=items.reduce((sum:number,item:any)=>sum+Number(item.promo_price??item.regular_price??0)*Number(item.quantity),0);
  const orderRows=await sql`INSERT INTO orders (user_id,customer_name,customer_email,status,payment_status,subtotal,shipping_amount,discount_amount,total_amount,platform_commission_total,seller_net_total,shipping_total,total) VALUES (${Number(user.id)},${user.full_name},${user.email},'pending_payment','pending',${subtotal},0,0,${subtotal},0,${subtotal},0,${subtotal}) RETURNING id`;
  const orderId=Number((orderRows[0] as any).id);
