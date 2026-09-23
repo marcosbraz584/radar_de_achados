@@ -1,0 +1,5 @@
+import { NextResponse } from "next/server";
+import { getCurrentUser } from "@/lib/auth";
+import { getDb } from "@/lib/db";
+export const dynamic="force-dynamic";
+export async function GET(){const user=await getCurrentUser();if(!user)return NextResponse.json({authenticated:false,items:[],total:0});const sql=getDb();const items=await sql`SELECT ci.id,ci.quantity,p.id product_id,p.name,p.product_type,p.regular_price,p.promo_price,p.stock_quantity,st.store_name,(SELECT image_url FROM product_images WHERE product_id=p.id ORDER BY sort_order,id LIMIT 1) image_url FROM carts c JOIN cart_items ci ON ci.cart_id=c.id JOIN products p ON p.id=ci.product_id LEFT JOIN seller_stores st ON st.seller_id=p.seller_id WHERE c.user_id=${Number(user.id)} ORDER BY ci.created_at DESC`;const data=(items as any[]).map(i=>({...i,price:Number(i.promo_price??i.regular_price??0),quantity:Number(i.quantity),stock_quantity:Number(i.stock_quantity??0)}));return NextResponse.json({authenticated:true,items:data,total:data.reduce((s,i)=>s+i.price*i.quantity,0)});}
