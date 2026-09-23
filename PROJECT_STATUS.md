@@ -1,6 +1,6 @@
 # SHILMASTORE — PROJECT STATUS
 
-Última revisão: 2026-09-14
+Última revisão: 2026-09-22
 Branch oficial de desenvolvimento: `radar-2.0`
 Repositório: `marcosbraz584/radar_de_achados`
 
@@ -160,3 +160,31 @@ Não repetir testes conceituais já validados sem motivo técnico; migrar esses 
 Em nova conversa:
 
 > Continue a SHILMASTORE. Consulte primeiro `PROJECT_STATUS.md` e a branch `radar-2.0` de `marcosbraz584/radar_de_achados`. O schema multivendedor do Neon já concluiu as Etapas 1, 2 e 3. Não recrie tabelas; prossiga pela integração da aplicação, começando pela autenticação e papéis.
+
+
+## 13. Avanços validados em 22/09/2026
+
+O fluxo multivendedor já avançou além da seção 9 deste documento. Estão funcionando e validados:
+
+- autenticação persistente e papéis;
+- solicitação/aprovação de vendedor e loja;
+- cadastro e aprovação de produtos físicos e digitais;
+- vitrine pública e página interna de produto;
+- carrinho e pedidos persistentes;
+- Checkout Pro Mercado Pago em ambiente de teste;
+- confirmação de pagamento no pedido;
+- liberação de produto digital após pagamento;
+- painel de pedidos do comprador e vendedor;
+- baixa automática do estoque físico após pagamento aprovado;
+- proteção contra baixa duplicada do mesmo pedido;
+- alerta de estoque mínimo no painel do vendedor;
+- estado "Sem estoque" e botão de compra desabilitado com estoque zero;
+- validação no checkout impedindo quantidade física acima do estoque;
+- página "Meus produtos" do vendedor;
+- reposição manual de estoque e estoque mínimo, restrita ao dono do produto.
+
+Teste de estoque físico validado: reposição para 10 unidades seguida de compra aprovada resultou em estoque 9.
+
+Credenciais atuais do Mercado Pago são de TESTE. Não ativar pagamentos reais sem decisão explícita e aviso sobre custos/taxas.
+
+Próximos pontos prioritários: revisar experiência do carrinho lateral/checkout, concluir segurança/entrega de arquivos digitais, estruturar comissão/financeiro do marketplace e preparar fluxo de produção.
